@@ -1,3 +1,10 @@
 *.bbl
 *.synctex.gz
+*.aux
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.toc
 thesis.pdf
