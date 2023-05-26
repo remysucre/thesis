@@ -1,0 +1,189 @@
+\documentclass[12pt]{book}
+
+\usepackage{hyperref}
+\def\chapterautorefname{Chapter}
+\def\sectionautorefname{Section}
+\def\subsectionautorefname{Section}
+\def\subsubsectionautorefname{Section}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\algrenewcommand\algorithmicrequire{\textbf{Input:}}
+\algrenewcommand\algorithmicensure{\textbf{Output:}}
+\algnewcommand\Not{\textbf{not} }
+\newcommand{\algorithmautorefname}{Algorithm} % autoref
+
+\usepackage{adjustbox}
+\usepackage[headings]{fullpage}
+\usepackage{xargs}
+\usepackage{xspace}
+\usepackage[doublespacing]{setspace}
+
+\usepackage{microtype}
+\usepackage[T1]{fontenc}
+
+\usepackage{wrapfig}
+\usepackage[font={sf}]{caption}
+\usepackage[subrefformat=parens]{subcaption}
+
+\usepackage{multirow}
+
+\usepackage{xcolor}
+\usepackage{graphicx}
+\graphicspath{{_build/}{figures/}}
+
+\usepackage{amsmath}
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{proof}{Proof}[chapter]
+
+\setlength{\marginparwidth}{2cm}
+\usepackage[textsize=tiny]{todonotes}
+\renewcommand\max[2][]{\todo[color=orange, #1]{\sffamily #2}}
+
+\usepackage{libertine}
+\usepackage[libertine]{newtxmath}
+\usepackage[scaled=.85]{DejaVuSansMono}
+
+\usepackage{listings}
+\lstset{
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  stringstyle=\slshape\color{green!40!black},
+  basicstyle=\ttfamily\small,
+  language=Python,
+  morekeywords={*, self},
+  commentstyle=\slshape\color{black!60},
+  tabsize=2,
+}
+
+\lstdefinelanguage{Rust}{
+  sensitive,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  moredelim=[s][{\itshape\color[rgb]{0,0,0.75}}]{\#[}{]},
+  morestring=[b]{"},
+  alsodigit={},
+  alsoother={},
+  alsoletter={!},
+  % keywords
+  otherkeywords={=>},
+  morekeywords={break, continue, else, for, if, in, loop, match, return, while},
+  morekeywords={as, const, let, move, mut, ref, static, unsafe},
+  morekeywords={dyn, enum, fn, impl, Self, self, struct, trait, type, use, where},
+  morekeywords={crate, extern, mod, pub, super},
+  morekeywords={abstract, alignof, become, box, do, final, macro,
+    offsetof, override, priv, proc, pure, sizeof, typeof, unsized, virtual, yield},
+  % traits
+  morekeywords=[2]{Send},
+  % types
+  morekeywords=[3]{bool, char, f32, f64, i8, i16, i32, i64, isize, str, u8, u16, u32, u64, unit, usize, i128, u128},
+}%
+
+\def\mytitle{Relational Programming}
+\def\myauthor{Yisu Remy Wang}
+\def\year{2023}
+
+\title{\mytitle}
+\author{\myauthor}
+
+\newcommand\thesisstmt{%
+  e-graphs and equality saturation are compelling techniques for
+  program representation and manipulation that should now be considered
+  for programming tools across many domains.
+}
+
+\newcommand\Thesisstmt{\expandafter\MakeUppercase \thesisstmt}
+
+\input{macros}
+
+\begin{document}
+\pagestyle{empty}
+
+% title and copyright pages
+\begin{center}
+  {\huge \mytitle}
+  \vfill
+
+  {\Large \myauthor}
+  \vfill
+
+  \begin{spacing}{1}
+    A dissertation \\
+    submitted in partial fulfillment of the \\
+    requirements for the degree of
+  \end{spacing}
+  \vfill
+
+  Doctor of Philosophy
+  \vfill
+
+  University of Washington \\
+  \year
+  \vfill
+
+  Reading Commitee: \\
+  Dan Suciu, Chair \\
+  Zachary Tatlock \\
+  Andrew Lumsdaine
+  \vfill
+
+  \begin{spacing}{1}
+    Program Authorized to Offer Degree: \\
+    \cse
+  \end{spacing}
+  \clearpage
+
+  \textcopyright{} Copyright \year\\
+  \myauthor
+  \clearpage
+\end{center}
+
+\pagestyle{plain}
+\setcounter{page}{1}
+\pagenumbering{roman}
+
+% abstract page
+\begin{center}
+  University of Washington \\[1em]
+  \textbf{Abstract}        \\[1em]
+  \mytitle                 \\[1em]
+  \myauthor                \\[1em]
+
+  % Supervisory Committee: \\[-0.5em]
+  % Luis Ceze, Chair \qquad
+  % Adriana Schulz   \qquad
+  % Zachary Tatlock  \\[-0.5em]
+  Chair of the Supervisory Committee: \\[-0.5em]
+  Dan Suciu \\[-0.5em]
+  \pgas
+  \\[2em]
+\end{center}
+\input{abstract}
+
+\begin{spacing}{1.5}
+  \tableofcontents
+\end{spacing}
+
+\chapter*{Acknowledgments}
+
+Thank you!
+
+\clearpage
+
+\pagestyle{headings}
+\setcounter{page}{1}
+\pagenumbering{arabic}
+\renewcommand{\chaptermark}[1]{\markboth{\sc{\chaptername\ \thechapter.\ #1}}{}}
+\renewcommand{\sectionmark}[1]{\markright{\sc{\thesection.\ #1}}{}}
+% \listoftodos
+\input{chapters/01-intro}
+
+\clearpage
+\addcontentsline{toc}{chapter}{Bibliography}
+\singlespacing
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}
