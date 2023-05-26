@@ -1,1 +1,3 @@
-build
+*.bbl
+*.synctex.gz
+thesis.pdf

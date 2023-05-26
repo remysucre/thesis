@@ -1,11 +1,5 @@
 \documentclass[12pt]{book}
 
-\usepackage{hyperref}
-\def\chapterautorefname{Chapter}
-\def\sectionautorefname{Section}
-\def\subsectionautorefname{Section}
-\def\subsubsectionautorefname{Section}
-
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \algrenewcommand\algorithmicrequire{\textbf{Input:}}
@@ -18,6 +12,12 @@
 \usepackage{xargs}
 \usepackage{xspace}
 \usepackage[doublespacing]{setspace}
+
+\usepackage{hyperref}
+\def\chapterautorefname{Chapter}
+\def\sectionautorefname{Section}
+\def\subsectionautorefname{Section}
+\def\subsubsectionautorefname{Section}
 
 \usepackage{microtype}
 \usepackage[T1]{fontenc}
@@ -128,7 +128,6 @@
   Zachary Tatlock \\
   Andrew Lumsdaine
   \vfill
-
   \begin{spacing}{1}
     Program Authorized to Offer Degree: \\
     \cse
@@ -179,6 +178,7 @@ Thank you!
 \renewcommand{\sectionmark}[1]{\markright{\sc{\thesection.\ #1}}{}}
 % \listoftodos
 \input{chapters/01-intro}
+\input{chapters/02-background}
 
 \clearpage
 \addcontentsline{toc}{chapter}{Bibliography}
