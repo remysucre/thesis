@@ -44,3 +44,136 @@
 %%% Local Variables:
 %%% TeX-master: "thesis"
 %%% End:
+
+\usepackage{bm} % bold math fonts, e.g. $\bm \Sigma$ will give a bold-face $\Sigma$
+% \usepackage{url}
+% \usepackage{fullpage}
+
+% \setlength{\marginparwidth}{2cm} % for todonotes
+% \usepackage[colorinlistoftodos]{todonotes}
+
+% % http://paultaylor.eu/diagrams/
+% % https://www.jmilne.org/not/Mdiagrams.pdf
+% \usepackage[small,nohug,heads=vee]{diagrams}
+% \diagramstyle[labelstyle=\scriptstyle]
+
+% \usepackage[ruled, noend]{algorithm2e}
+\usepackage{enumitem}
+% \usepackage{quiver}
+% \usepackage{subcaption}
+
+%%% package microtype recommended by Paul Beame who says:
+%%%%% try including [it] in any of your latex documents.  You will find that
+%%%%% not only is the result more compact without changing any spacing
+%%%%% parameters, the number of overfull/underfull warnings drops, and it
+%%%%% simply looks a lot better!
+%%%%%
+%%%%% Why it works:  Latex is not known for the beauty of its typography.  The
+%%%%% biggest issue is that the amount of visible white space between words
+%%%%% varies quite a lot line-to-line in a paragraph since inter-word spacing
+%%%%% is the only thing that will stretch/shrink.   The microtype package also
+%%%%% makes imperceptible changes to the inter-letter spacing within words
+%%%%% and, with all those extra degrees of freedom, it can do a much better
+%%%%% job of laying out paragraphs.
+% \usepackage{microtype}
+
+\newcommand{\yell}[1]{{\color{red} \textbf{#1}}}
+
+\newcommand{\rai}{Relational\underline{AI}}
+
+\newcommand{\gv}[1]{\ensuremath{\mbox{\boldmath$ #1 $}}}
+\newcommand{\grad}[1]{\gv{\nabla} #1}
+\newcommand{\norm}[1]{\|#1\|}
+\newcommand{\set}[1]{\{#1\}}                    % Set (as in \set{1,2,3}).
+\newcommand{\bag}[1]{\{\hspace{-1mm}\{#1\}\hspace{-1mm}\}}                    % bag (as in \bag{1,2,3}).
+\newcommand{\setof}[2]{\{{#1}\mid{#2}\}}        % Set (as in \setof{x}{x>0}).
+\newcommand{\bagof}[2]{\{\hspace{-1mm}\{{#1}\mid{#2}\}\hspace{-1mm}\}}        % Set (as in \setof{x}{x>0}).
+\newcommand{\pr}{\mathop{\textnormal{Prob}}}    % Probability
+\newcommand{\E}{\mathop{\mathbb E}}    % Probability
+\newcommand{\dom}{\textsf{Dom}}
+\newcommand{\id}{\textsf{ID}}
+\newcommand{\codom}{\textsf{CoDom}}
+\newcommand{\one}{\bm 1}
+\newcommand{\degree}{\text{\sf deg}}
+\newcommand{\critdegree}{\text{\sf critDeg}}
+\newcommand{\monomial}{\text{\sf Mon}}
+\newcommand{\cmonomial}{\text{\sf \#Mon}}
+\newcommand{\sign}{\text{\sf sign}}
+\newcommand{\lfp}{\text{\sf lfp}}
+\newcommand{\lpfp}{\text{\sf lpfp}}
+\newcommand{\pfp}{\text{\sf pfp}}
+
+\newcommand{\hqn}[1]{\todo[inline,color=cyan]{\textsf{#1} \hfill \textsc{--Hung.}}}
+\newcommand{\mak}[1]{\todo[inline,color=green]{\textsf{#1} \hfill \textsc{--Mahmoud.}}}
+\newcommand{\reinhard}[1]{\todo[inline,color=orange]{\textsf{#1} \hfill \textsc{--Reinhard.}}}
+\newcommand{\dan}[1]{\todo[inline,color=yellow]{\textsf{#1} \hfill \textsc{--Dan.}}}
+\newcommand{\remy}[1]{\todo[inline,color=lightgray]{\textsf{#1} \hfill \textsc{--Remy.}}}
+
+\newcommand{\inner}[1]{\langle #1 \rangle}
+%%
+\newcommand{\LB}{\textsf{LogicBlox}}
+\newcommand{\faq}{\textsf{FAQ}}
+\newcommand{\calB}{\mathcal B}
+\newcommand{\calC}{\mathcal C}
+\newcommand{\calH}{\mathcal H}
+\newcommand{\calV}{[n]}
+\newcommand{\calE}{\mathcal E}
+\newcommand{\calD}{\mathcal D}
+\newcommand{\calW}{\mathcal W}
+\newcommand{\calF}{\mathcal F}
+\newcommand{\calP}{\mathcal P}
+\newcommand{\calM}{\mathcal M}
+\newcommand{\calN}{\mathcal N}
+\newcommand{\calL}{\mathcal L}
+\newcommand{\calS}{\mathcal S}
+\newcommand{\calT}{\mathcal T}
+
+% \theoremstyle{plain}                   % default
+% \newtheorem{thm}{Theorem}[section]
+% \newtheorem{lmm}[thm]{Lemma}
+% \newtheorem{prop}[thm]{Proposition}
+% \newtheorem{cor}[thm]{Corollary}
+% \newtheorem{defn}[thm]{Definition}
+
+% \theoremstyle{definition}              % Examples and all
+% \newtheorem{pbm}{Problem}
+% \newtheorem{opm}{Question}
+% \newtheorem{conj}[thm]{Conjecture}
+% \newtheorem{ex}[thm]{Example}
+% \newtheorem{exer}{Exercise}
+% \newtheorem{alg}[thm]{Algorithm}
+% \newtheorem{rmk}[thm]{Remark}
+% \newtheorem{claim}{Claim}
+% \newtheorem{note}{Note}
+
+\newcommand{\defeq}{\stackrel{\text{def}}{=}}
+\newcommand{\mineq}{\stackrel{\text{min}}{=}}
+\newcommand{\maxeq}{\stackrel{\text{max}}{=}}
+\newcommand{\dleq}{\mbox{ :- }}
+\newcommand{\mult}{\cdot}
+
+\newcommand{\B}{\mathbb B} % the Booleans
+\newcommand{\Z}{\mathbb Z} % integers
+\newcommand{\N}{\mathbb N} % the natural numbers
+\newcommand{\Q}{\mathbb Q} % the rational numbers
+\newcommand{\R}{\mathbb R} % the real numbers
+\newcommand{\T}{\mathbb T} % \set{\bot,\top}
+%\newcommand{\C}{\mathbb C} % complex numbers
+\newcommand{\D}{\mathbf D} % bold-face D, used for generic domain
+% \newcommand{\U}{\mathbf U} % the universe
+
+
+\newcommand{\cd}{\text{ :- }}
+\newcommand{\iter}{\texttt{iter}}
+\newcommand{\name}{\text{\sf Datalog}^\circ}
+\newcommand{\Name}{\text{\sf Datalog}^\circ}
+\newcommand{\trop}{\text{\sf Trop}}
+% \newcommand{\tropset}{\text{\sf T}}
+
+\newcommand{\ground}{\textsf{GA}}
+\newcommand{\arity}{\textsf{arity}}
+\newcommand{\adom}{\textsf{ADom}}
+\newcommand{\inst}{\textsf{Inst}}
+
+\newcommand{\floor}[1]{\lfloor#1\rfloor}
+\newcommand{\ceil}[1]{\lceil#1\rceil}

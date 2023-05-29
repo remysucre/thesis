@@ -1,0 +1,431 @@
+\chapter{Datalog Chapter}
+\label{chap:datalogo}
+
+For fifty years, the relational data model has been the main choice for
+representing, modeling, and processing data.  Its main query
+language, SQL, is found today in a wide range of applications and
+devices, from smart phones, to database servers, to distributed
+cloud-based clusters.  The reason for its success is the {\em data
+  independence principle}, which separates the declarative model from
+the physical implementation~\cite{DBLP:journals/cacm/Codd70}, and
+enables advanced implementation techniques, such as cost-based
+optimizations, indices, materialized views, incremental view
+maintenance, parallel evaluation, and many others, while keeping the
+same simple, declarative interface to the data unchanged.
+
+But scientists today often need to perform tasks that require
+iteration over the data.
+Gradient descent, clustering, page-rank, network centrality, inference
+in knowledge graphs are some examples of common tasks in data science
+that require iteration.  While SQL has introduced recursion since 1999
+(through Common Table Expressions, CTE), it has many cumbersome
+limitations and is little used in practice~\cite{frankmcsherry-2022}.
+
+The need to support recursion in a declarative language led to the
+development of {\em datalog} in the mid 80s~\cite{DBLP:conf/pods/Vianu21}.
+Datalog adds recursion to the relational query language, yet enjoys several elegant
+properties: it has a simple, declarative semantics; its na\"ive
+bottom-up evaluation algorithm always terminates; and it admits a few
+powerful optimizations, such as semi-na\"ive evaluation and magic set
+rewriting.  Datalog has been extensively studied in the literature;
+see~\cite{DBLP:journals/ftdb/GreenHLZ13} for a survey
+and~\cite{DBLP:books/mc/18/MaierTKW18,DBLP:conf/pods/Vianu21} for historical notes.
+
+However, datalog is not the answer to modern needs, because it only
+supports monotone queries over sets.  Most tasks in data science today
+require the interleaving of recursion and aggregate computation.
+Aggregates are not monotone under set inclusion, and therefore they
+are not supported by the framework of pure datalog.  Neither SQL'99
+nor popular open-source datalog systems like
+Souffl\'e~\cite{DBLP:conf/cav/JordanSS16} allow recursive queries to
+have aggregates.  While several proposals have been made to extend
+datalog with
+aggregation~\cite{DBLP:conf/pods/GangulyGZ91,DBLP:conf/pods/RossS92,DBLP:journals/jcss/GangulyGZ95,DBLP:journals/vldb/MazuranSZ13,DBLP:conf/icde/ShkapskyYZ15,DBLP:conf/sigmod/ShkapskyYICCZ16,DBLP:conf/amw/ZanioloYDI16,DBLP:journals/tplp/ZanioloYDSCI17,DBLP:conf/amw/ZanioloYIDSC18,DBLP:journals/tplp/CondieDISYZ18,DBLP:conf/sigmod/0001WMSYDZ19,DBLP:journals/corr/abs-1910-08888,DBLP:journals/corr/abs-1909-08249,DBLP:journals/debu/ZanioloD0LL021},
+these extensions are at odds with the elegant properties of datalog
+and have not been adopted by either datalog systems or SQL engines.
+
+In this paper we propose a foundation for a query language that
+supports both recursion and aggregation.  Our proposal is based on the
+concept of $K$-relations, introduced in a seminal
+paper~\cite{DBLP:conf/pods/GreenKT07}.  In a $K$-relation, tuples are
+mapped to a fixed semiring. Standard relations (sets) are
+$\B$-relations where tuples are mapped to the Boolean semiring $\B$,
+relations with duplicates (bags) are $\N$-relations, sparse tensors
+are $\R$-relations, and so on.  Queries over $K$-relations are the
+familiar relational queries, where the operations $\wedge, \vee$ are
+replaced by the operations $\otimes, \oplus$ in the semiring;
+importantly, an existential quantifier $\exists$ becomes an
+$\oplus$-aggregate operator.
+$K$-relations are a very powerful abstraction, because they open up
+the possibility of adapting query processing and optimization
+techniques to other domains~\cite{DBLP:conf/pods/KhamisNR16}.
+
+Our first contribution is to introduce an extension of datalog to
+$K$-relations.  We call the language $\name$, where the superscript
+$o$ represents a (semi)-ring.  $\Name$ has a declarative semantics
+based on the least fixpoint, and supports both recursion and
+aggregates.  We illustrate throughout this paper its utility through
+several examples that are typical for recursive data processing.  In
+order to define the least fixpoint semantics of $\name$, the semiring
+needs to be partially ordered.  For this purpose, we introduce an
+algebraic structure called a {\em Partially Ordered Pre-Semiring (POPS)\/},
+which generalizes the more familiar naturally ordered semirings.  This
+generalization is necessary for some applications.  For example, the
+bill-of-material program (Example~\ref{ex:sum1:sum2}) is naturally
+expressed over the lifted reals, $\R_\bot$, which is a POPS that is
+not naturally ordered.
+
+Like datalog, $\name$ can be evaluated using the {\em na\"ive algorithm},
+by repeatedly applying all rules of the program, until there is no
+more change.  However, unlike datalog, a $\name$ program may diverge.
+Our second contribution consists of a full characterization of the
+POPS that guarantee that every $\name$ program terminates.  More
+precisely, we show that termination is guaranteed iff the POPS enjoys
+a certain algebraic property called {\em
+  stability}~\cite{semiring_book}.  The result is based on an analysis
+of the fixpoint of a vector-valued polynomial function over a semiring, which is of
+independent interest.  With some abuse, we will say in this paper that
+a $\name$ program {\em converges}, if the na\"ive algorithm terminates
+in a finite number of steps; we do not consider ``convergence in the
+limit'', for example in an $\omega$-continuous
+semirings~\cite{DBLP:conf/pods/GreenKT07,DBLP:journals/jacm/EsparzaKL10}.
+
+Finally, we describe how the {\em semi-na\"ive algorithm} can be
+extended to $\name$, under certain restrictions on the POPS.  This
+should be viewed as an illustration of the potential for applying
+advanced optimizations to $\name$: in a companion
+paper~\cite{DBLP:conf/sigmod/WangK0PS22}, we introduced a simple, yet
+powerful optimization technique for $\name$, and showed, among other
+things, that magic set rewriting can be obtained using several
+applications of that rule.
+
+At its essence, a $\name$ program consists of solving a fixpoint
+equation in a semiring, which is a problem that was studied in a variety
+of areas, like automata theory, program analysis, and many
+others~\cite{MR1470001,DBLP:conf/popl/CousotC77,MR1728440,MR1059930,
+  DBLP:conf/lics/HopkinsK99, DBLP:journals/tcs/Lehmann77,
+  semiring_book,MR609751}.  The existence of the fixpoint is usually
+ensured by requiring the semiring to be $\omega$-continuous. For
+example, Green et al.~\cite{DBLP:conf/pods/GreenKT07} studied the
+provenance of datalog on $K$-relations, while Esparza et
+al.~\cite{DBLP:journals/jacm/EsparzaKL10} studied dataflow equations,
+in both cases requiring the semiring to be $\omega$-continuous.  This
+guarantees that the least fixpoint exists, even if the na\"ive algorithm
+diverges.
+
+In addition to the (semi-)na\"ive method, which is a first-order method for solving
+fixpoint equations, there is a second-order method called the {\em Newton's method},
+discovered relatively recently \cite{DBLP:journals/jacm/EsparzaKL10,DBLP:conf/lics/HopkinsK99}
+in the program analysis literature.
+It was shown that Newton's method requires a smaller number of iterations than the
+na\"ive algorithm.\footnote{The na\"ive algorithm is called Kleene iteration
+method in~\cite{DBLP:journals/jacm/EsparzaKL10}.} In the particular
+case of a commutative and idempotent semiring, Newton's method always converges, while the
+na\"ive algorithm may diverge~\cite{DBLP:journals/jacm/EsparzaKL10}.
+However, every iteration of Newton's method requires solving a least fixpoint solution
+to an inner-recursion, which is expensive.
+Here, we are seeing the exact same phenomenon when comparing gradient descent vs.
+Newton's method in continuous optimization: while Newton's method may converge in fewer
+steps, every step is more expensive, and requires the materialization of a large intermediate
+result (the Hessian matrix).
+In continuous optimization, Newton's method is rarely used for large-scale problems for
+this reason~\cite{DBLP:books/sp/NocedalW99}.
+For $\name$, it remains unclear whether Newton's method is more efficient in practice than
+the na\"ive algorithm.  One experimental evaluation~\cite{DBLP:conf/popl/RepsTP16} has
+found that it is not. In contrast, the na\"ive algorithm, and its
+extension to the semi-na\"ive algorithm, is simple, and implemented by
+all datalog systems today.  In this paper we focus only on the
+convergence of the na\"ive algorithm, and do not consider Newton's
+method.
+
+
+\section{Overview of the Results}
+\label{subsec:overview}
+
+We present here a high-level overview of the main results in this
+paper.  We start by recalling the syntax of a (traditional) datalog
+program $\Pi$, which consists of a set of rules of the form:
+%
+\begin{align}
+  R_0(\bm X_0) &\cd R_1(\bm X_1) \wedge \cdots \wedge R_m(\bm X_m) \label{eq:datalog}
+\end{align}
+%
+where $R_0, \ldots, R_m$ are relation names (not necessarily distinct)
+and each $\bm X_i$ is a tuple of variables and/or constants.  The atom
+$R_0(\bm X_0)$ is called the head, and the conjunction
+$R_1(\bm X_1) \wedge \cdots \wedge R_m(\bm X_m)$ is called the body.
+A relation name that occurs in the head of some rule in $\Pi$ is
+called an {\em intensional database predicate} or IDB, otherwise it is
+called an {\em extensional database predicate} or EDB.  The EDBs form
+the input database, which is denoted $I$, and the IDBs represent the
+output instance computed by $\Pi$, which we denote by $J$.  The finite
+set of all constants occurring in $I$ is called the {\em active
+  domain} of $I$, and denoted $\adom(I) \subseteq D$.
+%
+The textbook example of a datalog program is one that computes the
+transitive closure of a graph defined by the edge relation $E(X,Y)$:
+%
+\begin{align*}
+  T(X,Y) &\cd E(X,Y) \\
+  T(X,Y) &\cd T(X,Z) \wedge E(Z,Y)
+\end{align*}
+%
+Here $E$ is an EDB predicate, and $T$ is an IDB predicate.  Multiple
+rules with the same head are interpreted as a disjunction, and in this
+paper we prefer to combine them in a single rule, with an explicit
+disjunction.  In particular, the program above becomes:
+%
+\begin{align}
+  T(X,Y) & \cd E(X,Y) \vee \exists_Z (T(X,Z) \wedge E(Z,Y)) \label{eq:datalog:intro}
+\end{align}
+%
+The semantics of a datalog program is the least fixpoint of the
+function defined by its rules, and can be computed by the {\em na\"ive
+  evaluation algorithm}, as follows: initialize all IDBs to the empty
+set, then repeatedly apply all rules, updating the state of the IDBs,
+until there is no more change to the IDBs.  The algorithm always
+terminates in time polynomial in $\adom(I)$.
+
+We introduce $\name$, a language that generalize datalog to relations
+over a {\em partially ordered, commutative pre-semiring}, or POPS.  A
+POPS, $\bm P$, is an algebraic structure with operations
+$\oplus, \otimes$ on a domain $P$, which is also a partially ordered set with an order
+relation $\sqsubseteq$ and a smallest element $\bot$. (Formal
+definition is in Sec.~\ref{sec:pops}).  For example, the Boolean
+semiring $\B$ forms a POPS where $(\oplus,\otimes) = (\vee, \wedge)$, over domain
+$\{0,1\}$, and the order relation is $0 \leq 1$.  For another example, the {\em
+  tropical semiring}, $\trop$, consists of the real numbers $\R$, the
+operations are $\min, +$, and the order relation $x \sqsubseteq y$ is
+the reverse of the usual order $x \geq y$.  If
+we restrict the tropical semiring to the non-negative reals, $\R_+$, then
+we denote the POPS by $\trop^+$.  For a fixed POPS $\bm P$, a
+$\bm P$-relation of arity $k$ is a function that maps all $k$-tuples
+over some domain to values in $\bm P$; for example, a standard
+relation is a $\B$-relation, where $\B$ is the Boolean semiring, while
+a relation with duplicates (a bag) is an $\N$-relation.  A $\name$
+program consists of a set of rules, e.g.
+like~\eqref{eq:datalog:intro}, where all relations are
+$\bm P$-relations, and the operators $\wedge, \vee, \exists_Z$ are
+replaced by $\otimes, \oplus, \bigoplus_Z$, and its semantics is
+defined as its least fixpoint, when it exists, or undefined otherwise.
+We will illustrate the utility of $\name$ through multiple examples in
+this paper, and give here only a preview.
+
+\begin{ex} \label{ex:intro} The {\em all-pairs shortest paths} (APSP) problem is to compute the
+  shortest path length $T(X,Y)$ between all pairs $X,Y$ of vertices in
+  the graph, given that $E(X,Y)=$ the length of the edge $(X,Y)$ in
+  the graph.  We assume that both $E$ and $T$ are $\trop^+$-relations.
+  The APSP problem can be expressed very compactly in $\name$ as
+  %
+  \begin{align}
+    T(X,Y) &\cd E(X,Y) \oplus \bigoplus_Z T(X,Z) \otimes E(Z,Y), \label{eqn:linear:tc}
+  \end{align}
+%
+  where $(\oplus,\otimes) = (\min, +)$ are the ``addition'' and
+  ``multiplication'' in $\trop^+$.  If we instantiate these operations
+  in~\eqref{eqn:linear:tc}, the program becomes:
+  %
+  \begin{align}
+    T(X,Y) &\cd \min\left(E(X,Y), \min_Z (T(X,Z) + E(Z,Y))\right), \label{eqn:apsp}
+  \end{align}
+%
+  If we use a different POPS in~\eqref{eqn:linear:tc}, then the same
+  $\name$ program will express similar problems, in exactly the same
+  way. For example, if the relations $E, T$ are $\B$-relations, then
+  the program~\eqref{eqn:linear:tc} becomes the {\sf transitive
+    closure} program~\eqref{eq:datalog:intro}; alternatively, if both
+  $E, T$ are $\trop^+_p$-relations, where $\trop^+_p$ is a semiring
+  defined in Sec.~\ref{sec:pops}, then the program computes the {\em
+    top $p+1$-shortest-paths}.
+\end{ex}
+
+The least fixpoint of $\name$, if exists, can be computed by the na\"ive
+algorithm, quite similar to datalog: initialize all IDBs to $\bot$,
+then repeatedly apply all rules of the $\name$ program, obtaining an
+increasing chain of IDB instances,
+$J^{(0)} \sqsubseteq J^{(1)} \sqsubseteq J^{(2)} \sqsubseteq \cdots$
+When $J^{(t)} = J^{(t+1)}$, then the algorithm stops and returns
+$J^{(t)}$; in that case we say that the $\name$ program converges in
+$t$ steps, or we just say that it converges; otherwise we say that it
+diverges.  Traditional datalog always converges, but this is no longer
+the case for $\name$ programs.  There are five possibilities,
+depending on the choice of the POPS $\bm P$:
+%
+\begin{enumerate}[label=(\roman*)]
+\item \label{item:converge:1} For some $\name$ programs, $\bigvee_t J^{(t)}$ is not the least fixpoint.
+\item \label{item:converge:2} Every $\name$ program has the least fixpoint $\bigvee_t J^{(t)}$, but may not necessarily converge.
+\item \label{item:converge:3} Every $\name$ program converges.
+\item \label{item:converge:4} Every $\name$ program converges in a
+  number of steps that depends only on $|\adom(I)|$.
+\item \label{item:converge:5} Every $\name$ program converges in a
+  number of steps that is polynomial in $|\adom(I)|$.
+\end{enumerate}
+%
+In this paper, we will only consider
+data-complexity~\cite{DBLP:conf/stoc/Vardi82}, where the $\name$
+program is assumed to be fixed, and the input consists only of the EDB
+instance $I$.
+
+We study algebraic properties of the POPS $\bm P$ that ensure that we
+are in one of the cases~\ref{item:converge:3}-\ref{item:converge:5};
+we do not address cases~\ref{item:converge:1}-\ref{item:converge:2} in
+this paper.  We give next a necessary and sufficient condition for
+each of the cases~\ref{item:converge:3} and~\ref{item:converge:4}, and
+give a sufficient condition for case~\ref{item:converge:5}.  For any
+POPS $\bm P$, the set
+$\bm P \oplus \bot \defeq \setof{u\oplus \bot}{u \in P}$ is a
+semiring (Proposition~\ref{prop:s:plus:bot}); our characterization is based entirely on a certain
+property, called {\em stability}, of the semiring $\bm P \oplus \bot$,
+which we describe here.
+
+Given a semiring $\bm S$ and $u \in S$, denote by
+$u^{(p)} := 1 \oplus u \oplus u^2 \oplus \cdots \oplus u^{p}$, where
+$u^{i} := u \otimes u \otimes \cdots \otimes u$ ($i$ times).  We say
+that $u$ is {\em $p$-stable} if $u^{(p)}=u^{(p+1)}$; we say that the
+semiring $\bm S$ is {\em $p$-stable} if every element $u \in S$ is $p$-stable, and
+we say that $\bm S$ is {\em stable} if every element $u$ is stable for some
+$p$ that may depend on $u$.
+A $\name$ program is {\em linear} if every rule has at most one IDB predicate in the body.
+We prove:
+
+\begin{thm} \label{th:main:intro} Given a POPS $\bm P$, the following hold.
+  \begin{itemize}
+  \item Every $\name$ program converges iff the semiring $\bm P\oplus \bot$ is stable.
+  \item Every program converges in a number of steps that depends only
+    on $|\adom(I)|$ iff $\bm P \oplus \bot$ is $p$-stable for some
+    $p$.  More precisely, every $\name$ program converges in
+    $\sum_{i=1}^{N}(p+2)^i$ steps, where $N$ is the number of ground
+    tuples consisting of IDB predicates and constants from $\adom(I)$.
+    Furthermore, if the program is linear, then it converges in $\sum_{i=1}^N(p+1)^i$ steps.
+  \item If $\bm P\oplus \bot$ is $0$-stable, then every $\name$
+    program converges in $N$ steps; in particular, the program runs in
+    polynomial time in the size of the input database.
+  \end{itemize}
+\end{thm}
+
+In a nutshell, the theorem says that convergence of $\name$ is
+intimately related to the notion of stability.  The proof, provided in
+Sec.~\ref{sec:complexity}, consists of an analysis of the infinite
+powerseries resulting from unfolding the fixpoint definition; for
+the proof of the first item we also use Parikh's
+theorem~\cite{MR209093}.  As mentioned earlier, most prior work on
+fixpoint equations assumes an $\omega$-continuous semiring; when
+convergence is desired, one usually offers the Ascending Chain
+Condition, ACC (see Sec.~\ref{sec:lfp}) as a sufficient condition for
+convergence.  Our theorem implies that ACC is only a sufficient, but
+not a necessary condition for convergence, for example $\trop^+$ is
+$0$-stable, and therefore every $\name$ program converges on
+$\trop^+$, yet it does not satisfy the ACC condition.  A somewhat
+related result is proven by Luttenberger and
+Schlund~\cite{DBLP:journals/iandc/LuttenbergerS16} who showed that, if
+$1$ is $p$-stable, then Newton's method requires at most
+$N + \log\log p$ iterations.  As mentioned earlier, each step of
+Newton's method requires the computation of another least fixpoint,
+hence that result does not inform us on the convergence of the na\"ive
+algorithm.
+
+Next, we introduce an extension of the semi-na\"ive evaluation
+algorithm to $\name$.  It is known that the na\"ive evaluation
+algorithm is inefficient in practice, because at each iteration it
+repeats all the computations that it has done at the previous
+iterations.  Most datalog systems implement an improvement called the
+{\em semi-na\"ive} evaluation, which keeps track of the delta between
+the successive states of the IDBs and applies the datalog rules as a
+function of these deltas to obtain the new iteration's deltas.
+Semi-na\"ive evaluation is one of the major optimization techniques
+for evaluating datalog, however, it is defined only for programs that
+are monotone under set inclusion, and the systems that implement it
+enforce monotonicity, preventing the use of aggregation in
+recursion. Our second result consists of showing how to adapt the
+semi-na\"ive algorithm to $\name$, under certain restrictions of the
+POPS $\bm P$, thus, enabling the semi-na\"ive algorithm to be applied
+to programs with aggregation in recursion.
+
+Let's illustrate the semi-na\"ive algorithm on the APSP program in
+Example~\ref{ex:intro}.  For that, let's first review the standard
+semi-na\"ive algorithm for pure datalog on the transitive closure
+program~\eqref{eq:datalog:intro}.  While the na\"ive algorithm starts
+with $T^{(0)}(X,Y)=\emptyset$ and repeats
+$T^{(t+1)}(X,Y) = E(X,Y) \vee \bigvee_Z T^{(t)}(X,Z) \wedge E(Z,Y)$
+for $t=0,1,2,\ldots$, the semi-na\"ive algorithm starts by
+initializing $T^{(1)}(X,Y) = \delta^{(0)}(X,Y) = E(X,Y)$, then
+performs the following steps for $t=1,2,3,\ldots$:
+%
+\begin{align}
+  \delta^{(t)}(X,Y) &= \left(\bigvee_z \delta^{(t-1)}(X,Z) \wedge E(Z,Y) \right) \setminus T^{(t)}(X,Y) \label{eqn:deltat}\\
+  T^{(t+1)}(X,Y) &= T^{(t)}(X,Y) \cup \delta^{(t)}(X,Y).\nonumber
+\end{align}
+%
+Thus, the semi-na\"ive algorithm avoids re-discovering at iteration
+$t$ tuples already discovered at iterations $1,2,\ldots, t-1$.
+
+In order to apply the same principle to the APSP
+program~\eqref{eqn:apsp}, we need to define an appropriate ``minus''
+$\ominus$ operator on the tropical semiring.  This operator is:
+%
+\begin{align}
+  v\ominus u=&
+        \begin{cases} v &\mbox{if } v < u\\
+          \infty &\mbox{if } v \geq u
+        \end{cases} \label{eqn:trop:minus}
+\end{align}
+%
+The semi-na\"ive algorithm for the APSP problem in~\eqref{eqn:linear:tc}
+is a mirror of that in~\eqref{eqn:deltat}:
+%
+\begin{align}
+  \delta^{(t)}(X,Y) &= (\min_Z \delta^{(t-1)}(X,Z) + E(Z,Y)) \ominus T^{(t)}(X,Y), \label{eq:semi-naive:trop}\\
+  T^{(t+1)}(X,Y) &= \min(T^{(t)}(X,Y), \delta^{(t)}(X,Y))\nonumber
+\end{align}
+%
+where the difference operator $\ominus$ is defined
+in~\eqref{eqn:trop:minus}. The reason why this algorithm is more
+efficient than the na\"ive algorithm is the fact that, in general, a
+database system needs to store only the tuples that are ``present'' in
+a relation, i.e. those whose value is $\neq \bot$.  In our example,
+only those tuples $\delta^{(t)}(X,Y)$ whose value is $\neq \infty$
+need to be stored.  The $\ominus$ operator
+in~\eqref{eq:semi-naive:trop} checks if the new value
+$\min_Z \delta^{(t-1)}(X,Z) + E(Z,Y)$ is strictly less than the old
+value $T^{(t)}(X,Y)$: if not, then it returns $\infty$, signaling that
+the value of $(X,Y)$ in both $\delta^{(t)}(X,Y)$ and $T^{(t)}(X,Y)$
+does not need to be updated.  As a consequence, only those tuples
+$T^{(t+1)}(X,Y)$ need to be processed at step $t$ where the value has
+strictly decreased from the previous step.
+
+
+
+Finally, the last topic we address in this paper is a possible way of
+introducing negation in $\name$.  We will show that by interpreting
+$\name$ over a particular POPS called THREE
+(Sec.~\ref{subsec:three:pops}) and by appropriately defining a
+function \texttt{not}, $\name$ can express datalog queries with
+negation under Fitting's three-valued
+semantics~\cite{DBLP:journals/jlp/Fitting85a}.  The crux in Fitting's
+approach is to apply to the three-valued logic
+(with truth values $\{0, 1,\bot\}$, where $\bot$ means ``undefined'')
+the
+{\em knowledge order} $\leq_k$ with $\bot \leq_k 0$ and
+$\bot \leq_k 1$. Then, the function \texttt{not} defined as
+$\mathtt{not}(0) = 1$, $\mathtt{not}(1) = 0$, and
+$\mathtt{not}(\bot) = \bot$ is monotone w.r.t.\ $\leq_k$, and one can
+apply the usual least fixpoint semantics to datalog programs with
+negation (and, likewise, to $\name$ programs with the function
+\texttt{not}).  Hence, in cases when Fitting's 3-valued semantics
+coincides with the well-founded semantics, so does $\name$ equipped
+with the function \texttt{not} when interpreted over the POPS THREE.
+
+\subsection{Paper organization}
+
+We define POPS in Sec.~\ref{sec:pops} and give several examples.
+In Sec.~\ref{sec:lfp} we consider the least fixpoint of monotone
+functions over posets, and prove an upper bound on the number of
+iterations needed to compute the least fixpoint.  We define $\name$
+formally in Sec.~\ref{sec:datalogo}, and give several examples.
+The convergence results described in Theorem~\ref{th:main:intro} are
+stated formally and proven in Sec.~\ref{sec:complexity}.
+Sec.~\ref{sec:semi:naive} presents a generalization of semi-na\"ive
+evaluation to $\name$.  We discuss how $\name$ can express datalog
+queries with negation using 3-valued logic in
+Sec.~\ref{sec:fitting}.  Finally, we conclude in
+Sec.~\ref{sec:conclusions}.
