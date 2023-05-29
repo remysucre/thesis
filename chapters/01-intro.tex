@@ -1,4 +1,118 @@
 \chapter{Introduction}
 \label{sec:intro}
 
-Writing my thesis now!
+Fifty years after its initial proposal by Edgar F. Codd,
+ the relational model has cemeted its status as the de-facto data model 
+ in nearly all modern databases.
+It provides data independence 
+ which has allowed data systems to scale to unprecedented scales,
+ while guaranteeing performance and correctness.
+The success of the relational model is witnessed 
+ by the popularity of SQL 
+ which is uniquitous in computing systems 
+ of any size from smartphones to data centers.
+
+ Nevertheless, traditional relational databases are struggling 
+  to meet the demands of modern data analytics.
+Today's data analytics involve new kinds of data, 
+ as well as new kinds of computation over such data. 
+For example, machine learning workloads involve linear algebra operations
+ running over data stored as matrices. 
+For another example, graph analytics require iterative algorithms
+ over graph data.
+Running these workloads in existing relational databases 
+ is both cumbersome 
+ (because SQL is a poor language for expressing the computation),
+ and slow (because the systems are not optimized for such workloads).
+
+This dissertation is motivated by the following question: 
+{\em How can we renew relational database systems 
+ to support modern data analytics?}
+In this dissertation, I propose a new language 
+ for writing relational programs;
+ a new algorithm for the relational join;
+ and techniques to optimize relational queries. 
+
+\section{Motivation}
+\label{sec:intro:motivation}
+
+There are tons of specialized systems for the tasks 
+ in modern data analytics.
+For example (list machine learning systems), and (list graph databases).
+Given the abundance of such options,
+ why do we still care about the relational systems?
+It's the same reason that made relational successful 
+ for traditional data management: data independence.
+At a high level, data independence decouples
+ how computation is specified from how it is carried out. 
+More specifically, the programmer writes a high-level,
+ declarative program {\em once},
+ and the relational system automatically 
+ compiles and optimizes the program to execute 
+ in a variety of environments:
+ over data in-memory or on-disk;
+ the data may be distributed over several machines,
+ or it may arrive in a stream;
+ and the system may take advantage of a large number of parallel threads,
+ or specialized accelerators like the GPU.
+Other concerns include indexing, view materialization,
+ approximation, and fault-toleration.
+In short, the users of a relational database need only focus on
+ specifying {\em what} to compute, 
+ and the database systems automatically figures out {\em how}. 
+
+Database systems have been roughly catergorized as {\em transactional},
+ or OLTP, and {\em analytic}, or OLAP.
+In this dissertation we focus on the latter category.
+The main objective of the user of an OLAP database 
+ is to analyze the stored data to gain insight about it.
+For example, the owner of an online store may hope to 
+ analyze historic sales data to understand 
+ the affect of promotion campaigns.
+An OLAP query often touches large amount of data,
+ performing complex operations over them.
+In other words, we run big queries over big data. 
+
+Over the past decade, the landscape of data analytics has changed.
+On one hand, people are working with many new forms of data, 
+ in the form of graphs, matrices and tensors.
+On the other, they are running new kinds of computation 
+ over such data, including linear/tensor algebra operations 
+ and iterative graph algorithms.
+Initially designed and optimized for loop-free queries over tabular data,
+ relational databases struggle to support modern data analytics. 
+They struggle in two levels: 
+ at the interface between the system and the human,  
+ the SQL language is not designed to express linear algebra operations 
+ and iteration. 
+SQL queries expressing such computation are complex,
+ brittle and ugly.
+At the interface between the system and the machine,
+ traditional systems are not optimized for the workloads 
+ central to modern analytics.
+For example, linear algebra extensively uses aggregation 
+ which is rarely optimized in existing databases.
+For another example, most graph algorithms are iterative,
+ yet existing databases only provide na\"ive optimizations for iterations. 
+Namely, most systems optimize within each iteration independently;
+ the few systems that do optimize across iterations 
+ only implement classic techniques like the magic-set transformation. 
+
+Facing these challenges, a relational system modernized 
+ for today's data analytics 
+ should therefore provide an ergonomic language 
+ for specifying a variety of computation 
+ over different forms of data,
+ and at the same time optimize it for efficient execution. 
+
+\section{Contributions}
+\label{sec:intro:contributions}
+
+Make intro accessible, expand the section for someone who doesn't follow 
+ the work. 
+
+\section{Related Work}
+\label{sec:intro:related-work}
+
+Include miniKanren. Prolog v.s. Datalog: top-down v.s.
+bottom-up. Left recursion doesn't work in prolog. 
