@@ -107,6 +107,29 @@ powerful optimization technique for \datalogo, and showed, among other
 things, that magic set rewriting can be obtained using several
 applications of that rule.
 
+The remainder of this Chapter is organized as follows. 
+We define POPS in Sec.~\ref{sec:pops} and give several examples.
+In Sec.~\ref{sec:lfp} we consider the least fixpoint of monotone
+functions over posets, and prove an upper bound on the number of
+iterations needed to compute the least fixpoint.  We define \datalogo
+formally in Sec.~\ref{sec:datalogo}, and give several examples.
+The convergence results described in Theorem~\ref{th:main:intro} are
+stated formally and proven in Sec.~\ref{sec:complexity}.
+Sec.~\ref{sec:semi:naive} presents a generalization of semi-na\"ive
+evaluation to \datalogo.  We discuss how \datalogo can express Datalog
+queries with negation using 3-valued logic in
+Sec.~\ref{sec:fitting}.  Finally, we conclude in
+Sec.~\ref{sec:conclusions}.
+
+\section{Partially Ordered Pre-Semirings (POPS)}
+\label{sec:pops}
+
+\section{\datalogo}
+\label{sec:datalogo}
+
+\section{Convergence of \datalogo}
+\label{sec:convergence}
+
 At its essence, a \datalogo program consists of solving a fixpoint
 equation in a semiring, which is a problem that was studied in a variety
 of areas, like automata theory, program analysis, and many
@@ -159,48 +182,6 @@ we do not address cases~\ref{item:converge:1}-\ref{item:converge:2} in
 this paper.  We give next a necessary and sufficient condition for
 each of the cases~\ref{item:converge:3} and~\ref{item:converge:4}, and
 give a sufficient condition for case~\ref{item:converge:5}.  
-
-Next, we introduce an extension of the semi-na\"ive evaluation
-algorithm to \datalogo.  It is known that the na\"ive evaluation
-algorithm is inefficient in practice, because at each iteration it
-repeats all the computations that it has done at the previous
-iterations.  Most Datalog systems implement an improvement called the
-{\em semi-na\"ive} evaluation, which keeps track of the delta between
-the successive states of the IDBs and applies the Datalog rules as a
-function of these deltas to obtain the new iteration's deltas.
-Semi-na\"ive evaluation is one of the major optimization techniques
-for evaluating Datalog, however, it is defined only for programs that
-are monotone under set inclusion, and the systems that implement it
-enforce monotonicity, preventing the use of aggregation in
-recursion. Our second result consists of showing how to adapt the
-semi-na\"ive algorithm to \datalogo, under certain restrictions of the
-POPS $\bm P$, thus, enabling the semi-na\"ive algorithm to be applied
-to programs with aggregation in recursion.
-
-\section{Chapter Organization}
-
-% We define POPS in Sec.~\ref{sec:pops} and give several examples.
-% In Sec.~\ref{sec:lfp} we consider the least fixpoint of monotone
-% functions over posets, and prove an upper bound on the number of
-% iterations needed to compute the least fixpoint.  We define \datalogo
-% formally in Sec.~\ref{sec:datalogo}, and give several examples.
-% The convergence results described in Theorem~\ref{th:main:intro} are
-% stated formally and proven in Sec.~\ref{sec:complexity}.
-% Sec.~\ref{sec:semi:naive} presents a generalization of semi-na\"ive
-% evaluation to \datalogo.  We discuss how \datalogo can express Datalog
-% queries with negation using 3-valued logic in
-% Sec.~\ref{sec:fitting}.  Finally, we conclude in
-% Sec.~\ref{sec:conclusions}.
-
-\section{Partially Ordered Pre-Semirings (POPS)}
-\label{sec:pops}
-
-\section{\datalogo}
-\label{sec:datalogo}
-
-\section{Convergence of \datalogo}
-\label{sec:convergence}
-
 For any POPS $\bm P$, the set
 $\bm P \oplus \bot \defeq \setof{u\oplus \bot}{u \in P}$ is a
 semiring (Proposition~\ref{prop:s:plus:bot}); our characterization is based entirely on a certain
@@ -255,3 +236,20 @@ algorithm.
 
 \section{Semi-na\"ive Evaluation for \datalogo}
 \label{sec:semi-naive}
+
+Next, we introduce an extension of the semi-na\"ive evaluation
+algorithm to \datalogo.  It is known that the na\"ive evaluation
+algorithm is inefficient in practice, because at each iteration it
+repeats all the computations that it has done at the previous
+iterations.  Most Datalog systems implement an improvement called the
+{\em semi-na\"ive} evaluation, which keeps track of the delta between
+the successive states of the IDBs and applies the Datalog rules as a
+function of these deltas to obtain the new iteration's deltas.
+Semi-na\"ive evaluation is one of the major optimization techniques
+for evaluating Datalog, however, it is defined only for programs that
+are monotone under set inclusion, and the systems that implement it
+enforce monotonicity, preventing the use of aggregation in
+recursion. Our second result consists of showing how to adapt the
+semi-na\"ive algorithm to \datalogo, under certain restrictions of the
+POPS $\bm P$, thus, enabling the semi-na\"ive algorithm to be applied
+to programs with aggregation in recursion.
