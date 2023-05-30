@@ -1,4 +1,4 @@
-\chapter{Datalog Chapter}
+\chapter{\texorpdfstring{$\name$}{Datalogo}}
 \label{chap:datalogo}
 
 For fifty years, the relational data model has been the main choice for
@@ -22,7 +22,7 @@ that require iteration.  While SQL has introduced recursion since 1999
 limitations and is little used in practice~\cite{frankmcsherry-2022}.
 
 The need to support recursion in a declarative language led to the
-development of {\em datalog} in the mid 80s~\cite{DBLP:conf/pods/Vianu21}.
+development of {\em Datalog} in the mid 80s~\cite{DBLP:conf/pods/Vianu21}.
 Datalog adds recursion to the relational query language, yet enjoys several elegant
 properties: it has a simple, declarative semantics; its na\"ive
 bottom-up evaluation algorithm always terminates; and it admits a few
@@ -31,18 +31,18 @@ rewriting.  Datalog has been extensively studied in the literature;
 see~\cite{DBLP:journals/ftdb/GreenHLZ13} for a survey
 and~\cite{DBLP:books/mc/18/MaierTKW18,DBLP:conf/pods/Vianu21} for historical notes.
 
-However, datalog is not the answer to modern needs, because it only
+However, Datalog is not the answer to modern needs, because it only
 supports monotone queries over sets.  Most tasks in data science today
 require the interleaving of recursion and aggregate computation.
 Aggregates are not monotone under set inclusion, and therefore they
-are not supported by the framework of pure datalog.  Neither SQL'99
-nor popular open-source datalog systems like
+are not supported by the framework of pure Datalog.  Neither SQL'99
+nor popular open-source Datalog systems like
 Souffl\'e~\cite{DBLP:conf/cav/JordanSS16} allow recursive queries to
 have aggregates.  While several proposals have been made to extend
-datalog with
+Datalog with
 aggregation~\cite{DBLP:conf/pods/GangulyGZ91,DBLP:conf/pods/RossS92,DBLP:journals/jcss/GangulyGZ95,DBLP:journals/vldb/MazuranSZ13,DBLP:conf/icde/ShkapskyYZ15,DBLP:conf/sigmod/ShkapskyYICCZ16,DBLP:conf/amw/ZanioloYDI16,DBLP:journals/tplp/ZanioloYDSCI17,DBLP:conf/amw/ZanioloYIDSC18,DBLP:journals/tplp/CondieDISYZ18,DBLP:conf/sigmod/0001WMSYDZ19,DBLP:journals/corr/abs-1910-08888,DBLP:journals/corr/abs-1909-08249,DBLP:journals/debu/ZanioloD0LL021},
-these extensions are at odds with the elegant properties of datalog
-and have not been adopted by either datalog systems or SQL engines.
+these extensions are at odds with the elegant properties of Datalog
+and have not been adopted by either Datalog systems or SQL engines.
 
 In this paper we propose a foundation for a query language that
 supports both recursion and aggregation.  Our proposal is based on the
@@ -60,7 +60,7 @@ $K$-relations are a very powerful abstraction, because they open up
 the possibility of adapting query processing and optimization
 techniques to other domains~\cite{DBLP:conf/pods/KhamisNR16}.
 
-Our first contribution is to introduce an extension of datalog to
+Our first contribution is to introduce an extension of Datalog to
 $K$-relations.  We call the language $\name$, where the superscript
 $o$ represents a (semi)-ring.  $\Name$ has a declarative semantics
 based on the least fixpoint, and supports both recursion and
@@ -75,9 +75,9 @@ bill-of-material program (Example~\ref{ex:sum1:sum2}) is naturally
 expressed over the lifted reals, $\R_\bot$, which is a POPS that is
 not naturally ordered.
 
-Like datalog, $\name$ can be evaluated using the {\em na\"ive algorithm},
+Like Datalog, $\name$ can be evaluated using the {\em na\"ive algorithm},
 by repeatedly applying all rules of the program, until there is no
-more change.  However, unlike datalog, a $\name$ program may diverge.
+more change.  However, unlike Datalog, a $\name$ program may diverge.
 Our second contribution consists of a full characterization of the
 POPS that guarantee that every $\name$ program terminates.  More
 precisely, we show that termination is guaranteed iff the POPS enjoys
@@ -107,7 +107,7 @@ others~\cite{MR1470001,DBLP:conf/popl/CousotC77,MR1728440,MR1059930,
   semiring_book,MR609751}.  The existence of the fixpoint is usually
 ensured by requiring the semiring to be $\omega$-continuous. For
 example, Green et al.~\cite{DBLP:conf/pods/GreenKT07} studied the
-provenance of datalog on $K$-relations, while Esparza et
+provenance of Datalog on $K$-relations, while Esparza et
 al.~\cite{DBLP:journals/jacm/EsparzaKL10} studied dataflow equations,
 in both cases requiring the semiring to be $\omega$-continuous.  This
 guarantees that the least fixpoint exists, even if the na\"ive algorithm
@@ -134,7 +134,7 @@ For $\name$, it remains unclear whether Newton's method is more efficient in pra
 the na\"ive algorithm.  One experimental evaluation~\cite{DBLP:conf/popl/RepsTP16} has
 found that it is not. In contrast, the na\"ive algorithm, and its
 extension to the semi-na\"ive algorithm, is simple, and implemented by
-all datalog systems today.  In this paper we focus only on the
+all Datalog systems today.  In this paper we focus only on the
 convergence of the na\"ive algorithm, and do not consider Newton's
 method.
 
@@ -143,7 +143,7 @@ method.
 \label{subsec:overview}
 
 We present here a high-level overview of the main results in this
-paper.  We start by recalling the syntax of a (traditional) datalog
+paper.  We start by recalling the syntax of a (traditional) Datalog
 program $\Pi$, which consists of a set of rules of the form:
 %
 \begin{align}
@@ -162,7 +162,7 @@ output instance computed by $\Pi$, which we denote by $J$.  The finite
 set of all constants occurring in $I$ is called the {\em active
   domain} of $I$, and denoted $\adom(I) \subseteq D$.
 %
-The textbook example of a datalog program is one that computes the
+The textbook example of a Datalog program is one that computes the
 transitive closure of a graph defined by the edge relation $E(X,Y)$:
 %
 \begin{align*}
@@ -179,14 +179,14 @@ disjunction.  In particular, the program above becomes:
   T(X,Y) & \cd E(X,Y) \vee \exists_Z (T(X,Z) \wedge E(Z,Y)) \label{eq:datalog:intro}
 \end{align}
 %
-The semantics of a datalog program is the least fixpoint of the
+The semantics of a Datalog program is the least fixpoint of the
 function defined by its rules, and can be computed by the {\em na\"ive
   evaluation algorithm}, as follows: initialize all IDBs to the empty
 set, then repeatedly apply all rules, updating the state of the IDBs,
 until there is no more change to the IDBs.  The algorithm always
 terminates in time polynomial in $\adom(I)$.
 
-We introduce $\name$, a language that generalize datalog to relations
+We introduce $\name$, a language that generalize Datalog to relations
 over a {\em partially ordered, commutative pre-semiring}, or POPS.  A
 POPS, $\bm P$, is an algebraic structure with operations
 $\oplus, \otimes$ on a domain $P$, which is also a partially ordered set with an order
@@ -240,14 +240,14 @@ this paper, and give here only a preview.
 \end{ex}
 
 The least fixpoint of $\name$, if exists, can be computed by the na\"ive
-algorithm, quite similar to datalog: initialize all IDBs to $\bot$,
+algorithm, quite similar to Datalog: initialize all IDBs to $\bot$,
 then repeatedly apply all rules of the $\name$ program, obtaining an
 increasing chain of IDB instances,
 $J^{(0)} \sqsubseteq J^{(1)} \sqsubseteq J^{(2)} \sqsubseteq \cdots$
 When $J^{(t)} = J^{(t+1)}$, then the algorithm stops and returns
 $J^{(t)}$; in that case we say that the $\name$ program converges in
 $t$ steps, or we just say that it converges; otherwise we say that it
-diverges.  Traditional datalog always converges, but this is no longer
+diverges.  Traditional Datalog always converges, but this is no longer
 the case for $\name$ programs.  There are five possibilities,
 depending on the choice of the POPS $\bm P$:
 %
@@ -328,12 +328,12 @@ Next, we introduce an extension of the semi-na\"ive evaluation
 algorithm to $\name$.  It is known that the na\"ive evaluation
 algorithm is inefficient in practice, because at each iteration it
 repeats all the computations that it has done at the previous
-iterations.  Most datalog systems implement an improvement called the
+iterations.  Most Datalog systems implement an improvement called the
 {\em semi-na\"ive} evaluation, which keeps track of the delta between
-the successive states of the IDBs and applies the datalog rules as a
+the successive states of the IDBs and applies the Datalog rules as a
 function of these deltas to obtain the new iteration's deltas.
 Semi-na\"ive evaluation is one of the major optimization techniques
-for evaluating datalog, however, it is defined only for programs that
+for evaluating Datalog, however, it is defined only for programs that
 are monotone under set inclusion, and the systems that implement it
 enforce monotonicity, preventing the use of aggregation in
 recursion. Our second result consists of showing how to adapt the
@@ -343,7 +343,7 @@ to programs with aggregation in recursion.
 
 Let's illustrate the semi-na\"ive algorithm on the APSP program in
 Example~\ref{ex:intro}.  For that, let's first review the standard
-semi-na\"ive algorithm for pure datalog on the transitive closure
+semi-na\"ive algorithm for pure Datalog on the transitive closure
 program~\eqref{eq:datalog:intro}.  While the na\"ive algorithm starts
 with $T^{(0)}(X,Y)=\emptyset$ and repeats
 $T^{(t+1)}(X,Y) = E(X,Y) \vee \bigvee_Z T^{(t)}(X,Z) \wedge E(Z,Y)$
@@ -399,7 +399,7 @@ Finally, the last topic we address in this paper is a possible way of
 introducing negation in $\name$.  We will show that by interpreting
 $\name$ over a particular POPS called THREE
 (Sec.~\ref{subsec:three:pops}) and by appropriately defining a
-function \texttt{not}, $\name$ can express datalog queries with
+function \texttt{not}, $\name$ can express Datalog queries with
 negation under Fitting's three-valued
 semantics~\cite{DBLP:journals/jlp/Fitting85a}.  The crux in Fitting's
 approach is to apply to the three-valued logic
@@ -409,13 +409,13 @@ the
 $\bot \leq_k 1$. Then, the function \texttt{not} defined as
 $\mathtt{not}(0) = 1$, $\mathtt{not}(1) = 0$, and
 $\mathtt{not}(\bot) = \bot$ is monotone w.r.t.\ $\leq_k$, and one can
-apply the usual least fixpoint semantics to datalog programs with
+apply the usual least fixpoint semantics to Datalog programs with
 negation (and, likewise, to $\name$ programs with the function
 \texttt{not}).  Hence, in cases when Fitting's 3-valued semantics
 coincides with the well-founded semantics, so does $\name$ equipped
 with the function \texttt{not} when interpreted over the POPS THREE.
 
-\subsection{Paper organization}
+\section{Paper organization}
 
 We define POPS in Sec.~\ref{sec:pops} and give several examples.
 In Sec.~\ref{sec:lfp} we consider the least fixpoint of monotone
@@ -425,7 +425,7 @@ formally in Sec.~\ref{sec:datalogo}, and give several examples.
 The convergence results described in Theorem~\ref{th:main:intro} are
 stated formally and proven in Sec.~\ref{sec:complexity}.
 Sec.~\ref{sec:semi:naive} presents a generalization of semi-na\"ive
-evaluation to $\name$.  We discuss how $\name$ can express datalog
+evaluation to $\name$.  We discuss how $\name$ can express Datalog
 queries with negation using 3-valued logic in
 Sec.~\ref{sec:fitting}.  Finally, we conclude in
 Sec.~\ref{sec:conclusions}.
