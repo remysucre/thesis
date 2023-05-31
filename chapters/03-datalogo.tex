@@ -124,6 +124,777 @@ Sec.~\ref{sec:conclusions}.
 \section{Partially Ordered Pre-Semirings (POPS)}
 \label{sec:pops}
 
+In this section, we review the basic algebraic notions of (pre-)semirings,
+$P$-relations, and sum-product queries.
+We also introduce an extension called partially ordered pre-semiring (POPS).
+
+\subsection{(Pre-)Semirings and POPS}
+
+\begin{defn}[(Pre-)semiring]
+A {\em pre-semiring}~\cite{semiring_book} is a tuple
+$\bm S = (S, \oplus, \otimes, 0, 1)$ where $\oplus$ and $\otimes$ are
+binary operators on $S$ for which $(S, \oplus, 0)$ is a commutative
+monoid, $(S, \otimes, 1)$ is a monoid, and $\otimes$ distributes over
+$\oplus$.
+When the {\em absorption rule} $x \otimes 0 = 0$ holds
+for all $x \in S$, we call $\bm S$ a {\em semiring}.\footnote{Some
+  references, e.g.~\cite{DBLP:journals/ai/KohlasW08}, define a
+  semiring without absorption.}
+%
+When $\oplus$ is commutative, then we say that the
+pre-semiring is {\em commutative}.  In this paper we only consider
+commutative pre-semirings, and we will simply refer to them as
+pre-semirings.
+\end{defn}
+
+In any (pre-)semiring $\bm S$, the relation $x \preceq_S y$ defined as
+$\exists z: x \oplus z = y$, is a {\em preorder}, which means that it
+is reflexive and transitive, but it is not anti-symmetric in general.
+When $\preceq_S$ is anti-symmetric, then it is a partial order, and is
+called the {\em natural order} on $\bm S$; in that case we say that
+$\bm S$ is {\em naturally ordered}.
+
+\begin{ex}
+  Some simple examples of pre-semirings\remy{Fix on Arxiv.} are the Booleans
+  $(\B \defeq \set{0,1}, \vee, \wedge, 0, 1)$, the natural numbers
+  $(\N, +, \times , 0, 1)$, and the real numbers
+  $(\R, +, \times, 0, 1)$.  We will refer to them simply as $\B, \N$
+  and $\R$.  The natural order on $\B$ is $0 \preceq_\B 1$ (or {\sf
+    false} $\preceq_\B$ {\sf true}); the natural order on $\N$ is the
+  same as the familiar total order $\leq$ of numbers.  $\R$ is not
+  naturally ordered, because $x \preceq_\R y$ holds for every
+  $x,y \in \R$.  Another useful example is the {\em tropical semiring}
+  $\trop^+ = (\R_+ \cup \{\infty\}, \min,+, \infty, 0)$, where the
+  natural order $x \preceq y$ is the {\em reverse} order $x \geq y$ on
+  $\R_+ \cup \{\infty\}$.
+\end{ex}
+
+
+A key idea we introduce in this paper is the decoupling of the partial order from the
+algebraic structure of the (pre-)semiring.
+The decoupling allows us to inject a partial order when the (pre-)semiring is not
+naturally ordered, or when we need a {\em different} partial order than the natural order.
+
+\begin{defn}[POPS] \label{def:pops} A {\em partially ordered pre-semiring} (POPS) is a tuple
+  $\bm P = (P, \oplus, \otimes, 0, 1, \sqsubseteq)$, where
+  $(P, \oplus, \otimes, 0, 1)$ is a pre-semiring, $(P, \sqsubseteq)$
+  is a poset, and $\oplus, \otimes$ are {\em monotone}\footnote{Monotonicity means
+  $x\sqsubseteq x'$ and $y \sqsubseteq y'$ imply $x\oplus y \sqsubseteq x' \oplus y'$
+  and $x \otimes y \sqsubseteq x' \otimes y'$.}
+  operators under $\sqsubseteq$.
+  In this paper, we will assume that every poset $(P, \sqsubseteq)$ has a minimum
+  element denoted by $\bot$.
+\end{defn}
+
+A POPS satisfies the identities $\bot \oplus \bot = \bot$ and
+$\bot \otimes \bot = \bot$, because, by monotonicity and the fact that
+$(P,\oplus,0)$ and $(P,\otimes,1)$ are commutative monoids, we have
+$\bot \oplus \bot \sqsubseteq \bot \oplus 0 = \bot$, and
+$\bot \otimes \bot \sqsubseteq \bot \otimes 1 = \bot$.  We say that
+the multiplicative operator $\otimes$ is {\em strict} if the identity
+$x \otimes \bot = \bot$ holds for every $x \in P$.
+
+Throughout this paper we will assume that $\otimes$ is strict,
+unless otherwise stated.
+One of the reasons for insisting on the strictness assumption is that
+we can ``extract'' from any POPS a semiring called the {\em core semiring}\remy{Remove?}
+ of the POPS,
+as shown in the following simple proposition.
+
+\begin{prop} \label{prop:s:plus:bot} Given an arbitrary POPS
+  $\bm P=(P,\oplus,\otimes,0,1,\sqsubseteq)$.  Define the subset
+  $P\oplus \bot \defeq \setof{x\oplus\bot}{x \in P} \subseteq P$.
+  Then, $(P\oplus \bot, \oplus, \otimes, 0\oplus \bot, 1 \oplus \bot)$
+  is a semiring.  We denote this semiring by $\bm P \oplus \bot$, and
+  refer to it as the {\em core} semiring of $\bm P$.
+\end{prop}
+%
+\begin{proof}
+  We use the fact that $\otimes$ is strict, and check that
+  $\bm P\oplus\bot$ is closed under $\oplus$ and $\otimes$:
+  $(x\oplus\bot)\oplus(y\oplus\bot)=(x\oplus
+  y)\oplus(\bot\oplus\bot)=(x\oplus y)\oplus\bot$, and similarly
+  $(x\oplus\bot)\otimes(y\oplus\bot)=(x\otimes y)\oplus (x\otimes\bot)
+  \oplus (y\otimes \bot) \oplus\bot = (x\otimes
+  y)\oplus\bot\oplus\bot\oplus\bot=(x\otimes y)\oplus\bot \in \bm P
+  \oplus \bot$.  Finally, it suffices to observe that $\bot= 0\oplus\bot$ is the identity
+  for $\oplus$ and $1\oplus\bot$ is the identity for $\otimes$.
+\end{proof}
+
+Every naturally ordered semiring is a POPS, where $\bot = 0$ and
+$\otimes$ is strict, and its core is itself, $\bm S \oplus 0 = \bm S$.
+The converse does not hold: some POPS are not naturally ordered; a
+simple example of a non-naturally ordered POPS is the set of {\em lifted
+  reals},
+$\R_\bot \defeq (\R \cup \set{\bot}, +, *, 0, 1, \sqsubseteq)$, where
+$x+\bot = x*\bot = \bot$ for all $x$, and $x \sqsubseteq y$ iff
+$x = \bot$ or $x=y$.  Its core semiring is the trivial semiring
+$\bm R_\bot + \bot = \set{\bot}$ consisting of a single element.  We
+will consider similarly the lifted natural numbers, $\N_\bot$.
+
+\subsection{Polynomials over POPS}
+\label{subsec:polynomial}
+
+\remy{Remove this section?}
+
+Fix a POPS $\bm P = (P, \oplus, \otimes, 0, 1, \sqsubseteq)$.
+We are interested in analysing behaviors of vector-valued multivariate functions on $P$
+defined by composing $\oplus$ and $\otimes$.
+These functions are multivariate polynomials.
+Writing polynomials in $\bm P$ using the symbols $\oplus, \otimes$
+is cumbersome and difficult to parse. Consequently, we replace them with $+, \cdot$ when the underlying
+POPS $\bm P$ is clear from context; furthermore, we will also
+abbreviate a multiplication $a\cdot b$ with $ab$.  As usual, $a^k$
+denotes the product of $k$ copies of $a$, where $a^0 \defeq 1$.
+
+Let $x_1, \ldots, x_N$ be $N$ variables.  A {\em monomial} (on $\bm P$) is an
+expression of the form:
+%
+\begin{align}
+  m \defeq & c \cdot x_1^{k_1}\cdot \cdots \cdot x_N^{k_N} \label{eq:def:monomial}
+\end{align}
+%
+where $c \in P$ is some constant.  Its {\em degree} is
+$\degree(m) \defeq k_1+\cdots+k_N$.  A (multivariate) {\em polynomial}
+is a sum:
+%
+\begin{align}
+  f(x_1, \ldots, x_N) \defeq & m_1 + m_2 + \cdots + m_q \label{eq:def:polynomial}
+\end{align}
+%
+where each $m_i$ is a monomial.  The polynomial $f$ defines a function
+$P^N \rightarrow P$ in the obvious way, and, with some abuse,
+we will denote by $f$ both the polynomial and the function it defines.
+Notice that $f$ is monotone in each of its arguments.
+
+A {\em vector-valued polynomial function} on $\bm P$ is a function
+$\bm f : P^N \rightarrow P^M$ whose component functions are polynomials.
+In particular, the vector-valued polynomial function is a
+{\em tuple of polynomials} $\bm f = (f_1, \ldots, f_M)$ where each $f_i$ is a
+polynomial in variables $x_1, \ldots, x_N$.
+
+We note a subtlety when dealing with POPS:
+when the POPS is not a semiring, then we cannot ``remove'' monomials
+by setting their coefficient $c=0$, because $0$ is not absorbing.
+Instead, we must ensure that they are not included in the polynomial~\eqref{eq:def:polynomial}.
+For example, consider the POPS of the lifted reals, $\bm R_\bot$, and
+the linear polynomial $f(x) = ax + b$.  If we set $a = 0$, we do not
+obtain the constant function $g(x)=b$, because
+$f(\bot) = a\bot + b = \bot + b = \bot \neq g(\bot)=b$.  We just have
+to be careful to not include monomials we don't want.
+
+\subsection{$P$-Relations}
+
+\label{subsec:p:relations}
+
+Fix a relational vocabulary, $\sigma = \set{R_1, \ldots, R_m}$, where
+each $R_i$ is a relation name, with an associated arity.  Let $D$ be
+an infinite domain of constants, for example the set of all strings
+over a fixed alphabet, or the set of natural numbers.  Recall that an
+instance of the relation $R_i$ is a finite subset of
+$D^{\text{arity}(R_i)}$, or equivalently, a mapping
+$D^{\text{arity}(R_i)} \rightarrow \B$ assigning $1$ to all tuples
+present in the relation.  Following~\cite{DBLP:conf/pods/GreenKT07},
+we generalize this abstraction from $\B$ to an arbitrary POPS $\bm P$.
+
+Given a relation name $R_i \in \sigma$, a {\em ground atom} of $R_i$
+is an expression of the form $R_i(\bm u)$, where
+$\bm u \in D^{\arity(R_i)}$.  Let $\ground(R_i,D)$ denote the set of
+all ground atoms of $R_i$, and
+$\ground(\sigma, D) \defeq \bigcup_i \ground(R_i,D)$ denote the set of
+all ground atoms over the entire vocabulary $\sigma$.  The set
+$\ground(\sigma, D)$ is the familiar Herbrand base in logic
+programming.  Note that each ground atom is prefixed by a relation
+name.
+
+Let $\bm P$ be a POPS.  A {\em $\bm P$-instance for $\sigma$} is a function
+$I : \ground(\sigma, D) \rightarrow \bm P$ with {\em finite support},
+where the support is defined as the set of ground atoms that are
+mapped to elements {\em other than} $\bot$.
+For example, if $\bm P$ is a naturally ordered semiring, then the support of the function
+$I$ is the number of ground atoms assigned to a non-zero value.
+The {\em active domain} of the instance $I$,
+denoted by $\adom(I)$, is the finite set $\adom(I) \subseteq D$ of all constants that occur
+in the support of $I$.  We denote by $\inst(\sigma, D, \bm P)$ the set
+of $\bm P$-instances over the domain $D$.  When $\sigma$ consists of a
+single relation name, then we call $I$ a {\em $\bm P$-relation}.
+
+An equivalent way to define a $\bm P$-instance is as a function
+$I : \ground(\sigma, D_0) \rightarrow \bm P$, for some finite subset
+$D_0 \subseteq D$; by convention, this function is extended to the
+entire set $\ground(\sigma, D)$ by setting $I(a) := \bot$ for all
+$a \in \ground(\sigma,D) \setminus \ground(\sigma,D_0)$.  The set
+$\inst(\sigma, D_0, \bm P)$ is isomorphic to $P^N$, where
+$N=|\ground(\sigma, D_0)|$, and, throughout this paper, we will
+identify a $\bm P$-instance with a tuple in $P^N$.
+
+Thus, a $\bm P$-instance involves two domains: $D$, which is called
+the {\em key space}, and the POPS $\bm P$, which is called the {\em
+  value space}.  For some simple illustrations, a $\B$-relation is a
+standard relation where every ground tuple is either true or false,
+while an $\R$-relation is a sparse tensor.
+
+\subsection{(Sum-)Sum-Product Queries on POPS}
+\label{subsec:sum-products}
+
+In the Boolean world, conjunctive queries and union of conjunctive
+queries are building-block queries.  Analogously, in the POPS world,
+we introduce the concepts of {\em sum-product queries} and {\em
+  sum-sum-product queries}.  In the most simple setting, these queries
+have been studied in other communities (especially AI and machine
+learning as reviewed below).  In our setting, we need to introduce one
+extra feature called ``conditional'', in order to cope with the fact
+that $0$ is not absorptive.
+
+% However, there are two extra features of these queries that we deal with explicitly in our
+% work: they can be {\em recursive}, and they operate under POPS instead of the usual
+% sum-product semiring over the reals.
+% 
+% First, recursive sum-sum-product queries are generalizations of Datalog to POPS. There is a
+% a rich landscape of convergence behavior that we open up a study of.
+% Second, the fact that the bottom element $\bot$ is not necessarily the additive identity $0$
+% of the semiring leads to subtle but necessary complications in how we formulate these
+% queries, as shall be explained below with the notion of "conditional" (sum-)sum-product
+% queries.
+% 
+% \dan{We should clarify the discussion of recursive queries and datalog
+%   above.  Right now it's confusing because in this section we do not
+%   mention recursive queries.  Maybe we should say that we will
+%   introduce $\name$ in Sec.~\ref{sec:datalogo}.}
+
+% We now introduce these classes of queries.
+Fix two disjoint vocabularies, $\sigma, \sigma_\B$; the relation names
+in $\sigma$ will be interpreted over a POPS $\bm P$, while those in
+$\sigma_\B$ will be interpreted over the Booleans.  Let $D$ be a
+domain, and $V = \set{X_1, \ldots, X_p}$ a set of ``key variables''
+whose values are over the key space $D$. They should not be
+confused with variables used in polynomials, which are interpreted
+over the POPS $\bm P$; we refer to them as ``value variables'' to
+contrast them with
+the key variables.
+We use upper case for key variables, and
+lower case for value variables.  A {\em $\sigma$-atom} is an expression
+of the form $R_i(\bm X)$, where $R_i \in \sigma$ and $\bm X \in (V \cup D)^{\text{arity}(R_i)}$.
+% (Recall that the set of all atoms of the form $R_i(X)$ for $X \in D^{\text{arity}(R_i)}$
+% is the familiar {\em Herbrand Base} in logic programming.)
+
+\begin{defn} \label{def:sum:product} A (conditional) {\em sum-product query}, or
+{\em sum-product rule} is an expression of the form
+%
+  \begin{align}
+    T(X_1, \ldots, X_k) &\cd \bigoplus_{X_{k+1}, \ldots,X_p} \setof{R_1(\bm X_1) \otimes
+    \cdots \otimes R_m(\bm X_m)}{\Phi(V)}  \label{eq:t:monomial}
+  \end{align}
+%
+  where $T$ is a new relation name of arity $k$, each $R_j(\bm X_j)$
+  is a $\sigma$-atom, and $\Phi$ is a first-order (FO) formula over
+  $\sigma_\B$, whose free variables are in
+  $V = \set{X_1, \ldots, X_p}$.  The LHS of $\cd$ is called the {\em
+    head}, and the RHS the {\em body} of the rule.  The variables
+  $X_1, \ldots, X_k$ are called {\em free variables} of the query
+  (also called {\em head variables}), and $X_{k+1}, \ldots, X_p$ are
+  called {\em bound variables}.
+\end{defn}
+
+{\em Without} the conditional term $\Phi$,
+the problem of computing efficiently sum-products over semirings has
+been extensively studied both in the database and in the AI
+literature. In databases, the query optimization and evaluation
+problem is a special case of sum-product computation over the
+value-space of Booleans (set semantics) or natural numbers (bag
+semantics). The functional aggregate queries (FAQ)
+framework~\cite{DBLP:conf/pods/KhamisNR16} extends the formulation to
+queries over multiple semirings. In AI, this problem was studied by
+Shenoy and Schafer~\cite{DBLP:conf/uai/ShenoyS88},
+Dechter~\cite{DBLP:journals/constraints/Dechter97}, Kohlas and
+Wilson~\cite{DBLP:journals/ai/KohlasW08} and others.  Surveys and more
+examples can be found
+in~\cite{DBLP:journals/tit/AjiM00,DBLP:books/daglib/0008195}.  These
+methods use a sparse representation of the $\bm P$-relations,
+consisting of a collection of the tuples in their support.
+
+The use of a conditional $\Phi$ in the sum-product is non-standard,
+but it is necessary for sum-product expressions over a POPS that is
+not a semiring, as we illustrate next.
+% We will define its semantic shortly; before doing so, let us illustrate the motivation
+% for $\Phi$'s existence with an example.
+
+\begin{ex} \label{ex:conditional:sum:product}
+  Let $E(X,Y)$ be a $\B$-relation (i.e. a standard relation),
+  representing a graph.  The following sum-product expression over $\B$ computes
+  all pairs of nodes connected by a paths of length 2:
+  %
+  \begin{align*}
+      T(X,Z) & \cd \exists_Y \left(E(X,Y) \wedge E(Y,Z)\right)
+  \end{align*}
+  %
+  This is a standard conjunctive
+  query~\cite{DBLP:books/aw/AbiteboulHV95} (where the semantics of
+  quantification over $Y$ is explicitly written).  Here
+  $\sigma = \set{E}$, and $\sigma_\B = \emptyset$: we do not need the
+  conditional term $\Phi$ yet.
+
+  For the second example, consider the same graph given by $E(X,Y)$,
+  and let $C(X)$ be an $\R_\bot$-relation associating to each node $X$
+  a real number representing a cost, or $\bot$ if the cost is unknown;
+  now $\sigma = \set{C}, \sigma_\B = \set{E}$.  The following
+  sum-product expression computes the total costs of all neighbors of
+  $X$:
+  %
+  \begin{align}
+    T(X) \cd & \sum_Y \setof{C(Y)}{E(X,Y)} \label{eq:explicit:conditional}
+  \end{align}
+  %
+  Usually, conditionals are avoided by using an indicator function
+  $1_{E(X,Y)}$, which is defined to be $1$ when $E(X,Y)$ is true and
+  $0$ otherwise, and writing the rule as
+  $T(X) \cd \sum_Y \left(1_{E(X,Y)}\cdot C(Y)\right)$.  But this does
+  not work in $\R_\bot$, because, when $Y$ is mapped to a
+  non-neighboring node which so happens to have an unknown cost (while
+  all neighbors' costs are known), we have $C(Y) = \bot$. In this
+  case, $1_{E(X,Y)} \cdot C(Y) = 0 \cdot \bot = \bot$, instead of
+  $0$. Since $x + \bot = \bot$ in $\R_\bot$, the result is also
+  $\bot$.  One may ask whether we can re-define the POPS $\R_\bot$ so
+  that $\bot \cdot 0 = 0$,\remy{What if we redefine $x + \bot = x$?} but we show in
+  Lemma~\ref{lemma:no:extension:for:r} that this is not possible.  The
+  explicit conditional in~\eqref{eq:explicit:conditional} allows us to
+  restrict the range of $Y$ only to the neighbors of $X$.
+\end{ex}
+
+We now formally define the semantics of (conditional) sum-product queries.
+Due to the subtlety with POPS, we need to consider an alternative approach to evaluating
+the results of sum-product queries: first compute the {\em provenance polynomials} of
+the query~\eqref{eq:t:monomial} to obtain the component polynomials of a vector-valued
+function, then evaluate these polynomials.  The provenance polynomials, or simply
+provenance, are also called lineage, or groundings in the literature~\cite{DBLP:conf/pods/GreenKT07}.
+
+% \hqn{Need a citation above}
+% \dan{Done}
+
+Given an input instance $I_\B \in \inst(\sigma_\B, D, \B)$,
+$I \in \inst(\sigma, D, \bm P)$, and let $D_0 \subseteq D$ be the
+finite set consisting of their active domains and all constants
+occurring in the sum-product expression~\eqref{eq:t:monomial}.  Let
+$N \defeq |\ground(\sigma, D_0)|$ and
+$M \defeq |\ground(T,D_0)| = |D_0|^k$ be the number of input ground
+atoms and output ground atoms respectively.
+
+To each of the $N$ input atoms $\ground(\sigma,D_0)$ we associate a unique POPS variable
+$x_1, \ldots, x_N$. (Recall that we use upper case for key variables and
+lower case for value variables.)
+Abusing notation, we also write $x_{R(\bm u)}$ to mean the variable associated to the ground
+atom $R(\bm u)$.
+A {\em valuation} is a function $\theta : V \rightarrow D_0$.
+When applied to the body of the rule~\eqref{eq:t:monomial}, the valuation $\theta$ defines the
+following monomial:
+%
+\begin{align}
+  \theta(\text{body}) \defeq & x_{R_1(\theta(\bm X_1))}\cdot x_{R_2(\theta(\bm X_2))}\cdots x_{R_m(\theta(\bm X_m))} \label{eq:grounding:monomial}
+\end{align}
+%
+The {\em provenance polynomial}~\cite{DBLP:conf/pods/GreenKT07} of the output tuple
+$T(\bm a) \in \ground(T,D_0)$ is the following:
+%
+\begin{align}
+  f_{T(\bm a)}(x_1, \ldots, x_N) \defeq &
+  \sum_{\substack{\theta: V \rightarrow D_0: \\ \theta(X_1,\ldots,X_k)=\bm a, \\ I_\B \models
+  \Phi[\theta]}} \theta(\text{body}) \label{eq:grounding:polynomial}
+\end{align}
+%
+In other words, we consider only valuations $\theta$ that map the head
+variables to the tuple $\bm a$ and satisfy the FO sentence $\Phi$.
+There are $M$ provenance polynomials, one for each tuple in
+$\ground(T,D_0)$, and they define an $M$-tuple of polynomials in $N$
+variables, $\bm f$, which in turn defines a function
+$\bm f : \bm P^N \rightarrow \bm P^M$.  The semantics of the
+query~\eqref{eq:t:monomial} is defined as the value of this polynomial
+on the input instance $I \in \inst(\sigma, D_0, \bm P)$, when viewed
+as a tuple $I \in \bm P^N$.
+
+Note that, once we have constructed the provenance polynomial, we no longer need to deal with the
+conditional $\Phi$, because the grounded version does not have $\Phi$ anymore.
+In most of the rest of the paper we will study properties of vector-valued
+functions whose components are these provenance polynomials.
+
+We notice that, as defined, our semantics depends on the choice of the
+domain $D_0$: if we used a larger finite domain $D'_0 \supseteq D_0$,
+then the provenance polynomials will include additional spurious
+monomials, corresponding to the spurious grounded tuples in $D_0'$.
+Traditionally, these spurious monomials are harmless, because their
+value is 0.  However, in our setting, their value is $\bot$, and they
+may change the result.  This is precisely the role of the conditional
+$\Phi$ in~\eqref{eq:t:monomial}: to control the range of the variables
+and ensure that the semantics is domain independent.  All examples in
+this paper are written such that they are domain independent.
+
+Finally, (conditional) sum-sum-product queries are defined in the natural way:
+
+\begin{defn} \label{def:sum:sum:product}
+    A (conditional) {\em sum-sum-product query} or {\em sum-sum-product rule} has the
+  form:
+%
+\begin{align}
+  T(X_1, \ldots, X_k) &\cd E_1 \oplus \cdots \oplus E_q \label{eq:sum:sum:product}
+  \end{align}
+%
+  where $E_1, E_2, \ldots, E_q$ are the bodies of sum-product
+  expressions~\eqref{eq:t:monomial}, each with the same free variables
+  $X_1, \ldots, X_k$.
+\end{defn}
+
+The provenance polynomials of a sum-sum-product query are defined as
+the sum of the provenance polynomials of the expressions
+$E_1, \ldots, E_q$.
+
+For a simple illustration, we show a modification
+of~\eqref{eq:explicit:conditional} where we include in the total sum
+$T(X)$ the cost of $X$:
+%
+\begin{align*}
+    T(X) \cd & C(X) + \sum_Y \setof{C(Y)}{E(X,Y)}
+\end{align*}
+
+\subsection{Properties and Examples of POPS}
+\label{subsec:examples:pops}
+
+We end this section by presenting several properties of POPS and
+illustrating them  with a few examples.
+
+\subsubsection{Extending Pre-semirings to POPS}
+
+If $\bm S$ is a pre-semiring, then we say that a POPS $\bm P$ {\em
+extends} $\bm S$ if $S \subseteq P$ ($S$ and $P$ are their domains), and the
+operations $\oplus, \otimes, 0, 1$ in $\bm S$ are the same as those in $\bm P$.
+We describe three procedures to extend a pre-semiring $\bm S$ to a
+POPS $\bm P$, inspired by abstract interpretations in programming
+languages~\cite{DBLP:conf/popl/CousotC77}.
+
+\begin{description}
+\item[Representing Undefined] The {\em lifted POPS} is
+  $\bm S_\bot = (S \cup \set{\bot}, \oplus, \otimes, 0, 1,
+  \sqsubseteq)$, where $x \sqsubseteq y$ iff $x = \bot$ or $x = y$,
+  and the operations $\oplus, \otimes$ are extended to $\bot$ by
+  setting $x \oplus \bot = x \otimes \bot = \bot$.  Notice that
+  $\bm S_\bot$ is not a semiring, because $0$ is not absorbing:
+  $0 \otimes \bot \neq 0$.  Its core semiring is the trivial semiring
+  $S_\bot \oplus \bot = \set{\bot}$.  Here $\bot$ represents {\em
+    undefined}.
+
+\item[Representing Contradiction] The {\em completed POPS} is
+  $\bm S_\bot^\top = (S \cup \set{\bot, \top}, \oplus, \otimes, 0, 1,
+  \sqsubseteq)$, where $x \sqsubseteq y$ iff $x=\bot$, $x=y$, or
+  $y=\top$ and the operations $\oplus, \otimes$ are extended to
+  $\bot, \top$ as follows: $x \oplus \bot = x \otimes \bot = \bot$ for
+  all $x$ (including $x=\top$), and
+  $x \oplus \top = x \otimes \top = \top$ for all $x \neq \bot$.  As
+  before, its core semiring is the trivial semiring
+  $S_\bot^\top \oplus \bot = \set{\bot}$.  Here $\bot, \top$ represent
+  undefined and contradiction respectively.  Intuitively: $\bot$ is
+  the empty set $\emptyset$, each element $x \in \bm S$ is a singleton
+  set consisting of one value, and $\top$ is the entire set $S$.
+
+\item[Representing Incomplete Values] More generally, define
+  $\calP(\bm S) = (\calP(S), \oplus, \otimes, 0, 1, \subseteq)$.  It
+  consists of all subsets of $\bm S$, ordered by set inclusion, where
+  the operations $\oplus, \otimes$ are extended to sets, e.g.
+  $A \oplus B = \setof{x\oplus y}{x \in A, y \in B}$.  Its core
+  semiring is itself, $\calP(\bm S) \oplus \set{0} = \calP(\bm S)$.
+  Here $\bot=\emptyset$ represents undefined, $\top=S$ represents
+  contradiction, and, more generally, every set represents some degree
+  of incompleteness.
+\end{description}
+
+
+A lifted POPS $\bm S_\bot$ is never a semiring, because
+$\bot \otimes 0 = \bot$, and the reader may ask whether there exists
+an alternative way to extend it to a POPS that is also a semiring,
+i.e. $0 \otimes x = 0$.  For example, we can define
+$\N \cup \set{\bot}$ as a semiring by setting $x + \bot = \bot$ for
+all $x$, $0 \mult \bot = 0$ and $x \mult \bot = \bot$ for $x > 0$: one can
+check that the semiring laws hold.  However, this is not possible in
+general.  We prove:
+
+\begin{lmm} \label{lemma:no:extension:for:r} If $\bm S$ is any POPS
+  extension of $(\R, +, \mult, 0, 1)$, then $\bm S$ is not a semiring,
+  i.e. it fails the absorption law $0 \mult x = 0$.
+\end{lmm}
+\begin{proof}
+  Let $\bm S = (S, +, \mult, 0, 1, \sqsubseteq)$ be any POPS that is an
+  extension of $\R$.  In particular $\R \subseteq S$ and $S$ has a
+  minimal element $\bot$.  Since 0, 1 are additive and multiplicative identities,
+  we have:
+%
+  \begin{align*}
+    \bot+0 &= \bot & \bot \mult 1 &= \bot
+  \end{align*}
+%
+  We claim that the following more general identities hold:
+%
+  \begin{align*}
+    \forall x \in \R:\  \bot+x = & \bot & \forall x \in \R \setminus \set{0}: \bot \mult x = & \bot
+  \end{align*}
+%
+  To prove the first identity, we use the fact that $+$ is monotone in
+  $\bm S$ and $\bot$ is the smallest element, and derive
+  $\bot + x \sqsubseteq (\bot + (y-x)) +x = \bot + y$ for all
+  $x,y\in\R$.  This implies $\bot + x = \bot + y$ for all $x,y$ and
+  the claim follows by setting $y=0$.  The proof of the second
+  identity is similar: first observe that
+  $\bot \mult x \sqsubseteq (\bot \mult \frac{y}{x}) \mult x=\bot
+  \mult y$ hence $\bot \mult x = \bot \mult y$ for all
+  $x, y \in \R \setminus \set{0}$, and the claim follows by setting
+  $y=1$.
+
+  Assuming $\bm S$ is a semiring, it satisfies the absorption law:
+  $\bot \mult 0 = 0$.  We prove now that $0 = \bot$.  Choose any
+  $x \in \R \setminus \set{0}$, and derive:
+%
+  \begin{align*}
+    \bot = \bot + \bot =
+    (\bot  \mult  x) + (\bot \mult (-x))
+    = \bot \mult (x+(-x)) &= \bot  \mult  0 = 0.
+  \end{align*}
+%
+  The middle identity follows from distributivity. From $0 = \bot$, we
+  conclude that $0$ is the smallest element in $\bm S$.  Then, for
+  every $x \in \R$, we have $x = x+0 \sqsubseteq x+(-x) = 0$, which
+  implies $x = 0$, $\forall x \in \R$, which is a contradiction.
+  Thus, $\bm S$ is not a semiring.
+\end{proof}
+
+\subsubsection{The POPS THREE} \label{subsec:three:pops}
+
+Consider the following POPS:
+$\texttt{THREE} \defeq (\set{\bot, 0,  1}, \vee, \wedge,  0,
+ 1, \leq_k)$, where:
+  %
+\begin{itemize}
+\item $\vee, \wedge$ have the semantics of 3-valued
+  logic~\cite{DBLP:journals/jlp/Fitting85a}.  More precisely, define
+  the {\em truth ordering} $0 \leq_t \bot \leq_t 1$ and set
+  $x \vee y \defeq \max_t(x,y)$, $x \wedge y \defeq \min_t(x,y)$.  We
+  note that this is precisely Kleene's three-valued
+  logic~\cite{DBLP:journals/logcom/Fitting91}.
+\item $\leq_k$ is the {\em knowledge order\/}, defined as
+  $\bot <_k  0$ and $\bot <_k  1$.
+\end{itemize}
+%
+$\texttt{THREE}$ is not the same as the lifted Booleans, $\B_\bot$,
+because in the latter $0 \wedge \bot = \bot$, while in
+$\texttt{THREE}$ we have $0 \wedge \bot = 0$.  Its core semiring is
+$\texttt{THREE} \vee \bot = \set{\bot, 1}$, and is isomorphic to $\B$.
+We will return to this POPS in Sec.~\ref{sec:fitting}.
+
+\subsubsection{Stable Semirings}
+\label{subsec:stable:semirings}
+
+We illustrate here two examples of semirings that are {\em stable}, a
+property that we define formally in Sec.~\ref{sec:complexity}.  Both
+examples are adapted from~\cite[Example 7.1.4]{semiring_book}
+and~\cite[Chapt.8, Sec.1.3.2]{semiring_book} respectively.  If $A$ is
+a set and $p \geq 0$ a natural number, then we denote by $\calP_p(A)$
+the set of subsets of $A$ of size $p$, and by $\calB_p(A)$ the set of
+bags of $A$ of size $p$.  We also define
+\begin{align*}
+    \calP_{\texttt{fin}}(A) &\defeq \bigcup_{p\geq 0}\calP_p(A) &
+    \calB_{\texttt{fin}}(A) & \defeq \bigcup_{p\geq 0}\calB_p(A).
+     &
+\end{align*}
+We denote bags as in $\bag{a,a,a,b,c,c}$.  Given
+$\bm x,\bm y \in \calP_{fin}(\R_+ \cup \infty)$, we denote by:
+%
+\begin{align*}
+  \bm x \cup \bm y \defeq & \mbox{set union of $\bm x,\bm y$} &
+  \bm x + \bm y \defeq & \setof{u+v}{u \in \bm x, v \in \bm y}
+\end{align*}
+%
+Similarly, given $\bm x,\bm y \in \calB_{fin}(\R_+ \cup \infty)$, we denote
+by:
+%
+\begin{align*}
+  \bm x \uplus \bm y \defeq & \mbox{bag union of $\bm x,\bm y$} &
+  \bm x + \bm y \defeq & \bagof{u+v}{u \in \bm x, v \in \bm y}
+\end{align*}
+
+
+\begin{ex} \label{ex:trop:p} For any bag
+  $\bm x = \bag{x_0, x_1, \ldots, x_n}$, where
+  $x_0\leq x_1 \leq \ldots \leq x_n$, and any $p \geq 0$, define:
+  %
+  \begin{align*}
+    {\min}_p(\bm x) \defeq & \bag{x_0, x_1, \ldots, x_{\min(p,n)}}
+  \end{align*}
+  %
+  In other words, $\min_p$ returns the smallest $p+1$ elements of the
+  bag $\bm x$.  Then, for any $p \geq 0$, the following is a semiring:
+  %
+  \begin{align*}
+    \trop^+_p \defeq & (\calB_{p+1}(\R_+\cup\set{\infty}), \oplus_p, \otimes_p, \bm 0_p, \bm 1_p)
+  \end{align*}
+  %
+  where:
+  %
+  \begin{align*}
+    \bm x \oplus_p \bm y \defeq & {\min}_p(\bm x \uplus \bm y) &
+    \bm 0_p \defeq & \set{\infty, \infty, \ldots, \infty} \\
+    \bm x \otimes_p \bm y \defeq & {\min}_p(\bm x + \bm y) &
+    \bm 1_p \defeq & \set{0,\infty, \ldots, \infty}
+  \end{align*}
+  %
+  For example, if $p=2$ then
+  $\bag{3,7,9} \oplus_2 \bag{3,7,7} = \bag{3,3,7}$ and
+  $\bag{3,7,9} \otimes_2 \bag{3,7,7} = \bag{6,10,10}$.
+  %
+  The following identities are easily checked, for any two finite bags
+  $\bm x, \bm y$:
+  %
+  \begin{align}
+    {\min}_p({\min}_p(\bm x) \uplus {\min}_p(\bm y))= & {\min}_p(\bm x \uplus \bm y)&
+    {\min}_p({\min}_p(\bm x) + {\min}_p(\bm y))= & {\min}_p(\bm x + \bm y) \label{eq:minp:identity}
+  \end{align}
+  %
+  This implies that, an expression in the semiring $\trop^+_p$ can be
+  computed as follows.  First, convert $\oplus, \otimes$ to
+  $\uplus, +$ respectively, compute the resulting bag, then apply
+  $\min_p$ only once, on the final result. $\trop^+_p$ is naturally
+  ordered (see Prop~\ref{prop:trop:p:stable}) and therefore its core
+  semiring is itself, $\trop^+_p \oplus_p \bm 0_p = \trop^+_p$.
+%
+% \reinhard{As discussed on 14 December, we will introduce a name for the semiring obtained as the set of $x+\bot$ elements of a POPS.}
+%
+  When $p=0$, then $\trop^+_p = \trop^+$, which we introduced in
+  Example~\ref{ex:intro}.
+\end{ex}
+
+\begin{ex} \label{ex:trop:eta} Fix a real number $\eta \geq 0$, and
+  denote by $\calP_{\leq \eta}(\R_+\cup\set{\infty})$ the set of
+  nonempty, finite sets $\bm x = \set{x_0, x_1, \ldots, x_p}$ where
+  $\min(\bm x) \leq \max(\bm x)\leq \min(\bm x) + \eta$.  Given any
+  finite set $\bm x \in \calP_{\texttt{fin}}(\R_+\cup\set{\infty})$,
+  we define
+  %
+  \begin{align*}
+    {\min}_{\leq \eta}(\bm x) \defeq & \setof{u}{u \in \bm x, u \leq \min(\bm x) + \eta}
+  \end{align*}
+  %
+  In other words, $\min_{\leq \eta}$ retains from the set $\bm x$ only
+  the elements at distance $\leq \eta$ from its minimum.  The
+  following is a semiring:
+  %
+  \begin{align*}
+    \trop^+_{\leq\eta} \defeq & (\calP_{\leq \eta}(\R_+\cup\set{\infty}),\oplus_{\leq\eta},\otimes_{\leq\eta},\bm 0_{\leq\eta},\bm 1_{\leq\eta})
+  \end{align*}
+  %
+  where:
+  %
+  \begin{align*}
+    \bm x \oplus_{\leq\eta} \bm y \defeq & {\min}_{\leq\eta}(\bm x \cup \bm y) &
+    \bm 0_{\leq\eta} \defeq & \set{\infty} \\
+    \bm x \otimes_{\leq\eta} \bm y \defeq & {\min}_{\leq\eta}(\bm x + \bm y)&
+    \bm 1_{\leq\eta} \defeq & \set{0}
+   \end{align*}
+   %
+   For example, if $\eta = 6.5$ then:
+   $\set{3,7} \oplus_{\leq \eta} \set{5,9,10} = \set{3,5,7,9}$ and
+   $\set{1,6} \otimes_{\leq \eta} \set{1,2,3} = \set{2,3,4,7,8}$.
+   %
+   The following identities are easily checked, for any two finite
+   sets $\bm x, \bm y$:
+     %
+  \begin{align}
+    {\min}_{\leq \eta}({\min}_{\leq \eta}(\bm x) \cup {\min}_{\leq \eta}(\bm y))= & {\min}_{\leq \eta}(\bm x \cup \bm y)&
+    {\min}_{\leq \eta}({\min}_{\leq \eta}(\bm x) + {\min}_{\leq \eta}(\bm y))= & {\min}_{\leq \eta}(\bm x + \bm y) \label{eq:mineta:identity}
+  \end{align}
+  %
+  It follows that expressions in $\trop^+_{\leq\eta}$ can be computed
+  as follows: first convert $\oplus, \otimes$ to $\cup, +$
+  respectively, compute the resulting set, and apply the
+  $\min_{\leq\eta}$ operator only once, on the final result.
+  %
+  $\trop^+_{\leq \eta}$ is naturally ordered (see
+  Prop.~\ref{prop:trop:eta:stable}) and therefore its core semiring is
+  itself,
+  $\trop^+_{\leq \eta}\oplus_{\leq \eta} \bm 0_{\leq \eta} =
+  \trop^+_{\leq\eta}$.
+%
+% \reinhard{Same as previous comment: we will have a name for this semiring inside a POPS.}
+%
+  Notice that, when $\eta=0$, then we recover again
+  $\trop^+_{\leq \eta} = \trop^+$.
+\end{ex}
+
+The reader may wonder why $\trop^+_p$ is defined to consist of bags of
+$p+1$ numbers, while $\trop^+_{\leq \eta}$ is defined on sets.  The main
+reason is for consistency with~\cite{semiring_book}.  We could have
+defined either semirings on either sets or bags, and both
+identities~\eqref{eq:minp:identity} and ~\eqref{eq:mineta:identity}
+continue to hold, which is sufficient to prove the semiring
+identities.  However, the {\em stability} property which we define and
+prove later (Proposition~\ref{prop:trop:eta:stable}) holds for
+$\trop^+_{\leq \eta}$ only if it is defined over sets; in contrast,
+$\trop^+_p$ is stable for either sets or bags
+(Proposition~\ref{prop:trop:p:stable}).
+
+\subsubsection{Nontrivial Core Semiring}
+
+In all our examples so far the core semiring $\bm P \oplus \bot$ is
+either $\set{\bot}$ or $\bm P$.  We show next that the core semiring
+may be non-trivial.  If $\bm P_1, \bm P_2$ are two POPS, then their
+Cartesian product $\bm P_1 \times \bm P_2$ is also a POPS: operations
+are defined element-wise, e.g.
+$(x_1,x_2) \oplus (y_1,y_2) \defeq (x_1\oplus_1 y_1, x_2 \oplus_2
+y_2)$, etc, the order is defined component-wise, and the smallest
+element is $(\bot_1, \bot_2)$.
+
+\begin{ex} Consider the following two POPS.
+  \begin{itemize}
+  \item A naturally ordered semiring
+    $\bm S = (S, \oplus_S, \otimes_S, 0_S, 1_S, \sqsubseteq_S)$.  Its
+    core semiring is itself $\bm S \oplus_S 0_S=\bm S$.
+  \item Any POPS $\bm P$ where addition is strict:
+    $x \oplus_P \bot = \bot$.  (For example, any lifted semiring.)
+    Its core semiring is $\bm P \oplus_P \bot_P = \set{\bot_P}$.
+  \end{itemize}
+  %
+  Consider the Cartesian product $\bm S \times \bm P$.  The smallest
+  element is $(0_S,\bot_P)$, and the core semiring is
+  $(\bm S \times \bm P) \oplus (0_S,\bot_P) = \bm S \times
+  \set{\bot_P}$, which is a non-trivial subset of
+  $\bm S \times \bm P$.
+\end{ex}
+
+
+%
+% \subsubsection{Strictness of \texorpdfstring{$\oplus$}{oplus} and \texorpdfstring{$\otimes$}{otimes} are independent}
+% We give two examples of POPS where only one of the two operators
+% $\oplus, \otimes$ is strict.
+%
+% \begin{description}
+% \item[Strict $\otimes$] In any non-trivial naturally ordered semiring
+%   $\otimes$ is strict, while $\oplus$ is not.  For example, consider
+%   $(\N, +, *, 0, 1, \leq)$.  Then $*$ is strict because $x * 0 = 0$,
+%   while $+$ is not strict because $x + 0 \neq 0$ for $x \neq 0$.
+% \item[Strict $\otimes$] Next, consider the semiring
+%   $(\N \cup \set{\top}, \oplus, \otimes, \set{0}, \set{1},
+%   \supseteq)$, where $\top$ the infinite set $\set{0,1,2,\ldots}$.  We
+%   view each element $x \in \N$ as the singleton set $\set{x}$, and
+%   define the operations $\oplus, \otimes$ set-wise:
+%   $A \oplus B \defeq \setof{x+y}{x \in A, y \in B}$,
+%   $A \otimes B \defeq \setof{x*y}{x \in A, y \in B}$, where we replace
+%   the result with $\top$ if the resulting set is not a singleton.
+%   Concretely, we have:
+%   \begin{align*}
+%     \set{x} \oplus \set{y} = & \set{x+y} & \set{x} \oplus \top = & \top\\
+%     \set{x} \otimes \set{y} = & \set{x*y} & \set{0} \oplus \top = & \set{0} & x\neq 0:\ \set{x} \oplus \top = \top
+%   \end{align*}
+% %
+%   Since $\top$ is the smallest element, $\oplus$ is strict, while
+%   $\otimes$ is not.
+% \end{description}
+%
+%
+
+
 \section{\datalogo}
 \label{sec:datalogo}
 
