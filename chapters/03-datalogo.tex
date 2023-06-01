@@ -332,7 +332,7 @@ Thus, a $\bm P$-instance involves two domains: $D$, which is called
 the {\em key space}, and the POPS $\bm P$, which is called the {\em
   value space}.  For some simple illustrations, a $\B$-relation is a
 standard relation where every ground tuple is either true or false,
-while an $\R$-relation is a sparse tensor.
+while an $\R$-relation is a sparse tensor.\remy{$R$ is not a POPS.}
 
 \subsection{(Sum-)Sum-Product Queries on POPS}
 \label{subsec:sum-products}
@@ -340,7 +340,8 @@ while an $\R$-relation is a sparse tensor.
 In the Boolean world, conjunctive queries and union of conjunctive
 queries are building-block queries.  Analogously, in the POPS world,
 we introduce the concepts of {\em sum-product queries} and {\em
-  sum-sum-product queries}.  In the most simple setting, these queries
+  sum-sum-product queries}.\remy{The parallel is misleading.}
+In the simplest setting, these queries
 have been studied in other communities (especially AI and machine
 learning as reviewed below).  In our setting, we need to introduce one
 extra feature called ``conditional'', in order to cope with the fact
@@ -369,7 +370,7 @@ $\sigma_\B$ will be interpreted over the Booleans.  Let $D$ be a
 domain, and $V = \set{X_1, \ldots, X_p}$ a set of ``key variables''
 whose values are over the key space $D$. They should not be
 confused with variables used in polynomials, which are interpreted
-over the POPS $\bm P$; we refer to them as ``value variables'' to
+over the POPS $\bm P$; we refer to the latter as ``value variables'' to
 contrast them with
 the key variables.
 We use upper case for key variables, and
@@ -387,7 +388,7 @@ of the form $R_i(\bm X)$, where $R_i \in \sigma$ and $\bm X \in (V \cup D)^{\tex
   \end{align}
 %
   where $T$ is a new relation name of arity $k$, each $R_j(\bm X_j)$
-  is a $\sigma$-atom, and $\Phi$ is a first-order (FO) formula over
+  is a $\sigma$-atom, and $\Phi$ is a first-order (FO) formula over\remy{What is the range of $\forall$?}
   $\sigma_\B$, whose free variables are in
   $V = \set{X_1, \ldots, X_p}$.  The LHS of $\cd$ is called the {\em
     head}, and the RHS the {\em body} of the rule.  The variables
@@ -432,7 +433,7 @@ not a semiring, as we illustrate next.
   query~\cite{DBLP:books/aw/AbiteboulHV95} (where the semantics of
   quantification over $Y$ is explicitly written).  Here
   $\sigma = \set{E}$, and $\sigma_\B = \emptyset$: we do not need the
-  conditional term $\Phi$ yet.
+  conditional term $\Phi$ yet.\remy{Remove this example?}
 
   For the second example, consider the same graph given by $E(X,Y)$,
   and let $C(X)$ be an $\R_\bot$-relation associating to each node $X$
@@ -455,7 +456,7 @@ not a semiring, as we illustrate next.
   case, $1_{E(X,Y)} \cdot C(Y) = 0 \cdot \bot = \bot$, instead of
   $0$. Since $x + \bot = \bot$ in $\R_\bot$, the result is also
   $\bot$.  One may ask whether we can re-define the POPS $\R_\bot$ so
-  that $\bot \cdot 0 = 0$,\remy{What if we redefine $x + \bot = x$?} but we show in
+  that $\bot \cdot 0 = 0$, but we show in
   Lemma~\ref{lemma:no:extension:for:r} that this is not possible.  The
   explicit conditional in~\eqref{eq:explicit:conditional} allows us to
   restrict the range of $Y$ only to the neighbors of $X$.
@@ -489,7 +490,7 @@ When applied to the body of the rule~\eqref{eq:t:monomial}, the valuation $\thet
 following monomial:
 %
 \begin{align}
-  \theta(\text{body}) \defeq & x_{R_1(\theta(\bm X_1))}\cdot x_{R_2(\theta(\bm X_2))}\cdots x_{R_m(\theta(\bm X_m))} \label{eq:grounding:monomial}
+  \theta(\text{body}) \defeq & x_{R_1(\theta(\bm X_1))}\cdot x_{R_2(\theta(\bm X_2))} \cdot \ldots \cdot x_{R_m(\theta(\bm X_m))} \label{eq:grounding:monomial}
 \end{align}
 %
 The {\em provenance polynomial}~\cite{DBLP:conf/pods/GreenKT07} of the output tuple
@@ -497,11 +498,11 @@ $T(\bm a) \in \ground(T,D_0)$ is the following:
 %
 \begin{align}
   f_{T(\bm a)}(x_1, \ldots, x_N) \defeq &
-  \sum_{\substack{\theta: V \rightarrow D_0: \\ \theta(X_1,\ldots,X_k)=\bm a, \\ I_\B \models
+  \sum_{\substack{\theta: V \rightarrow D_0, \\ \theta(X_1,\ldots,X_k)=\bm a, \\ I_\B \models
   \Phi[\theta]}} \theta(\text{body}) \label{eq:grounding:polynomial}
 \end{align}
 %
-In other words, we consider only valuations $\theta$ that map the head
+In other words, we consider only valuations $\theta$ that map the head\remy{Should the head vars be $X_1, \ldots, X_k$?}
 variables to the tuple $\bm a$ and satisfy the FO sentence $\Phi$.
 There are $M$ provenance polynomials, one for each tuple in
 $\ground(T,D_0)$, and they define an $M$-tuple of polynomials in $N$
