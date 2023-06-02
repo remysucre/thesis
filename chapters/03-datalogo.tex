@@ -283,7 +283,7 @@ obtain the constant function $g(x)=b$, because
 $f(\bot) = a\bot + b = \bot + b = \bot \neq g(\bot)=b$.  We just have
 to be careful to not include monomials we don't want.
 
-\subsection{$P$-Relations}
+\subsection{\texorpdfstring{$P$-Relations}{P-Relations}}
 
 \label{subsec:p:relations}
 
@@ -361,7 +361,7 @@ that $0$ is not absorptive.
 % \dan{We should clarify the discussion of recursive queries and datalog
 %   above.  Right now it's confusing because in this section we do not
 %   mention recursive queries.  Maybe we should say that we will
-%   introduce $\name$ in Sec.~\ref{sec:datalogo}.}
+%   introduce \datalogo in Sec.~\ref{sec:datalogo}.}
 
 % We now introduce these classes of queries.
 Fix two disjoint vocabularies, $\sigma, \sigma_\B$; the relation names
@@ -898,6 +898,554 @@ element is $(\bot_1, \bot_2)$.
 
 \section{\datalogo}
 \label{sec:datalogo}
+
+We define here the language \datalogo, which generalizes datalog from
+traditional relations to $\bm P$-relations, for some POPS $\bm P$.  As
+in datalog, the input relations to the program will be called
+Extensional Database Predicates, EDB, and the computed relations will
+be called Intensional Database Predicates, IDB.  Each EDB can be
+either a $\bm P$-relation, or standard relation, i.e. a $\B$-relation,
+and we denote by $\sigma \defeq \set{R_1, \ldots, R_m}$ and
+$\sigma_\B \defeq \set{B_1, \ldots, B_k}$ the two vocabularies.  All
+IDBs are $\bm P$-relations, and their vocabulary is denoted by
+$\tau = \set{T_1, \ldots, T_n}$.
+
+% We consider next a slight generalization of sum-product rules
+% from Definition~\ref{def:sum:product}.  A {\em sum-product rule} is a
+% rule like \eqref{eq:t:monomial} where the atoms are over the
+% vocabulary $\sigma \cup \tau$, and the predicate
+% $\Phi$ is any domain-independent\footnote{Domain-independence is
+%   undecidable in general, but is usually enforced syntactically, by
+%   requiring the formula to be range-restricted,
+%   see~\cite{DBLP:books/aw/AbiteboulHV95}.} FO formula over the
+% vocabulary $\sigma_\B$.  The semantics of a rule $\rho$ is still given
+% by Equation~\eqref{eq:jt}, where the sentence $\Phi[\theta]$ is now an
+% FO sentence over the Boolean EDBs.  A {\em sum-sum-product rule} is a
+% sum of sum-product expressions, as before.
+
+A \datalogo program $\Pi$ consists of $n$ sum-sum-product rules
+$r_1, \ldots, r_n$ (as in Definition~\ref{def:sum:sum:product}), where
+each rule $r_i$ has the IDB $T_i$ in the head:
+%
+\begin{align}
+  r_1: && T_1(\cdots) \cd & E_{11}\oplus E_{12} \oplus \cdots \nonumber \\
+       && & \ldots \label{eq:basic:datalogo} \\
+  r_n: && T_n(\cdots) \cd & E_{n1} \oplus E_{n2} \oplus \cdots, \nonumber
+\end{align}
+%
+and each $E_{ij}$ is a sum-product expression as
+in~\eqref{eq:t:monomial}.  The program $\Pi$ is said to be {\em
+  linear} if each sum-product expression $E_{ij}$ contains at most one
+IDB predicate.
+% Recall that Definition~\ref{def:sum:product} requires every rule to
+% be {\em safe}, meaning that every variable in the head of a rule
+% $r_i$ must occur in some atom of every sum-product expression
+% $E_{i1}, E_{i2}, \ldots$
+
+\subsection{Least Fixpoint of the Immediate Consequence Operator}
+
+\label{subsec:ico}
+
+The {\em Immediate Consequence Operator} (ICO) of a program
+$\Pi$ is the function
+$F : \inst(\sigma,D,\bm P) \times \inst(\sigma_\B,D,\B) \times
+\inst(\tau,D,\bm P) \rightarrow \inst(\tau,D,\bm P)$, that takes as
+input an instance $(I, I_\B)$ of the EDBs and an instance $J$ of the
+IDBs, and computes a new instance $F(I,I_\B,J)$ of the IDBs by
+evaluating each sum-sum-product rule.  By fixing the EDBs, we will
+view the ICO as function from IDBs to IDBs, written as $F(J)$. We
+define the {\em semantics} of the \datalogo
+program~\eqref{eq:basic:datalogo} as the least fixpoint of the ICO
+$F$, when it exists.
+
+\begin{algorithm}[th]
+     $J^{(0)} \leftarrow \bot\mbox{;}$ \mbox{\hspace{2cm} // In a naturally ordered  semiring this becomes $J^{(0)} \leftarrow 0$}\\
+    \For {  $t \leftarrow 0$   {\bf to}   $\infty$ }
+    {
+         {$J^{(t+1)} \leftarrow F(J^{(t)})$}\;
+        \If { $J^{(t+1)} = J^{(t)}$ }{
+           Break
+        }
+    }
+    \Return $J^{(t)}$
+    \caption{Na\"ive evaluation for \datalogo
+%       \\ In Sec.~\ref{sec:semi:naive} the POPS $\bm P$
+%       is a naturally ordered semiring, and the first line becomes
+%       $J^{(0)} \leftarrow 0$.
+    }
+    \label{algo:naive}
+\end{algorithm}
+
+The Na\"ive Algorithm for evaluating \datalogo is shown in
+Algorithm~\ref{algo:naive}, and it is quite similar to that for
+standard, positive datalog with set semantics.  We start with all IDBs
+at $\bot$, then repeatedly apply the ICO $F$, until we reach a
+fixpoint.
+% \hqn{Should we mention that $F$ is monotone and thus a LFP is guaranted to exists?}
+% \dan{It may not exists in general, it depends on $\bm P$.}
+The algorithm computes the increasing sequence
+$\bot \sqsubseteq F(\bot) \sqsubseteq F^{(2)}(\bot)
+\sqsubseteq \cdots$ When the algorithm terminates we say that it {\em
+  converges}; in that case it returns the least fixpoint of $F$.
+Otherwise we say that the algorithm {\em diverges}.
+
+% We will show in Sec.~\ref{sec:semi:naive} that, when evaluated over a
+% naturally ordered semiring with some additional properties, the naive
+% algorithm can be improved to a semi-na\"ive algorithm; in that case,
+% $\bot$ coincides with $\bm 0$, hence the first line of the na\"ive
+% algorithm becomes $I^{(0)} \leftarrow \bm 0$.
+
+\subsection{Convergence of \datalogo Programs}
+
+\label{subsec:five:cases}
+
+% \hqn{``Divergence'' typically means going a way from convergence. Here we use ``divergence''
+% to mean ``not converged in a finite number of steps'', which can be mis-leading.
+% In many papers, the LFP for a monotone $f$
+% is defined to be $f^\omega := \lim_{n\to \infty} f^n$;
+% and in those cases I would say that sequence $f^n$ {\em converges}.
+% As mentioned in an earlier comment, we probably need 5 categories intead of 4.
+% }
+% \dan{Hung, did you want a discussion of the five cases here?  I wrote
+%   one, tentatively, but I believe it is more suited in
+%   Sec.~\ref{sec:complexity}, because we refer to the
+%   program~\eqref{eq:datalogo:linear}.  We have already a discussion
+%   there, we can just add a 5th case.  So feel free to delete this
+%   section, or integrate in Sec.~\ref{sec:complexity}.}
+
+While every pure datalog program is guaranteed to have a least
+fixpoint, this no longer holds for \datalogo programs.  As we mentioned
+in the introduction, there are five possibilities, depending on the
+POPS $\bm P$:
+
+\begin{enumerate}[label=(\roman*)]
+\item $\bigvee_t J^{(t)}$ is not a fixpoint of the ICO; in this case
+  we say that the program {\em diverges}.
+%   For example, if we
+%   interpret the program~\eqref{eq:datalogo:linear} over $\N$ and set
+%   $c > 1$, then the sequence of IDBs computed by the na\"ive algorithm
+%   is $0 < 1+c < 1+c+c^2 < \cdots$, which has no least upper bound in
+%   $\N$.  One can construct POPS where $\bigvee_n J^{(n)}$ always
+%   exists, but is not the least fixpoint.
+\item $\bigvee_n J^{(n)}$ is always the least fixpoint, but the
+  na\"ive algorithm does not always terminate.  With some abuse we say
+  also in this case that the program {\em diverges}.
+  % lub is not reached in a finite number of steps; equivalently, the
+  % sequence $J^{(n)}$ is strictly increasing.  With some abuse we
+  % also say that the program {\em diverges}.  For example, if we
+  % interpret the program~\eqref{eq:datalogo:linear} over
+  % $\N \cup \set{\infty}$, then any increasing sequence has a lub,
+  % but if the lub is $\infty$ then the na\"ive algorithm will not
+  % terminate in a finite number of steps.
+\item The na\"ive algorithm always terminates, in which case we say
+  that it {\em converges}.  The number of steps depends on the input
+  EDB database, meaning {\em both} the number of ground atoms in the
+  EDB, and their values in $\bm P$.
+\item The na\"ive algorithm always terminates in a number of steps
+  that depends only on the number of ground atoms in the EDB, but not
+  on their values.
+\item The na\"ive algorithm always terminates in a number of steps
+  that is polynomial in the number of ground atoms in the EDB.
+\end{enumerate}
+
+In this paper we are interested in characterizing the POPS that ensure
+that every \datalogo program converges.  At a finer level, our goal is
+to characterize precisely
+cases~\ref{item:converge:3}-\ref{item:converge:5}.  We will do this in
+Sec.~\ref{sec:complexity}, and, for that purpose, we will use an
+equivalent definition of the semantics of a \datalogo program, namely as
+the least fixpoint of a tuple of polynomials, obtained by grounding
+the program.
+
+\subsection{Least Fixpoint of the Grounded Program}
+
+\label{subsec:grounded:program}
+
+In this paper we consider an equivalent semantics of \datalogo, which
+consists of first grounding the program, then computing its least
+fixpoint.
+
+% %
+% \reinhard{
+% As before, we just say "Fix a POPS P". Should we say "Fix a strict POPS P"?
+% }
+% \dan{we say early that all POPS are assumed to be strict in this paper}
+% %
+Fix an EDB instance $I, I_\B$, and let $D_0 \subseteq D$ be the finite
+set consisting of its active domain plus all constants occurring in
+the program $\Pi$.  Let $M = |\ground(\sigma,D_0)|$ and
+$N = |\ground(\tau,D_0)|$ be the number of ground tuples of the EDBs
+and the IDBs respectively.  We associate them in 1-to-1 correspondence
+with $M+N$ POPS variables $z_1, \ldots, z_M$ and $x_1, \ldots, x_N$,
+and use the same notation as in Sec.~\ref{subsec:sum-products} by
+writing $x_{T_i(\bm a)}$ for the variable associated to the ground
+tuple $T_i(\bm a)$.
+
+Consider a rule $T_i(\cdots) \cd E_{i1} \oplus E_{i2} \oplus \cdots$
+of the \datalogo program, with head relation $T_i$.  A {\em grounding}
+of this rule is a rule of the form:
+%
+\begin{align*}
+  x_{T_i(\bm a)} \cd & f_{T_i(\bm a)}(z_1, \ldots, z_M, x_1, \ldots, x_N)
+\end{align*}
+%
+where $T_i(\bm a) \in \ground(T_i,D_0)$ is a ground tuple, and
+$f_{T_i(\bm a)}$ is the {\em provenance polynomial} (defined in
+Sec.~\ref{subsec:sum-products}) of the rule's body
+$E_{i1} \oplus E_{i2} \oplus \cdots$ Since the value of each EDB
+variable $z_{R_i(\bm u)}$ is known, we can substitute it with its
+value, and the provenance polynomial simplifies to one that uses only
+IDB variables $x_j$; we will no longer refer to the EDB variables
+$z_i$.  The {\em grounded program} consists of all $N$ groundings, of
+all rules.  Using more friendly indexes, we write the grounded program
+as:
+%
+\begin{align}
+  x_1 \cd & f_1(x_1, \ldots, x_N) \nonumber\\
+          & \ldots \label{eq:grounded:pi} \\
+  x_N \cd & f_N(x_1, \ldots, x_N) \nonumber
+\end{align}
+%
+where each $f_i$ is a multivariate polynomial in the variables
+$x_1, \ldots, x_N$.  We write $\bm f = (f_1, \ldots, f_N)$ for the
+vector-valued function whose components are the $N$ provenance
+polynomials, and define the semantics of the \datalogo program as its
+least fixpoint, $\lfp(\bm f)$, when it exists,
+% \hqn{with $\oplus$ and  $\otimes$ monotone, $\bm f$ is monotone and thus $\lfp(\bm f)$  always exists} 
+where, as usual, we identify the tuple $\lfp(\bm f) \in \bm P^N$ with
+an IDB instance $\lfp(\bm f) \in \inst(\tau,D_0,\bm P)$.  By
+definition, $\lfp(\bm f)$ is equal to the least fixpoint of the ICO,
+as defined in Sec.~\ref{subsec:ico}.
+
+
+\subsection{Examples}
+
+\label{subsec:datalogo:examples}
+
+We illustrate \datalogo with two examples.  When the POPS $\bm P$ is a
+naturally ordered semiring, then we will use the following {\em
+  indicator function} $[C]_0^{1}$, which maps a Boolean condition $C$
+to either $0 \in \bm P$ or $1 \in \bm P$, depending on whether $C$ is
+false or true.  We write the indicator function simply as $[C]$, when
+the values $0,1$ are clear from the context.  An indicator function
+can be desugared by replacing
+$\setof{[C] \otimes P_1 \otimes \cdots \otimes P_k}{\Phi}$ with
+$\setof{P_1 \otimes \cdots \otimes P_k}{\Phi \wedge C}$.  When $\bm P$
+is not naturally ordered, then we will not use indicator functions,
+see Example~\ref{ex:conditional:sum:product}.
+
+
+
+\begin{figure}
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \begin{tikzpicture}[scale = 0.9, every node/.style={transform shape}]
+            \node [draw, circle] at (0,0) (a) {$a$};
+            \node [draw, circle] at (2,0) (b) {$b$};
+            \node [draw, circle] at (4,0) (c) {$c$};
+            \node [draw, circle] at (6,0) (d) {$d$};
+            \draw [bend left,-Latex] (a) to node [auto, swap] {1} (b);
+            \draw [bend left,-Latex] (b) to node [auto] {2} (a);
+            \draw [bend right,-Latex] (b) to node [auto, swap] {3} (c);
+            \draw [bend right,-Latex] (c) to node [auto] {4} (d);
+            \draw [bend left=40,-Latex] (a) to node [auto, swap] {5} (c);
+        \end{tikzpicture}
+        \caption{}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \begin{tikzpicture}[scale = 0.9, every node/.style={transform shape}]
+            \node [draw, circle] at (0,0) (a) {$a$};
+            \node at (a) [below=.2, anchor = north] {$C=1$};
+            \node [draw, circle] at (2,0) (b) {$b$};
+            \node at (b) [above=.2, anchor = south] {$C=1$};
+            \node [draw, circle] at (4,0) (c) {$c$};
+            \node at (c) [above right=.25, anchor = south] {$C=1$};
+            \node [draw, circle] at (6,0) (d) {$d$};
+            \node at (d) [above=.2, anchor = south] {$C=10$};
+            \draw [bend left,-Latex] (a) to (b);
+            \draw [bend left,-Latex] (b) to (a);
+            \draw [bend right,-Latex] (b) to (c);
+            \draw [bend right,-Latex] (c) to (d);
+            \draw [bend left=40,-Latex] (a) to (c);
+        \end{tikzpicture}
+        \caption{}
+    \end{subfigure}
+    \caption{A graph illustrating Example~\ref{ex:reachability:sssp} (a)
+  and Example~\ref{ex:sum1:sum2} (b)}
+  \label{fig:simple:graph}
+\end{figure}
+
+
+\begin{ex} \label{ex:reachability:sssp} Let the EDB and IDB
+  vocabularies be $\sigma = \set{E}$ and $\tau = \set{L}$, where $E$
+  is binary and $L$ is unary.  Consider the following \datalogo program:
+  %
+  \begin{align}
+    L(X) \cd & [X=a] \oplus \bigoplus_Z \left(L(Z) \otimes E(Z,X)\right) \label{eq:reachability}
+  \end{align}
+  %
+  where $a \in D$ is some constant in the domain.  We show three
+  different interpretations of the program, over three different
+  naturally ordered semirings.  First, we interpret it over the
+  semiring of Booleans.  In this case, the program can be written in a
+  more familiar notation:
+  %
+  \begin{align*}
+    L(X) \cd & [X=a]_0^1 \vee \exists_Z \left(L(Z) \wedge E(Z,X)\right)
+  \end{align*}
+  %
+  This is the reachability program, which computes the set of nodes
+  $X$ reachable from the node $a$.  The indicator function $[X=a]_0^1$
+  returns $0$ or $1$, depending on whether $X\neq a$ or $X=a$.
+
+  Next, let's interpret it over $\trop^+$.  In that case, the
+  indicator function $[X=a]_\infty^0$ returns $\infty$ when $X\neq a$,
+  and returns $0$ when $X=a$.  The program becomes:
+  %
+  \begin{align*}
+    L(X) \cd  & \min\left((\texttt{if } X=a\texttt{ then } 0 \texttt{ else } \infty),  \min_Z(L(Z) + E(Z,X))\right)
+  \end{align*}
+  %
+  This program solves the Single-Source-Shortest-Path (SSSP) problem with source
+  vertex $a$.
+  Consider the graph in Fig.~\ref{fig:simple:graph}(a).  The active
+  domain consists of the constants $a,b,c,d$, and the na\"ive evaluation
+  algorithm converges after 5 steps, as shown here:
+  \begin{align*}
+      &
+        \begin{array}{l|c|c|c|c|} \cline{2-5}
+          &L(a)&L(b)&L(c)&L(d) \\ \cline{2-5}
+          L^{(0)} & \infty & \infty & \infty & \infty  \\ \cline{2-5}
+          L^{(1)} & 0 & \infty & \infty & \infty  \\ \cline{2-5}
+          L^{(2)} & 0 & 1 & 5 & \infty  \\ \cline{2-5}
+          L^{(3)} & 0 & 1 & 4 & 9  \\ \cline{2-5}
+          L^{(4)} & 0 & 1 & 4 & 8  \\ \cline{2-5}
+          L^{(5)} & 0 & 1 & 4 & 8  \\ \cline{2-5}
+        \end{array}
+  \end{align*}
+
+  Third, let's interpret it over $\trop^+_p$, defined in
+  Example~\ref{ex:trop:p}.  Assume for simplicity that $p=1$.  In that
+  case the program computes, for each node $X$, the bag
+  $\bag{l_1,l_2}$ of the lengths of the two shortest paths from $a$ to
+  $X$.  The indicator function $[X=a]$ is equal to $\bag{0,\infty}$
+  when $X=a$, and equal to $\bag{\infty,\infty}$ otherwise.  The
+  reader may check that the program converges to:
+  %
+  \begin{align*}
+    L(a) = &\bag{0,3} & L(b) = & \bag{1,4} &
+    L(c) = &\bag{4,5} & L(d) = & \bag{8,9}
+  \end{align*}
+
+  Finally, we can interpret it over $\trop^+_{\leq \eta}$, the
+  semiring in Example~\ref{ex:trop:eta}.  In that case the program
+  computes, for each $X$, the set of all possible lengths of paths
+  from $a$ to $X$ that are no longer than the shortest path plus
+  $\eta$.
+\end{ex}
+
+
+
+\begin{ex} \label{ex:sum1:sum2} A classic problem that requires the
+  interleaving of recursion and aggregation is the bill-of-material
+  (see, e.g., \cite{DBLP:conf/amw/ZanioloYIDSC18}), where we are asked
+  to compute, for each part $X$, the total cost of $X$, of all
+  sub-parts of $X$, all sub-sub-parts of $X$, etc.  The EDB and IDB
+  schemas are $\sigma_\B = \set{E}$, $\sigma = \set{C}$,
+  $\tau=\set{T}$.  The relation $E(X,Y)$ is a standard, Boolean
+  relation, representing the fact hat ``$X$ has a subpart $Y$''; $C(X)$
+  is an $\N$-relation or an $\R_\bot$-relation (to be discussed
+  shortly) representing the cost of $X$; and $T(X)$ is the {\em total
+    cost} of $X$, that includes the cost of all its (sub-)subparts.
+  The \datalogo program is:
+  %
+  \begin{align*}
+    T(X) \cd & C(X) + \sum_Y \setof{T(Y)}{E(X,Y)}
+  \end{align*}
+  %
+  When the graph defined by $E$ is a tree then the program computes
+  correctly the bill-of-material.  We are interested, however, in what
+  happens when the graph encoded by $E$ has cycles, as illustrate with
+  Fig.~\ref{fig:simple:graph}(b).  The grounded program
+  is:\footnote{Strictly speaking, we should have introduced POPS
+    variables, $x_{T(a)}, x_{T(b)}, \ldots$, but, to reduce clutter,
+    we show here directly the grounded atoms instead of their
+    corresponding POPS variable.}
+  %
+  \begin{align*}
+    T(a) \cd & C(a) + T(b) + T(c) \\
+    T(b) \cd & C(b) + T(a) + T(c) \\
+    T(c) \cd & C(c) + T(d) \\
+    T(d) \cd & C(d)
+  \end{align*}
+  %
+  We consider two choices for the POPS.  First, the naturally ordered
+  semiring $(\N, +, *, 0, 1)$. Here the program diverges, since the
+  na\"ive algorithm will compute ever increasing values for $T(a)$ and
+  $T(b)$, which are on a cycle.  Second, consider the lifted reals
+  $\R_\bot = (\R \cup \set{\bot},+,*,0,1,\sqsubseteq)$.  Now the
+  program converges in 3 steps, as can be seen below:
+%
+  \begin{align*}
+    &
+      \begin{array}{l|c|c|c|c|} \cline{2-5}
+        &T(a)&T(b)&T(c)&T(d) \\ \cline{2-5}
+        T_0 & \bot & \bot & \bot & \bot  \\ \cline{2-5}
+        T_1 & \bot & \bot & \bot & 10  \\ \cline{2-5}
+        T_2 & \bot & \bot & 11 & 10  \\ \cline{2-5}
+        T_3 & \bot & \bot & 11 & 10  \\ \cline{2-5}
+        \end{array}
+  \end{align*}
+\end{ex}
+
+
+\subsection{Extensions}
+
+\label{subsec:extensions:datalogo}
+
+We discuss here several extensions of \datalogo that we believe are
+needed in a practical implementation.
+
+{\bf Case Statements} Sum-products can be extended w.l.o.g. to include
+case statements of the form:
+  %
+\begin{align*}
+  T(x_1, \ldots, x_k) &\cd \texttt{case } C_1: E_1; \ \ \ C_2: E_2;\cdots; [\texttt{ else } E_n]
+\end{align*}
+%
+where $C_1, C_2, \ldots$ are conditions and $E_1, E_2, \ldots$ are
+sum-product expressions.  This can be desugared to a sum-sum-product:
+%
+\begin{align*}
+  T(x_1, \ldots, x_k) &\cd \setof{E_1}{C_1} \oplus \setof{E_2}{\neg C_1 \wedge C_2} \oplus\cdots \oplus \setof{E_n}{\neg C_1 \wedge \neg C_2 \cdots}
+\end{align*}
+%
+and therefore the least fixpoint semantics and our convergence results
+in Sec.~\ref{sec:complexity} continue to hold.
+%
+For example, we may compute the prefix-sum of a vector $V$ of length
+100 as follows:
+%
+\begin{align*}
+  W(i) &\cd \texttt{case } i=0: V(0);\ \ \ \ i<100: W(i-1) + V(i);
+\end{align*}
+%
+
+{\bf Multiple Value Spaces} Our discussion so far assumed that all
+rules in a \datalogo program are over a single POPS.  In practice one
+often wants to perform computations over multiple POPS.  In that case
+we need to have some predefined functions mapping between various
+POPS; if these are monotone, then the least fixpoint semantics still
+applies, otherwise the program needs to be {\em stratified}.  We
+illustrate with an example, which uses two POPS: $\R_+$ and $\B$.
+
+\begin{ex} We illustrate the {\em company control} example
+  from~\cite[Example 3.2]{DBLP:conf/pods/RossS92}.
+  $S(X,Y)=n \in \R_+$ represents the fact that company $X$ owns a
+  proportion of $n$ shares in company $Y$.  We want to compute the
+  predicate $C(X,Y)$, representing the fact that the company $X$ {\em
+    controls} company $Y$, where control is defined as follows: $X$
+  controls $Y$ if the sum of shares it owns in $Y$ plus the sum of
+  shares in $Y$ owned by companies controlled by $X$ is $>0.5$.  The
+  program is adapted directly from~\cite{DBLP:conf/pods/RossS92}:
+  %
+  \begin{align*}
+    CV(X,Z,Y) \cd & [X=Z]*S(X,Y) + [C(X,Z)]*S(Z,Y) \\
+    T(X,Y) \cd & \sum_Z \setof{CV(X,Z,Y)}{\text{Company}(Z)} \\
+    C(X,Y) \cd & [T(X,Y) > 0.5]
+  \end{align*}
+  %
+  The value of $CV(X,Z,Y)$ is the fraction of shares that $X$ owns in
+  $Y$, through its control of company $Z$; when $X=Z$ then this
+  fraction includes $S(X,Y)$.  The value of $T(X,Y)$ is the total
+  amount of shares that $X$ owns in $Y$.  The last rule checks whether
+  this total is $>0.5$: in that case, $X$ controls $Y$.
+
+  The EDB and IDB vocabularies are $\sigma = \set{S}$,
+  $\sigma_\B = \set{\text{Company}}$,
+  $\tau = \set{CV, T}, \tau_\B = \set{C}$.  The IDBs $CV, T$ are
+  $\R_+$-relations, $C$ is a standard $\B$-relation.  The mapping
+  between the two POPS is achieved by the indicator function
+  $[\Phi] \in \R_+$, which returns 0 when the predicate $\Phi$ is
+  false, and 1 otherwise.  All rules are monotone, w.r.t. to the
+  natural orders on $\R_+$ and $\B$, and, thus, the least-fixpoint
+  semantics continues to apply to this program. But the results in
+  Sec.~\ref{sec:complexity} apply only to fixpoints of polynomials,
+  while the grounding of our program is no longer a polynomial.
+\end{ex}
+
+% {\bf Stratification} When using non-monotone functions between
+% different POPS, one needs to stratify the \datalogo, as is custom for
+% datalog with negation.
+
+{\bf Interpreted functions over the key-space} A practical language
+needs to allow interpreted functions over the key space, i.e. the
+domain $D$, as illustrated by this simple example:
+  %
+\begin{align*}
+  \texttt{Shipping}(cid,\texttt{date}+1) \cd & \texttt{Order}(cid,\texttt{date})
+\end{align*}
+  %
+Here $\texttt{date}+1$ is an interpreted function applied to
+$\texttt{date}$.  Interpreted functions over $D$ may cause the active
+domain to grow indefinitely, leading to divergence; our results in
+Sec.~\ref{sec:complexity} apply only when the active domain is fixed,
+enabling us to define the grounding~\eqref{eq:grounded:pi} of the
+\datalogo program.
+
+%   {\bf Cast Operator} Each \datalogo rule is over a single POPS $\bm S$.
+%   If we want to compute a program over multiple POPS then we need some
+%   mechanism to compute a rule over two or more POPS.  The simplest
+%   way is to combine Boolean predicates with $\bm S$-relations over
+%   some other POPS, using an indicator function
+%   $[-] : \B \rightarrow \bm S$, defined as follows:
+% %
+%   \begin{align*}
+%     [0] \defeq & \bot_{\bm S} &
+%     [1] \defeq & 1_{\bm S}
+%   \end{align*}
+% %
+%   We call $[-]$ a {\em cast} operator.  When the cast operator is
+%   applied only to Boolean EDB predicates, then it can be computed
+%   during grounding, in other words, the result of grounding a rule
+%   continues to be a multivariate polynomial over the POPS $\bm S$.
+%   However, if the condition is applied to Boolean IDBs, then the ICO
+%   is still a monotone operator, since the cast operator above is
+%   monotone, but the grounding is no longer a polynomial, and the
+%   results in the next section may no longer apply.
+
+%   {\bf Summation with Explicit Range} We allow an explicit range in
+%   the summation of a monomial.  This is necessary when
+%   $\bot_{\bm S} \neq 0$, because in that case the indicator function
+%   cannot be used to restrict the range of the summation.  More
+%   precisely, we extend the definition of a sum-product expression in
+%   Def.~\ref{def:sum:product} to:
+% %
+%   \begin{align*}
+%      T(x_1, \ldots, x_k) &\cd \bigoplus_{x_{k+1}, \ldots,x_p \in D} \setof{A_1 \otimes  \cdots \otimes A_m}{\text{Cond}}
+%   \end{align*}
+%   %
+%   where $\text{Cond}$ is a condition over the variables
+%   $x_{k+1}, \ldots, x_p$, restricting their range.  This extension
+%   affects only how we compute the grounding of a rule: we simply
+%   restrict the summation $f(u_1)+f(u_2)+\cdots+f(u_{|D|})$ to include
+%   only terms that satisfy the condition.  The result of grounding is
+%   still a multivariate polynomial over the POPS $\bm S$.
+
+{\bf Keys to Values} Finally, a useful extension is to allow key
+values to be used as POPS values, when the types are right.  For
+example, if $\texttt{Length}(X,Y,C)$ is Boolean relation, where a
+tuple $(X,Y,C)$ represents the fact that there exists a path of length
+$C$ from $X$ to $Y$, then the we can compute the length of the
+shortest path as the following rule of the tropical semiring
+$\trop^+$:
+%
+  \begin{align*}
+    \texttt{ShortestLength}(X,Y) &\cd \min_C \left([\texttt{Length}(X,Y,C)]_\infty^0 + C\right)
+  \end{align*}
+%
+  The key variable $C$ became an atom over the tropical semiring.
 
 \section{Convergence of \datalogo}
 \label{sec:convergence}
