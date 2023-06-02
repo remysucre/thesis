@@ -864,38 +864,6 @@ element is $(\bot_1, \bot_2)$.
   $\bm S \times \bm P$.
 \end{ex}
 
-
-%
-% \subsubsection{Strictness of \texorpdfstring{$\oplus$}{oplus} and \texorpdfstring{$\otimes$}{otimes} are independent}
-% We give two examples of POPS where only one of the two operators
-% $\oplus, \otimes$ is strict.
-%
-% \begin{description}
-% \item[Strict $\otimes$] In any non-trivial naturally ordered semiring
-%   $\otimes$ is strict, while $\oplus$ is not.  For example, consider
-%   $(\N, +, *, 0, 1, \leq)$.  Then $*$ is strict because $x * 0 = 0$,
-%   while $+$ is not strict because $x + 0 \neq 0$ for $x \neq 0$.
-% \item[Strict $\otimes$] Next, consider the semiring
-%   $(\N \cup \set{\top}, \oplus, \otimes, \set{0}, \set{1},
-%   \supseteq)$, where $\top$ the infinite set $\set{0,1,2,\ldots}$.  We
-%   view each element $x \in \N$ as the singleton set $\set{x}$, and
-%   define the operations $\oplus, \otimes$ set-wise:
-%   $A \oplus B \defeq \setof{x+y}{x \in A, y \in B}$,
-%   $A \otimes B \defeq \setof{x*y}{x \in A, y \in B}$, where we replace
-%   the result with $\top$ if the resulting set is not a singleton.
-%   Concretely, we have:
-%   \begin{align*}
-%     \set{x} \oplus \set{y} = & \set{x+y} & \set{x} \oplus \top = & \top\\
-%     \set{x} \otimes \set{y} = & \set{x*y} & \set{0} \oplus \top = & \set{0} & x\neq 0:\ \set{x} \oplus \top = \top
-%   \end{align*}
-% %
-%   Since $\top$ is the smallest element, $\oplus$ is strict, while
-%   $\otimes$ is not.
-% \end{description}
-%
-%
-
-
 \section{\datalogo}
 \label{sec:datalogo}
 
@@ -910,37 +878,20 @@ $\sigma_\B \defeq \set{B_1, \ldots, B_k}$ the two vocabularies.  All
 IDBs are $\bm P$-relations, and their vocabulary is denoted by
 $\tau = \set{T_1, \ldots, T_n}$.
 
-% We consider next a slight generalization of sum-product rules
-% from Definition~\ref{def:sum:product}.  A {\em sum-product rule} is a
-% rule like \eqref{eq:t:monomial} where the atoms are over the
-% vocabulary $\sigma \cup \tau$, and the predicate
-% $\Phi$ is any domain-independent\footnote{Domain-independence is
-%   undecidable in general, but is usually enforced syntactically, by
-%   requiring the formula to be range-restricted,
-%   see~\cite{DBLP:books/aw/AbiteboulHV95}.} FO formula over the
-% vocabulary $\sigma_\B$.  The semantics of a rule $\rho$ is still given
-% by Equation~\eqref{eq:jt}, where the sentence $\Phi[\theta]$ is now an
-% FO sentence over the Boolean EDBs.  A {\em sum-sum-product rule} is a
-% sum of sum-product expressions, as before.
-
 A \datalogo program $\Pi$ consists of $n$ sum-sum-product rules
 $r_1, \ldots, r_n$ (as in Definition~\ref{def:sum:sum:product}), where
 each rule $r_i$ has the IDB $T_i$ in the head:
 %
 \begin{align}
-  r_1: && T_1(\cdots) \cd & E_{11}\oplus E_{12} \oplus \cdots \nonumber \\
-       && & \ldots \label{eq:basic:datalogo} \\
-  r_n: && T_n(\cdots) \cd & E_{n1} \oplus E_{n2} \oplus \cdots, \nonumber
+  r_1: T_1(\cdots) & \cd E_{11}\oplus E_{12} \oplus \cdots \nonumber \\
+       & \ldots \label{eq:basic:datalogo} \\
+  r_n: T_n(\cdots) & \cd E_{n1} \oplus E_{n2} \oplus \cdots, \nonumber
 \end{align}
 %
 and each $E_{ij}$ is a sum-product expression as
 in~\eqref{eq:t:monomial}.  The program $\Pi$ is said to be {\em
   linear} if each sum-product expression $E_{ij}$ contains at most one
 IDB predicate.
-% Recall that Definition~\ref{def:sum:product} requires every rule to
-% be {\em safe}, meaning that every variable in the head of a rule
-% $r_i$ must occur in some atom of every sum-product expression
-% $E_{i1}, E_{i2}, \ldots$
 
 \subsection{Least Fixpoint of the Immediate Consequence Operator}
 
