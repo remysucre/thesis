@@ -1530,7 +1530,12 @@ We compute the delta relations as follows.
 Given a rule $T_i \cd F_i(T_1, \ldots, T_n)$,
  we define the {\em delta} relation as follows:
 %
-$$\delta_i^{(t)} \cd \bigoplus_{ T_1', \dots, T_n' \mid T_i' \in \set{T_i^{(t-1)}, \delta_i} } F_i(T_1', \ldots, T_n') $$
+$$\delta_i^{(t)} \cd \sum_{
+  \substack{
+   T_1', \dots, T_n', \\ 
+   T_i' \in \set{T_i^{(t-2)}, \delta_i^{(t-1)}}, \\ 
+   \exists i : T_i' = \delta_i^{(t-1)} }}
+  F_i(T_1', \ldots, T_n') $$
 %
 We now show the delta relation is defined correctly:
 
@@ -1572,16 +1577,16 @@ Under semi-na\"ive evaluation, we avoid recomputing the same values:
 \begin{align*}
  \begin{array}{l|c|c|c|c|} \cline{2-5}
    &T(a)&T(b)&T(c)&T(d) \\ \cline{2-5}
-   T^{(0)} & \bot & \bot & \bot & \bot  \\ \cline{2-5}
+   T^{(0)} & 0 & 0 & 0 & 0  \\ \cline{2-5}
    \delta^{(1)} & 1 & 1 & 1 & 1  \\ \cline{2-5}
    T^{(1)} & 1 & 1 & 1 & 1 \\ \cline{2-5}
-   \delta^{(2)} & \bot & 1 & 1 & 1  \\ \cline{2-5}
+   \delta^{(2)} & 0 & 1 & 1 & 1  \\ \cline{2-5}
    T^{(2)} & 1 & 2 & 2 & 2  \\ \cline{2-5}
-   \delta^{(3)} & \bot & \bot & 1 & 1  \\ \cline{2-5}
+   \delta^{(3)} & 0 & 0 & 1 & 1  \\ \cline{2-5}
    T^{(3)} & 1 & 2 & 3 & 3  \\ \cline{2-5}
-   \delta^{(4)} & \bot & \bot & \bot & 1  \\ \cline{2-5}
+   \delta^{(4)} & 0 & 0 & 0 & 1  \\ \cline{2-5}
    T^{(4)} & 1 & 2 & 3 & 4  \\ \cline{2-5}
-   \delta^{(5)} & \bot & \bot & \bot & \bot \\ \cline{2-5}
+   \delta^{(5)} & 0 & 0 & 0 & 0 \\ \cline{2-5}
    \end{array}
 \end{align*}
 
@@ -1593,7 +1598,31 @@ Recall that $\bot$ values are not explicitly stored in the relations,
 For example, at the third iteration we only update the entry $T^{(3)}(d)$ to compute $T^{(4)}(d)$
  and skip over other entries.
 
-\subsection{Unordered Semirings}
+The present definition of the delta rule contains
+ exponentially many terms in the number of IDB predicates, 
+ which is prohibitive for long rules.
+An alternative definition requires only linearly many terms,
+ but requires tracking extra relations.
+
+Let $T_1, \ldots, T_n$ be any permutation of the body IDB relations. 
+We can then compute the delta relation as follows:
+
+\begin{align*}
+\delta^{(t)} = & F(\delta_1^{(t-1)}, T_2^{(t-1)}, \ldots, T_n^{(t-1)}) \\
+ + & F(T_1^{(t-2)}, \delta_2^{(t-1)}, T_3^{(t-1)} \ldots, T_n^{(t-1)}) \\
+ + & \cdots  \\
+ + & F(T_1^{(t-2)}, \ldots, T_{n-2}^{(t-2)}, \delta_{n-1}^{(t-1)}, T_n^{(t-1)}) \\
+ + & F(T_1^{(t-2)}, \ldots, T_{n-1}^{(t-2)}, \delta_n^{(t-1)})
+\end{align*}
+
+That is, the $i$-th term has the $\delta$ relation at position $i$, 
+ and $T^{(t-2)}$ relations before position $i$, 
+ and $T^{(t-1)}$ relations after position $i$.
+This alternative formulation can be seen as a ``factorization'' 
+ of the previous formulation by using the distributivity of 
+ $\times$ over $+$. 
+
+\subsection{Datalog over Unordered Semirings}
 \label{subsec:unordered}
 Although \datalogo is defined over POPS which requires an ordering of the pre-semiring values,
 many pracitical Datalog variants simply rely on an {\em operational} semantics
@@ -1623,6 +1652,16 @@ Then $S' = S + \delta$, where $\delta$ is computed via the differential rule as 
 The proof is identical to the proof of Theorem~\ref{thm:delta} which did not rely on any properties of the ordering.
 \remy{Actually just state this theorem and proof in the previous secion.}
 
+\subsection{Complete, Distributive Dioids}
+When we further restrict the POPS $\bm P$ we can further
+ optimize the semi-na\"ive algorithm.
+When $\bm P$ is a {\em complete, distributive dioid}, 
+ we only need to track the previous relation $T^{(t-1)}$
+ and can drop $T^{(t-2)}$.
+Further, we can more aggressively remove redundant tuples
+ via a generalized difference operator $\ominus$.
+In this case, we recover exactly the classic semi-na\"ive algorithm for Datalog, 
+ which is \datalogo over $\B$.
 
 % \begin{algorithm}[t]
 %   $J^{(0)} \leftarrow \bm 0$\;
