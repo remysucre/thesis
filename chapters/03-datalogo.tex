@@ -1524,3 +1524,117 @@ recursion. Our second result consists of showing how to adapt the
 semi-na\"ive algorithm to \datalogo, under certain restrictions of the
 POPS $\bm P$, thus, enabling the semi-na\"ive algorithm to be applied
 to programs with aggregation in recursion.
+
+Assume the POPS $\bm P$ is naturally ordered.
+We compute the delta relations as follows.
+Given a rule $T_i \cd F_i(T_1, \ldots, T_n)$,
+ we define the {\em delta} relation as follows:
+%
+$$\delta_i^{(t)} \cd \bigoplus_{ T_1', \dots, T_n' \mid T_i' \in \set{T_i^{(t-1)}, \delta_i} } F_i(T_1', \ldots, T_n') $$
+%
+We now show the delta relation is defined correctly:
+
+\begin{thm}
+\label{thm:delta}
+$T_i^{(t)} + \delta_i^{(t)} = T_i^{(t+1)}$.
+\end{thm}
+\begin{proof}
+\begin{align}
+T_i^{(t+1)} & = T_1^{(t)} T_2^{(t)} \cdots T_n^{(t)} \\ 
+ & = (T_1^{(t-1)} + \delta_1^{(t)})(T_2^{(t-1)} + \delta_2^{(t)}) \cdots (T_n^{(t-1)} + \delta_n^{(t)}) \\
+ & = T_i^{(t)} + \delta_i^{(t)}
+\end{align}
+\end{proof}
+
+We demonstrate the efficiency of the semi-na\"ive algorithm on the Bill-of-Material example 
+ over $\N$.
+
+$$ T(X) \cd C(X) + \sum_{Y \mid E(X, Y)} T(Y) $$
+
+Na\"ive evaluation:
+
+\begin{align*}
+ &
+   \begin{array}{l|c|c|c|c|} \cline{2-5}
+     &T(a)&T(b)&T(c)&T(d) \\ \cline{2-5}
+     T^{(0)} & 1 & 1 & 1 & 1  \\ \cline{2-5}
+     T^{(1)} & 1 & 2 & 2 & 2  \\ \cline{2-5}
+     T^{(2)} & 1 & 2 & 3 & 3  \\ \cline{2-5}
+     T^{(3)} & 1 & 2 & 3 & 4  \\ \cline{2-5}
+     \end{array}
+\end{align*}
+
+Note that the values for $a, b$ and $c$ are recomputed at each iteration, 
+ even after they stop changing.
+
+Under semi-na\"ive evaluation, we avoid recomputing the same values:
+
+\begin{align*}
+ \begin{array}{l|c|c|c|c|} \cline{2-5}
+   &T(a)&T(b)&T(c)&T(d) \\ \cline{2-5}
+   T^{(0)} & \bot & \bot & \bot & \bot  \\ \cline{2-5}
+   \delta^{(1)} & 1 & 1 & 1 & 1  \\ \cline{2-5}
+   T^{(1)} & 1 & 1 & 1 & 1 \\ \cline{2-5}
+   \delta^{(2)} & \bot & 1 & 1 & 1  \\ \cline{2-5}
+   T^{(2)} & 1 & 2 & 2 & 2  \\ \cline{2-5}
+   \delta^{(3)} & \bot & \bot & 1 & 1  \\ \cline{2-5}
+   T^{(3)} & 1 & 2 & 3 & 3  \\ \cline{2-5}
+   \delta^{(4)} & \bot & \bot & \bot & 1  \\ \cline{2-5}
+   T^{(4)} & 1 & 2 & 3 & 4  \\ \cline{2-5}
+   \delta^{(5)} & \bot & \bot & \bot & \bot \\ \cline{2-5}
+   \end{array}
+\end{align*}
+
+Even though the values for each of $a, b, c$, and $d$ reappear at each iteration, 
+ they are maintained {\em incrementally} instead of recomputed.
+Recall that $\bot$ values are not explicitly stored in the relations,
+ and $\bot = 0$ in a naturally ordered POPS,
+ therefore we need only update an entry of $T$ if the corresponding delta entry is non-zero.
+For example, at the third iteration we only update the entry $T^{(3)}(d)$ to compute $T^{(4)}(d)$
+ and skip over other entries.
+
+\subsection{Unordered Semirings}
+\label{subsec:unordered}
+Although \datalogo is defined over POPS which requires an ordering of the pre-semiring values,
+many pracitical Datalog variants simply rely on an {\em operational} semantics
+ that iterates the rules until convergence (the semantics is undefined if the rules diverge).
+Suprisingly, the semi-na\"ive algorithm remains valid for unordered pre-semirings.
+This is because the proof of Theorem~\ref{thm:delta} does not rely on the ordering of the pre-semiring values.
+One important detail is necessary to ensure efficiency:
+ just as we do not store $\bot$-values in relations over POPS, 
+ we also need to omit $0$-values in relations over unordered pre-semirings.
+Doing so makes sure we only update entries that change their values after each iteration.
+
+\begin{ex}
+\label{ex:unordered}
+Observe that Example~\ref{ex:sum1:sum2} remains valid over the (unordered) pre-semiring over $\R$,
+ if we replace $\bot$ with $0$.
+\end{ex}
+
+\begin{thm}
+\label{thm:unordered}
+Let $\bm P$ be a pre-semiring, and $T_1, \ldots, T_n, \delta_1, \ldots, \delta_n$ be 
+ $\bm P$-relations.
+Let $S = F(T_1, \ldots, T_N)$ be a sum-product relation;
+ define $T_1' = T_1 + \delta_1, \ldots, T_n' = T_n + \delta_n$, 
+ and $S' = F(T_1', \ldots, T_n')$.
+Then $S' = S + \delta$, where $\delta$ is computed via the differential rule as in~\ref{todo}.
+\end{thm}
+The proof is identical to the proof of Theorem~\ref{thm:delta} which did not rely on any properties of the ordering.
+\remy{Actually just state this theorem and proof in the previous secion.}
+
+
+% \begin{algorithm}[t]
+%   $J^{(0)} \leftarrow \bm 0$\;
+%  \For {  $t \leftarrow 0$   {\bf to}   $\infty$ }
+%  {
+%      {$\delta^{(t)} \leftarrow F(J^{(t)})\ominus J^{(t)}$}\tcp*[r]{incremental computation, see Sec.~\ref{subsec:differential:rule}}
+%      {$J^{(t+1)} \leftarrow J^{(t)} \oplus \delta^{(t)}$}\;
+%      \If { $\delta^{(t)} = \bm 0$ }{
+%         Break
+%      }
+%  }
+%  \Return $J^{(t)}$
+%  \caption{Semi-na\"ive evaluation for \datalogo}
+%  \label{algo:seminaive}
+% \end{algorithm}
