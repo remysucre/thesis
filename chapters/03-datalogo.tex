@@ -1608,11 +1608,11 @@ Let $T_1, \ldots, T_n$ be any permutation of the body IDB relations.
 We can then compute the delta relation as follows:
 
 \begin{align*}
-\delta^{(t)} = & F(\delta_1^{(t-1)}, T_2^{(t-1)}, \ldots, T_n^{(t-1)}) \\
- + & F(T_1^{(t-2)}, \delta_2^{(t-1)}, T_3^{(t-1)} \ldots, T_n^{(t-1)}) \\
+\delta^{(t)} = & F(\delta_1^{(t-1)}, T_2^{(t-1)}, T_3^{(t-1)},\ldots, T_n^{(t-1)}) \\
+ + & F(T_1^{(t-2)}, \delta_2^{(t-1)}, T_3^{(t-1)}, \ldots, T_n^{(t-1)}) \\
  + & \cdots  \\
  + & F(T_1^{(t-2)}, \ldots, T_{n-2}^{(t-2)}, \delta_{n-1}^{(t-1)}, T_n^{(t-1)}) \\
- + & F(T_1^{(t-2)}, \ldots, T_{n-1}^{(t-2)}, \delta_n^{(t-1)})
+ + & F(T_1^{(t-2)}, \ldots, T_{n-2}^{(t-2)}, T_{n-1}^{(t-2)}, \delta_n^{(t-1)})
 \end{align*}
 
 That is, the $i$-th term has the $\delta$ relation at position $i$, 
@@ -1704,9 +1704,22 @@ Is there a naturally-ordered pre-semiring that is not idempotent,
  but there exists $c \neq 0$ such that $c + x = x$ for some $x$?
 Note that $c + x \geq x$, becaues $c + x \geq \bot + x = 0 + x = x$.
 
-Suppose there is.
+Yes: in the POPS ${\bm S}^{\leq 10}$, $+^{\leq 10}$ is not idempotent 
+ but $\forall x : x +^{\leq 10} 10 = 10$.
 
-\remy{Prop. 2.4: semiring change to pre-semiring.}
+What about rounding arithmetic?
+
+More general definition of $\ominus$:
+\begin{align*}
+  x \ominus y = \begin{cases}
+    \bot & \text{if } x + y = y \\
+    x & \text{otherwise}
+  \end{cases}
+\end{align*}
+
+$$x \ominus y = \bigwedge \setof{c}{c + y = x + y}$$
+
+$$x \ominus y = \bigwedge \setof{c}{c + y \geq x}$$
 
 \begin{algorithm}[t]
   $J^{(0)} \leftarrow \bm 0$\;
