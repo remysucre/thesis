@@ -1663,17 +1663,62 @@ Further, we can more aggressively remove redundant tuples
 In this case, we recover exactly the classic semi-na\"ive algorithm for Datalog, 
  which is \datalogo over $\B$.
 
-% \begin{algorithm}[t]
-%   $J^{(0)} \leftarrow \bm 0$\;
-%  \For {  $t \leftarrow 0$   {\bf to}   $\infty$ }
-%  {
-%      {$\delta^{(t)} \leftarrow F(J^{(t)})\ominus J^{(t)}$}\tcp*[r]{incremental computation, see Sec.~\ref{subsec:differential:rule}}
-%      {$J^{(t+1)} \leftarrow J^{(t)} \oplus \delta^{(t)}$}\;
-%      \If { $\delta^{(t)} = \bm 0$ }{
-%         Break
-%      }
-%  }
-%  \Return $J^{(t)}$
-%  \caption{Semi-na\"ive evaluation for \datalogo}
-%  \label{algo:seminaive}
-% \end{algorithm}
+If $0 = \bot$, does the POPS have to be naturally ordered?
+
+A POPS is {\em sparse} if $\bot = 0$.
+
+Every naturally ordered POPS is sparse, but the converse is not true.
+For example, $S = \setof{ m + n \sqrt{2}}{ m, n \in \N }$.
+Then $(S, +, \times, 0, 1)$ with the usual ordering is sparse.
+$1 \leq \sqrt{2}$, but $\not \exists x \in S : 1 + x = \sqrt{2}$.
+
+Even if we require the sparse POPS to be stable, 
+ its order may still not be the natural order.
+For example, $S^{\leq 10} = \setof{s \in S}{ s \leq 10}$, 
+ and ${\bm S}^{\leq 10} = (S^{\leq 10}, +^{\leq 10}, \times^{\leq 10}, 0, 1)$
+ where $x +^{\leq 10} y = x + y$ if $x + y \leq 10$, and $x +^{\leq 10} y = 10$ otherwise, 
+ and similarly for $\times^{\leq 10}$.
+It is easy to verify ${\bm S}^{\leq 10}$ is a POPS, 
+  and ${\bm S}^{\leq 10}$ is stable, 
+  but ${\bm S}^{\leq 10}$ is not naturally ordered.
+This may appear to contradict Theorem ?? which states
+  every stable POPS is naturally ordered.
+However, a POPS being naturally ordered only means 
+ the natural order over P is a partial order;
+ it does not rule out other orderings that are not the natural order.
+Nevertheless, any sparse POPS satisfies 
+ $\exists z : x + z = y \implies x \leq y$ (but not the converse).
+
+\begin{thm}
+  Any POPS where $\bot = 0$ satisfies: if $x + z = y$ then $x \leq y$.
+\end{thm}
+\begin{proof}
+First direction: if $x + z = y$ then $x \leq y$.
+$x = x + 0 = x + \bot \leq x + z = y$.
+
+Second direction: if $x \leq y$ then $\exists z : x + z = y$.
+
+\end{proof}
+
+Is there a naturally-ordered pre-semiring that is not idempotent, 
+ but there exists $c \neq 0$ such that $c + x = x$ for some $x$?
+Note that $c + x \geq x$, becaues $c + x \geq \bot + x = 0 + x = x$.
+
+Suppose there is.
+
+\remy{Prop. 2.4: semiring change to pre-semiring.}
+
+\begin{algorithm}[t]
+  $J^{(0)} \leftarrow \bm 0$\;
+ \For {  $t \leftarrow 0$   {\bf to}   $\infty$ }
+ {
+     {$\delta^{(t)} \leftarrow F(J^{(t)})\ominus J^{(t)}$}\tcp*[r]{incremental computation, see Sec.~\ref{subsec:differential:rule}}
+     {$J^{(t+1)} \leftarrow J^{(t)} \oplus \delta^{(t)}$}\;
+     \If { $\delta^{(t)} = \bm 0$ }{
+        Break
+     }
+ }
+ \Return $J^{(t)}$
+ \caption{Semi-na\"ive evaluation for \datalogo}
+ \label{algo:seminaive}
+\end{algorithm}
