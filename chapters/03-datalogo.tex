@@ -1605,7 +1605,7 @@ We can now define the semi-na\"ive algorithm using these delta rules,
   $I^{(1)} \leftarrow F(\bm 0)$, $\delta I^{(1)} \gets F(\bm 0)$ \;
  \For {  $t \leftarrow 2$   {\bf to}   $\infty$ }
  {
-     {$\delta^{(t)} \leftarrow \delta F(I^{(t-2)}, \delta I^{(t-1)})$}\;
+     {$\delta^{(t)} \leftarrow \delta F(I^{(t-2)}, \delta I^{(t-1)})$} \label{algo:sn:delta} \; 
      {$I^{(t)} \leftarrow I^{(t-1)} \oplus \delta^{(t)}$}\;
      \If { $\delta^{(t)} = \bm 0$ }{
         break
@@ -1737,58 +1737,63 @@ Although \datalogo is defined over POPS which requires an ordering of the pre-se
 many pracitical Datalog variants simply rely on an {\em operational} semantics
  that iterates the rules until convergence (the semantics is undefined if the rules diverge).
 Suprisingly, the semi-na\"ive algorithm remains valid for unordered pre-semirings.
-This is because the proof of Theorem~\ref{thm:delta} does not rely on the ordering of the pre-semiring values.
+This is because the proof of Proposition~\ref{thm:delta} does not rely on any ordering of the pre-semiring values.
 One important detail is necessary to ensure efficiency:
  just as we do not store $\bot$-values in relations over POPS, 
  we also need to omit $0$-values in relations over unordered pre-semirings.
 Doing so makes sure we only update entries that change their values after each iteration.
-
+%
 \begin{ex}
 \label{ex:unordered}
-Observe that Example~\ref{ex:sum1:sum2} remains valid over the (unordered) pre-semiring over $\R$,
- if we replace $\bot$ with $0$.
+Observe that Example~\ref{ex:sum1:sum2} remains valid over the (unordered) pre-semiring over $\R$.
 \end{ex}
+%
+One may be tempted to think that the semi-na\"ive algorithm works 
+ for every POPS with any arbitrary order.
+However, this is not the case.
+For example, in the lifted semiring $\R_\bot$
+ we do not have $0 = \bot$.
+Since we must reserve the meaning of a missing tuple 
+ to indicate that tuple has value $\bot$,
+ we cannot omit tuples with value $0$.
+In other words, the semi-na\"ive algorithm 
+ does not apply because $\R_\bot$ is not sparse.
 
-\begin{thm}
-\label{thm:unordered}
-Let $\bm P$ be a pre-semiring, and $T_1, \ldots, T_n, \delta_1, \ldots, \delta_n$ be 
- $\bm P$-relations.
-Let $S = F(T_1, \ldots, T_N)$ be a sum-product relation;
- define $T_1' = T_1 + \delta_1, \ldots, T_n' = T_n + \delta_n$, 
- and $S' = F(T_1', \ldots, T_n')$.
-Then $S' = S + \delta$, where $\delta$ is computed via the differential rule as in~\ref{todo}.
-\end{thm}
-The proof is identical to the proof of Theorem~\ref{thm:delta} which did not rely on any properties of the ordering.
-\remy{Actually just state this theorem and proof in the previous secion.}
-
-\subsection{Complete, Distributive Dioids}
-When we further restrict the POPS $\bm P$ we can further
- optimize the semi-na\"ive algorithm.
-When $\bm P$ is a {\em complete, distributive dioid}, 
- we only need to track the previous relation $T^{(t-1)}$
- and can drop $T^{(t-2)}$.
-Further, we can more aggressively remove redundant tuples
- via a generalized difference operator $\ominus$.
-In this case, we recover exactly the classic semi-na\"ive algorithm for Datalog, 
- which is \datalogo over $\B$.
-
-What about rounding arithmetic?
-
-More general definition of $\ominus$:
+\subsection{Further Optimizations}
+\label{sec:redundant}
+In many cases we can further improve the efficiency of the semi-na\"ive algorithm
+ by removing redundant tuples from the delta relations.
+We achieve this with a generalized difference operation $\ominus$,
+ which is defined as follows:
+%
 \begin{align*}
   x \ominus y = \begin{cases}
-    \bot & \text{if } x + y = y \\
+    0 & \text{if } x + y = y \\
     x & \text{otherwise}
   \end{cases}
 \end{align*}
+%
+The intuition is simple: if adding a new value $x$ does not chagne the result, 
+ we can omit $x$ from the delta relation.
+With this, we can change the delta computation
+ on line~\ref{algo:sn:delta}
+ of Algorithm~\ref{algo:seminaive} 
+ to use $\ominus$:
+%
+$$\delta^{(t)} \gets \delta F(I^{(t-2)}, \delta I^{(t-1)}) \ominus I^{(t-1)}$$
+%
+For the POPS $\N$, the only value $x$ such that $x \ominus y = 0$ is $x = 0$. 
+One example where we can remove non-zero elements with $\ominus$ 
+ is the POPS ${\bm S}^{\leq 10}$, $+^{\leq 10}$.
+Let $x = 1$, then $x \ominus 10 = 0$ because $x +^{\leq} 10 = 10$.
+% Note ${\bm S}^{\leq 10}$ is not idempotent.
+Another example is the tropical semiring $\trop^+$
+ where $\forall x \geq y . x \ominus y = 0$.
 
-$$x \ominus y = \bigwedge \setof{c}{c + y = x + y}$$
-
-$$x \ominus y = \bigwedge \setof{c}{c + y \geq x}$$
-
-Is there a naturally-ordered pre-semiring that is not idempotent, 
- but there exists $c \neq 0$ such that $c + x = x$ for some $x$?
-Note that $c + x \geq x$, becaues $c + x \geq \bot + x = 0 + x = x$.
-
-Yes: in the POPS ${\bm S}^{\leq 10}$, $+^{\leq 10}$ is not idempotent 
- but $\forall x : x +^{\leq 10} 10 = 10$.
+Finally, when the POPS is idempotent (meaning $x \oplus x \oplus y = x \oplus y$),
+ we only need to track the IDB relations at time $t-1$
+ and can discard those at time $t-2$.
+Specifically, we replace every $t-2$ with $t-1$
+ in each delta rule and in Algorithm~\ref{algo:seminaive}.
+At this point, we recover exactly the semi-na\"ive algorithm for classic Datalog
+ which is the same as \datalogo over the POPS $\B$.
