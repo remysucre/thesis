@@ -1514,25 +1514,25 @@ algorithm is inefficient in practice, because at each iteration it
 repeats all the computations that it has done at the previous
 iterations.  Most Datalog systems implement an improvement called the
 {\em semi-na\"ive} evaluation, which keeps track of the change between
-the successive states of the IDBs and applies the Datalog rules as a
-function of these changes to obtain the change in the new iteration.
+the successive states of the IDBs, and applies the Datalog rules as a
+function of these changes to obtain the new change in the next iteration.
 Semi-na\"ive evaluation is one of the major optimization techniques
 for evaluating Datalog, however, it is defined only for programs that
 are monotone under set inclusion, and the systems that implement it
 enforce monotonicity, preventing the use of aggregation in
-recursion. Our second result consists of showing how to adapt the
+recursion. We how to adapt the
 semi-na\"ive algorithm to \datalogo, under certain restrictions of the
-POPS $\bm P$, thus, enabling the semi-na\"ive algorithm to be applied
+POPS $\bm P$, thus enabling the semi-na\"ive algorithm to be applied
 to programs with aggregation in recursion.
 Specifically, our semi-na\"ive algorithm applies to \datalogo programs
  over any {\em sparse} POPS, defined below.
 Surprisingly, it also works when the semiring is unordered, 
  as we will discuss in Sec.~\ref{sec:unordered}.
 
-\subsection{Sparse POPS}
-\label{sec:sparse-pops}
+% \subsection{Sparse POPS}
+% \label{sec:sparse-pops}
 
-A {\em sparse} POPS is one where $\bot$ coincides with $0$:
+% A {\em sparse} POPS is one where $\bot$ coincides with $0$:
 %
 \begin{defn}[Sparse POPS]
   \label{def:sparse}
@@ -1543,28 +1543,27 @@ Every naturally ordered POPS is sparse, but the converse is not true.
 For example, 
  consider the POPS $\bm S = (\N \times \N, +^2, \times^2, (0, 0), (1, 1))$,
  where $+^2$ and $\times^2$ mean to apply the operations component-wise,
- and the elements are ordered lexicographically.
+ and the elements in $\bm S$ are ordered lexicographically.
 $\bm S$ is sparse but not naturally ordered, 
  because $(1, 2) \leq (2, 1)$ but
  $\not \exists x \in {\bm S} : (1, 2) + x = (2, 1)$.
-
-Even if we require the sparse POPS to be stable, 
+Moreover, even if we require the sparse POPS to be stable, 
  its order may still not be the natural order.
-For example, $S^{\leq 10} = \setof{s \in S}{ s \leq 10}$, 
+For example, $\bm S^{\leq 10} = \setof{(x_1, x_2) \in \N \times \N }{ x_1 \leq 10, x_2 \leq 10}$, 
  and ${\bm S}^{\leq 10} = (S^{\leq 10}, +^{\leq 10}, \times^{\leq 10}, 0, 1)$
- where $x +^{\leq 10} y = x + y$ if $x + y \leq 10$, and $x +^{\leq 10} y = 10$ otherwise, 
+ where $(x_1, x_2) +^{\leq 10} (y_1, y_2) = (\min(10, x_1 + y_1), \min(10, x_2 + y_2))$
  and similarly for $\times^{\leq 10}$.
-It is easy to verify ${\bm S}^{\leq 10}$ is a POPS, 
-  and ${\bm S}^{\leq 10}$ is stable, 
-  but ${\bm S}^{\leq 10}$ is not naturally ordered.
-This may appear to contradict Theorem ?? which states
-  every stable POPS is naturally ordered.
-However, a POPS being naturally ordered only means 
- the natural order over P is a partial order;
- it does not rule out other orderings that are not the natural order.
-Nevertheless, any sparse POPS satisfies 
- $\exists z : x + z = y \implies x \leq y$ (but not the converse):
-$x = x + 0 \leq x + \bot \leq x + z = y$.
+As for $\bm S$, the elements in $\bm S^{\leq 10}$ are lexicographically ordered.
+It is easy to verify ${\bm S}^{\leq 10}$ is a stable POPS, 
+  but it is not naturally ordered.
+% This may appear to contradict Theorem ?? which states
+%   every stable POPS is naturally ordered.
+% However, a POPS being naturally ordered only means 
+%  the natural order over P is a partial order;
+%  it does not rule out other orderings that are not the natural order.
+% Nevertheless, any sparse POPS satisfies 
+%  $\exists z : x + z = y \implies x \leq y$ (but not the converse):
+% $x = x + 0 \leq x + \bot \leq x + z = y$.
 
 \subsection{The Semi-na\"ive Algorithm for Sparse \datalogo}
 \label{sec:semi-naive-algorithm}
@@ -1594,9 +1593,10 @@ In words, each term under sum evaluates $F_i$ on arguments $T_1', \ldots, T_n'$,
 We evaluate $F_i$ on all such sets of arguments, 
  except for the set that does not contain any $\delta_i^{(t-1)}$.
 Note that there are exponentially many such argument sets, 
- which we will improve to linearly many in our refined algorithm.
+ which we will improve to linearly many in our refined definition.
 The sum of these results then becomes the current delta relation $\delta_i^{(t)}$.
-We will denote this delta rule as $\delta F_i$.
+We will denote this delta rule as $\delta F_i$,
+ and use $\delta F$ to denote the set of all delta rules.
 We can now define the semi-na\"ive algorithm using these delta rules, 
  as shown in Algorithm~\ref{algo:seminaive}.
 %
@@ -1619,7 +1619,7 @@ We can now define the semi-na\"ive algorithm using these delta rules,
 We initialize the IDB relations at time $0$ to be empty, 
  then apply $F$ once to compute the IDB relations and the delta relations 
  at time 1.
-Then in each iteration, we apply the delta rules to compute the 
+In each iteration of the for-loop, we apply the delta rules to compute the 
  new delta relations $\delta^{(t)}$.
 We then update the IDB relations by adding the delta relations to them. 
 We repeat until the delta relations are all empty, 
@@ -1627,13 +1627,13 @@ We repeat until the delta relations are all empty,
 
 To guarantee the semi-na\"ive algorithm is correct,
 the key property of the delta rule is that it computes the difference
- between two iterations:
+ between two iterations of the na\"ive algorithm:
 %
 \begin{prop}
 \label{thm:delta}
 Let $T_i^{(t)}$ and $T_i^{(t+1)}$ be an IDB relation $T_i$ 
  at successive iterations $t$ and $t+1$ during na\"ive evaluation.
-Let $\delta_i^{(t)}$ be the delta relation for $T_i$ at iteration $t$.
+Let $\delta_i^{(t+1)}$ be the delta relation for $T_i$ at iteration $t+1$.
 Then $T_i^{(t)} + \delta_i^{(t+1)} = T_i^{(t+1)}$.
 \end{prop}
 %
@@ -1645,13 +1645,16 @@ Then we have:
 \begin{align*}
 T_i^{(t+1)} & = T_1^{(t)} T_2^{(t)} \cdots T_n^{(t)} && \text{by na\"ive evaluation} \\ 
  & = (T_1^{(t-1)} + \delta_1^{(t)}) \cdots (T_n^{(t-1)} + \delta_n^{(t)}) && \text{by the inductive hypothesis} \\
- & = T_i^{(t)} + \delta_i^{(t)} && \text{by definition of $\delta_i^{(t)}$}
+ & = T_i^{(t)} + \delta_i^{(t+1)} && \text{by definition of $\delta_i^{(t+1)}$}
 \end{align*}
 \end{proof}
 
 Although this simple version of the semi-na\"ive algorithm requires exponentially
  many delta rules, it can already improve the efficiency of na\"ive evaluation
  on certain programs.
+
+\begin{ex}
+\label{ex:sn-datalogo}
 We now demonstrate the efficiency of the semi-na\"ive algorithm on the Bill-of-Material example 
  over $\N$:
 %
@@ -1659,7 +1662,7 @@ $$ T(X) \cd C(X) + \sum_{Y \mid E(X, Y)} T(Y) $$
 %
 In words, we want to compute the total cost $T(X)$ of a component $X$, 
  which is defined to be the individual cost $C(X)$ of $X$ 
- plus the sum of the total costs of all the subcomponents $Y$ of $X$.
+ plus the sum of the total costs of all subcomponents $Y$ of $X$.
 Suppose there are four components $a, b, c, d$, 
  the subpart relation $E = \set{ (a, b), (b, c), (c, d)}$, 
  and each individual component has cost 1.
@@ -1675,8 +1678,9 @@ Recall $0 = \bot$ in a sparse semiring,
  and therefore a tuple whose value is 0 is not stored.
 This means we indeed avoid (re-)computing the grayed-out entries.
 In this example the overhead of keeping track of both $T$ 
- and $\delta T$ cancels out the savings, 
+ and $\delta$ cancels out the savings, 
  but it is not hard to construct examples where the savings are significant. 
+\end{ex}
 
 \begin{figure*}
   \begin{subfigure}{0.47\linewidth}
@@ -1711,7 +1715,7 @@ In this example the overhead of keeping track of both $T$
 The present definition of the delta rule contains
  exponentially many terms in the number of IDB predicates, 
  which is prohibitive for long rules.
-An alternative definition requires only linearly many terms.
+An improved definition requires only linearly many terms.
 Let $T_1, \ldots, T_n$ be any permutation of the body IDB relations. 
 We can then compute the delta relation as follows:
 %
@@ -1734,34 +1738,36 @@ It is easy to verify the two formulations are equivalent.
 \subsection{Datalog over Unordered Semirings}
 \label{sec:unordered}
 Although \datalogo is defined over POPS which requires an ordering of the pre-semiring values,
-many pracitical Datalog variants simply rely on an {\em operational} semantics
+many pracitical Datalog variants lack an ordering and simply rely on an {\em operational} semantics
  that iterates the rules until convergence (the semantics is undefined if the rules diverge).
 Suprisingly, the semi-na\"ive algorithm remains valid for unordered pre-semirings.
 This is because the proof of Proposition~\ref{thm:delta} does not rely on any ordering of the pre-semiring values.
 One important detail is necessary to ensure efficiency:
  just as we do not store $\bot$-values in relations over POPS, 
  we also need to omit $0$-values in relations over unordered pre-semirings.
-Doing so makes sure we only update entries that change their values after each iteration.
+Doing so guarantees we only update entries that change their values after each iteration.
 %
 \begin{ex}
 \label{ex:unordered}
-Observe that Example~\ref{ex:sum1:sum2} remains valid over the (unordered) pre-semiring over $\R$.
+Observe that Example~\ref{ex:sn-datalogo} remains valid over the (unordered) pre-semiring over $\R$.
 \end{ex}
 %
 One may be tempted to think that the semi-na\"ive algorithm works 
  for every POPS with any arbitrary order.
-However, this is not the case.
+However, it is not the case.
 For example, in the lifted semiring $\R_\bot$
  we do not have $0 = \bot$.
 Since we must reserve the meaning of a missing tuple 
  to indicate that tuple has value $\bot$,
  we cannot omit tuples with value $0$.
-In other words, the semi-na\"ive algorithm 
- does not apply because $\R_\bot$ is not sparse.
+The semi-na\"ive algorithm still produces the correct result,
+ but it does not save any work.
+% In other words, the semi-na\"ive algorithm 
+%  does not apply because $\R_\bot$ is not sparse.
 
 \subsection{Further Optimizations}
 \label{sec:redundant}
-In many cases we can further improve the efficiency of the semi-na\"ive algorithm
+In some cases we can further improve the efficiency of the semi-na\"ive algorithm
  by removing redundant tuples from the delta relations.
 We achieve this with a generalized difference operation $\ominus$,
  which is defined as follows:
@@ -1773,7 +1779,7 @@ We achieve this with a generalized difference operation $\ominus$,
   \end{cases}
 \end{align*}
 %
-The intuition is simple: if adding a new value $x$ does not chagne the result, 
+The intuition is simple: if adding a new value $x$ does not change the result, 
  we can omit $x$ from the delta relation.
 With this, we can change the delta computation
  on line~\ref{algo:sn:delta}
@@ -1784,11 +1790,11 @@ $$\delta^{(t)} \gets \delta F(I^{(t-2)}, \delta I^{(t-1)}) \ominus I^{(t-1)}$$
 %
 For the POPS $\N$, the only value $x$ such that $x \ominus y = 0$ is $x = 0$. 
 One example where we can remove non-zero elements with $\ominus$ 
- is the POPS ${\bm S}^{\leq 10}$, $+^{\leq 10}$.
+ is the POPS ${\N}^{\leq 10}$.
 Let $x = 1$, then $x \ominus 10 = 0$ because $x +^{\leq} 10 = 10$.
 % Note ${\bm S}^{\leq 10}$ is not idempotent.
 Another example is the tropical semiring $\trop^+$
- where $\forall x \geq y . x \ominus y = 0$.
+ where $\forall x \geq y : x \ominus y = 0$.
 
 Finally, when the POPS is idempotent (meaning $x \oplus x \oplus y = x \oplus y$),
  we only need to track the IDB relations at time $t-1$
