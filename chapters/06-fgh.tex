@@ -31,7 +31,7 @@ DBLP:journals/tkde/SeoGL15,
 10.14778/2824032.2824052,
 francislandau-vieira-eisner-2020-wrla}.
 But the optimization problem for recursive queries is
-much less studied.  A datalog program consists of multiple rules,
+much less studied.  A  Datalog program consists of multiple rules,
 defining several, mutually recursive relations, and one
 distinguished relation name which is the output of the program.  The
 effect of the program consist of repeatedly applying the rules,
@@ -314,7 +314,7 @@ rewriting using views).
 % cenario is when the optimized program is not expressible in the
 % anguage supported by the system.  For example, the program in
 % ig.~\ref{fig:cc} (b) is both recursive and requires the computation
-% f an aggregate.  The datalog system
+% f an aggregate.  The  Datalog system
 % ouffle~\cite{DBLP:conf/cav/JordanSS16} supports both recursive rules
 %  and aggregates, but does not allow them to be combined.  Thus, the
 %  only way to express connected components in Souffle is as
@@ -483,7 +483,7 @@ longer change.
   a single rule by OR-ing their bodies, and writing explicitly all
   existential quantifiers.  This is a common convention used in the
   literature, see e.g.,~\cite{DBLP:journals/jlp/Fitting91}.  For
-  example the following datalog program, which computes the transitive
+  example the following  Datalog program, which computes the transitive
   closure of a relation $E$,
 %
 \begin{align*}
@@ -1493,7 +1493,7 @@ This step is implicit in both boxes {\em Rule-based Synthesis} and
 
 % to handle interpreted functions.
 % To simplify implementation, we preprocess the input
-% datalog program by mapping all semirings in the program to
+%  Datalog program by mapping all semirings in the program to
 % the semiring used in $G$.
 % For example, the boolean semiring in $CC_{1}$ is mapped to
 % the Tropical semiring as shown in Figure~\ref{fig:cc1:semiring}.
@@ -1676,7 +1676,7 @@ axioms~\eqref{eq:axiom:plus:plus}-\eqref{eq:axiom:plus:equal}).  The
   %   D(x,y,\min(v+c)) \cd & D(x,z,v),E(z,y,c)
   % \end{align*}
 %
-  % In standard datalog rules with aggregates are not monotone.  In
+  % In standard  Datalog rules with aggregates are not monotone.  In
   % order to add such rules to datalog, prior
   % work~\cite{DBLP:conf/pods/GangulyGZ91,DBLP:journals/tkde/SeoGL15}
   % has re-defined the semantics of the $\min$ operator, whenever it
@@ -2569,7 +2569,7 @@ Sec.~\ref{subsec:loop:invariants}.
     There is a great number of commercial and open-source Datalog engines in the
     wild, but only a few support aggregates in recursion.
     % Supporting non-recursive
-    % aggregate is straightforward given any datalog engine: simply create a separate
+    % aggregate is straightforward given any  Datalog engine: simply create a separate
     % stratum for the aggregation. Therefore, we only consider one system that lacks
     % recusive aggregate and use it as a baseline.
     We were able to identify five major systems with such support:

@@ -924,7 +924,7 @@ $F$, when it exists.
 
 The Na\"ive Algorithm for evaluating \datalogo is shown in
 Algorithm~\ref{algo:naive}, and it is quite similar to that for
-standard, positive datalog with set semantics.  We start with all IDBs
+standard, positive  Datalog with set semantics.  We start with all IDBs
 at $\bot$, then repeatedly apply the ICO $F$, until we reach a
 fixpoint.
 % \hqn{Should we mention that $F$ is monotone and thus a LFP is guaranted to exists?}
@@ -959,7 +959,7 @@ Otherwise we say that the algorithm {\em diverges}.
 %   there, we can just add a 5th case.  So feel free to delete this
 %   section, or integrate in Sec.~\ref{sec:complexity}.}
 
-While every pure datalog program is guaranteed to have a least
+While every pure  Datalog program is guaranteed to have a least
 fixpoint, this no longer holds for \datalogo programs.  As we mentioned
 in the introduction, there are five possibilities, depending on the
 POPS $\bm P$:
@@ -1323,7 +1323,7 @@ illustrate with an example, which uses two POPS: $\R_+$ and $\B$.
 
 % {\bf Stratification} When using non-monotone functions between
 % different POPS, one needs to stratify the \datalogo, as is custom for
-% datalog with negation.
+%  Datalog with negation.
 
 {\bf Interpreted functions over the key-space} A practical language
 needs to allow interpreted functions over the key space, i.e. the
