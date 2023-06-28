@@ -8,6 +8,19 @@
 % \newcommand{\algorithmautorefname}{Algorithm} % autoref
 
 \usepackage[inline]{enumitem}
+\makeatletter
+% This command ignores the optional argument for itemize and enumerate lists
+\newcommand{\inlineitem}[1][]{%
+\ifnum\enit@type=\tw@
+    {\descriptionlabel{#1}}
+  \hspace{\labelsep}%
+\else
+  \ifnum\enit@type=\z@
+       \refstepcounter{\@listctr}\fi
+    \quad\@itemlabel\hspace{\labelsep}%
+\fi}
+\makeatother
+
 \usepackage{adjustbox}
 \usepackage[headings]{fullpage}
 \usepackage{xargs}
@@ -40,6 +53,7 @@
 \newtheorem{prop}{Proposition}[chapter]
 \newtheorem{lmm}{Lemma}[chapter]
 \newtheorem{ex}{Example}[chapter]
+\newtheorem{fact}{Example}[chapter]
 
 \setlength{\marginparwidth}{2cm}
 \usepackage[textsize=tiny]{todonotes}
