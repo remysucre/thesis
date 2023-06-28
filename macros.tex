@@ -52,10 +52,6 @@
 % \setlength{\marginparwidth}{2cm} % for todonotes
 % \usepackage[colorinlistoftodos]{todonotes}
 
-% % http://paultaylor.eu/diagrams/
-% % https://www.jmilne.org/not/Mdiagrams.pdf
-% \usepackage[small,nohug,heads=vee]{diagrams}
-% \diagramstyle[labelstyle=\scriptstyle]
 
 \usepackage[ruled, linesnumbered]{algorithm2e}
 \usepackage{enumitem}
@@ -111,7 +107,7 @@
 \newcommand{\LB}{\textsf{LogicBlox}}
 \newcommand{\faq}{\textsf{FAQ}}
 \newcommand{\calB}{\mathcal B}
-\newcommand{\calC}{\mathcal C}
+% \newcommand{\calC}{\mathcal C}
 \newcommand{\calH}{\mathcal H}
 \newcommand{\calV}{[n]}
 \newcommand{\calE}{\mathcal E}
@@ -252,3 +248,110 @@
 
 \newcommand{\SR}{\mathbf S} % semiring
 \newcommand{\C}{\mathbb C} % complex numbers
+
+% FGH macros
+
+\usepackage{bm} % bold math fonts, e.g. $\bm \Sigma$ will give a bold-face $\Sigma$
+
+% http://paultaylor.eu/diagrams/
+% https://www.jmilne.org/not/Mdiagrams.pdf
+% \usepackage[small,nohug,heads=vee]{diagrams}
+% \diagramstyle[labelstyle=\scriptstyle]
+
+\definecolor{light-gray}{RGB}{230,230,230}
+% \definecolor{light-gray}{gray}{0.95}
+
+% \newcommand{\update}[1]{{\color{blue} #1}}
+% \newcommand{\required}[1]{{\color{red} #1}}
+\newcommand{\update}[1]{#1}
+\newcommand{\required}[1]{#1}
+
+
+\newcommand{\eat}[1]{}
+
+% \newcommand{\yell}[1]{{\color{red} \text{#1}}}
+% \newcommand{\sys}{\texttt{Dove}}
+\newcommand{\cegis}{\textsf{CEGIS}}
+\newcommand{\eqsat}{\textsf{EQSAT}}
+\newcommand{\zzz}{\texttt{\texttt{z3}}}
+\newcommand{\egraph}{\textsf{e-graph}}
+\newcommand{\egraphs}{\textsf{e-graphs}}
+\newcommand{\eclass}{\textsf{e-class}}
+\newcommand{\eclasses}{\textsf{e-classes}}
+\newcommand{\enode}{\textsf{e-node}}
+\newcommand{\enodes}{\textsf{e-nodes}}
+\newcommand{\prem}{\textsf{PreM}}
+
+% \newcommand{\rai}{relational\underline{AI}}
+
+\newcommand{\abs}[1]{\text{abs}(#1)}
+
+% \newcommand{\inner}[1]{\langle #1 \rangle}
+% %%
+% \newcommand{\LB}{\textsf{LogicBlox}}
+% \newcommand{\faq}{\textsf{FAQ}}
+% \newcommand{\calC}{\mathcal C}
+% \newcommand{\calH}{\mathcal H}
+% \newcommand{\calV}{[n]}
+% \newcommand{\calE}{\mathcal E}
+% \newcommand{\calD}{\mathcal D}
+% \newcommand{\calW}{\mathcal W}
+% \newcommand{\calF}{\mathcal F}
+% \newcommand{\calT}{\mathcal T}
+
+% \newcommand{\defeq}{\stackrel{\text{def}}{=}}
+% \newcommand{\mineq}{\stackrel{\text{min}}{=}}
+% \newcommand{\maxeq}{\stackrel{\text{max}}{=}}
+% \newcommand{\dleq}{\mbox{ :- }}
+% \newcommand{\mult}{\circ}
+
+% \newcommand{\B}{\mathbb B} % the Booleans
+% \newcommand{\Z}{\mathbb Z} % integers
+% \newcommand{\N}{\mathbb N} % the natural numbers
+% \newcommand{\Q}{\mathbb Q} % the rational numbers
+% \newcommand{\R}{\mathbb R} % the real numbers
+% \newcommand{\SR}{\mathbb S} % a semiring
+% \newcommand{\T}{\mathbb T} % the tropical semiring
+% %\newcommand{\C}{\mathbb C} % complex numbers
+% \newcommand{\D}{\mathbf D} % bold-face D, used for generic domain
+% % \newcommand{\U}{\mathbf U} % the universe
+
+% \newcommand{\gv}[1]{\ensuremath{\mbox{\boldmath$ #1 $}}}
+% \newcommand{\grad}[1]{\gv{\nabla} #1}
+% \newcommand{\norm}[1]{\|#1\|}
+% \newcommand{\set}[1]{\{#1\}}                    % Set (as in \set{1,2,3}).
+% \newcommand{\setof}[2]{\{{#1}\mid{#2}\}}        % Set (as in \setof{x}{x>0}).
+% \newcommand{\pr}{\mathop{\textnormal{Prob}}}    % Probability
+% \newcommand{\E}{\mathop{\mathbb E}}    % Probability
+% \newcommand{\dom}{\textsf{Dom}}
+% \newcommand{\id}{\textsf{ID}}
+% \newcommand{\codom}{\textsf{CoDom}}
+% \newcommand{\degree}{\text{\sf deg}}
+% \newcommand{\sign}{\text{\sf sign}}
+% \newcommand{\lfp}{\text{\sf lfp}}
+% \newcommand{\lpfp}{\text{\sf lpfp}}
+% \newcommand{\pfp}{\text{\sf pfp}}
+
+% \newcommand{\one}{\bar 1}
+\newcommand{\zero}{\bar 0}
+
+    % \newcommand{\cd}{\text{ :- }}
+    % \newcommand{\iter}{\texttt{iter}}
+\newcommand{\name}{\text{\sf Datalog}^\circ}
+  % \newcommand{\trop}{\text{\sf Trop}}
+\newcommand{\totrop}[1]{[#1]_{\infty}^{0}}
+
+
+\newcommand{\bA}{\mathbf{A}}
+\newcommand{\bB}{\mathbf{B}}
+\newcommand{\bC}{\mathbf{C}}
+\newcommand{\bx}{\mathbf{x}}
+\newcommand{\by}{\mathbf{y}}
+\newcommand{\bu}{\mathbf{u}}
+\newcommand{\bv}{\mathbf{v}}
+\newcommand{\ba}{\mathbf{a}}
+\newcommand{\bc}{\mathbf{c}}
+\newcommand{\bd}{\mathbf{d}}
+
+
+\newcommand{\property}{Property B}

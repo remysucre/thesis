@@ -1,11 +1,18 @@
 \documentclass[12pt]{book}
 
+\usepackage{mathtools}
+\usepackage{quiver}
 % \usepackage{algorithm}
 % \usepackage{algpseudocode}
 % \algrenewcommand\algorithmicrequire{\textbf{Input:}}
 % \algrenewcommand\algorithmicensure{\textbf{Output:}}
 % \algnewcommand\Not{\textbf{not} }
 % \newcommand{\algorithmautorefname}{Algorithm} % autoref
+
+% % http://paultaylor.eu/diagrams/
+% % https://www.jmilne.org/not/Mdiagrams.pdf
+\usepackage[small,nohug,heads=vee]{diagrams}
+\diagramstyle[labelstyle=\scriptstyle]
 
 \usepackage[inline]{enumitem}
 \makeatletter
@@ -54,6 +61,7 @@
 \newtheorem{lmm}{Lemma}[chapter]
 \newtheorem{ex}{Example}[chapter]
 \newtheorem{fact}{Example}[chapter]
+\newtheorem{corollary}{Example}[chapter]
 
 \setlength{\marginparwidth}{2cm}
 \usepackage[textsize=tiny]{todonotes}
@@ -199,6 +207,7 @@ Thank you!
 \input{chapters/04-free-join.tex}
 \input{chapters/05-spores.tex}
 \input{chapters/06-fgh.tex}
+\input{chapters/07-conclusion.tex}
 
 \clearpage
 \addcontentsline{toc}{chapter}{Bibliography}
