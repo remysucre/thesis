@@ -1670,14 +1670,14 @@ axioms~\eqref{eq:axiom:plus:plus}-\eqref{eq:axiom:plus:equal}).  The
   % $x$ to range over the set of nodes in the graph, but we omit that in
   % order to reduce clutter.  The second rule is both recursive {\em
   %   and} contains an aggregate operator, $\min$.  If one were to
-  % represent it in standard datalog, it would be something like this:
+  % represent it in standard Datalog, it would be something like this:
 %
   % \begin{align*}
   %   D(x,y,\min(v+c)) \cd & D(x,z,v),E(z,y,c)
   % \end{align*}
 %
   % In standard  Datalog rules with aggregates are not monotone.  In
-  % order to add such rules to datalog, prior
+  % order to add such rules to Datalog, prior
   % work~\cite{DBLP:conf/pods/GangulyGZ91,DBLP:journals/tkde/SeoGL15}
   % has re-defined the semantics of the $\min$ operator, whenever it
   % occurs in the head of a recursive rule.  Instead, in $\name$ our
