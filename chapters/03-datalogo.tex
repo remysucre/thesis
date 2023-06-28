@@ -1,11 +1,6 @@
 \chapter{The \datalogo Language}
 \label{chap:datalogo}
 
-\remy{Define the semantics for \datalogo, 
- state the convergence theorems, 
- and give examples for each case.
- Then describe the semi-na\"ive algorithm.}
-
 For fifty years, the relational data model has been the main choice for
 representing, modeling, and processing data.  Its main query
 language, SQL, is found today in a wide range of applications and
@@ -155,7 +150,7 @@ called the {\em natural order} on $\bm S$; in that case we say that
 $\bm S$ is {\em naturally ordered}.
 
 \begin{ex}
-  Some simple examples of pre-semirings\remy{Fix on Arxiv.} are the Booleans
+  Some simple examples of pre-semirings are the Booleans
   $(\B \defeq \set{0,1}, \vee, \wedge, 0, 1)$, the natural numbers
   $(\N, +, \times , 0, 1)$, and the real numbers
   $(\R, +, \times, 0, 1)$.  We will refer to them simply as $\B, \N$
@@ -332,7 +327,7 @@ Thus, a $\bm P$-instance involves two domains: $D$, which is called
 the {\em key space}, and the POPS $\bm P$, which is called the {\em
   value space}.  For some simple illustrations, a $\B$-relation is a
 standard relation where every ground tuple is either true or false,
-while an $\R$-relation is a sparse tensor.\remy{$R$ is not a POPS.}
+while an $\R^+$-relation\footnote{Recall the $\R$ semiring is not a POPS.} is a sparse tensor.
 
 \subsection{(Sum-)Sum-Product Queries on POPS}
 \label{subsec:sum-products}
@@ -340,7 +335,7 @@ while an $\R$-relation is a sparse tensor.\remy{$R$ is not a POPS.}
 In the Boolean world, conjunctive queries and union of conjunctive
 queries are building-block queries.  Analogously, in the POPS world,
 we introduce the concepts of {\em sum-product queries} and {\em
-  sum-sum-product queries}.\remy{The parallel is misleading.}
+  sum-sum-product queries}.
 In the simplest setting, these queries
 have been studied in other communities (especially AI and machine
 learning as reviewed below).  In our setting, we need to introduce one
