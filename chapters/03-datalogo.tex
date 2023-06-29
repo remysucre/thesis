@@ -44,7 +44,7 @@ aggregation~\cite{DBLP:conf/pods/GangulyGZ91,DBLP:conf/pods/RossS92,DBLP:journal
 these extensions are at odds with the elegant properties of Datalog
 and have not been adopted by either Datalog systems or SQL engines.
 
-In this paper we propose a foundation for a query language that
+In this paper\remy{change paper to thesis.} we propose a foundation for a query language that
 supports both recursion and aggregation.  Our proposal is based on the
 concept of $K$-relations, introduced in a seminal
 paper by Green, Karvounarakis, and Tannen~\cite{DBLP:conf/pods/GreenKT07}.
@@ -78,43 +78,39 @@ bill-of-material program (Example~\ref{ex:sum1:sum2}) is naturally
 expressed over the lifted reals, $\R_\bot$, which is a POPS that is
 not naturally ordered.
 
-Like Datalog, \datalogo can be evaluated using the {\em na\"ive algorithm},
-by repeatedly applying all rules of the program, until there is no
-more change.  However, unlike Datalog, a \datalogo program may diverge.
-Our second contribution consists of a full characterization of the
-POPS that guarantee that every \datalogo program terminates.  More
-precisely, we show that termination is guaranteed iff the POPS enjoys
-a certain algebraic property called {\em
-  stability}~\cite{semiring_book}.  The result is based on an analysis
-of the fixpoint of a vector-valued polynomial function over a semiring, which is of
-independent interest.  With some abuse, we will say in this paper that
-a \datalogo program {\em converges}, if the na\"ive algorithm terminates
-in a finite number of steps; we do not consider ``convergence in the
-limit'', for example in an $\omega$-continuous
-semirings~\cite{DBLP:conf/pods/GreenKT07,DBLP:journals/jacm/EsparzaKL10}.
+% Like Datalog, \datalogo can be evaluated using the {\em na\"ive algorithm},
+% by repeatedly applying all rules of the program, until there is no
+% more change.  However, unlike Datalog, a \datalogo program may diverge.
+% \cite{DBLP:conf/pods/Khamis0PSW22} gives a full characterization of the 
+% POPS that guarantee that every \datalogo program terminates.  
 
-Finally, we describe how the {\em semi-na\"ive algorithm} can be
-extended to \datalogo, under certain restrictions on the POPS.  This
+% precisely, we show that termination is guaranteed iff the POPS enjoys
+% a certain algebraic property called {\em
+%   stability}~\cite{semiring_book}.  The result is based on an analysis
+% of the fixpoint of a vector-valued polynomial function over a semiring, which is of
+% independent interest.  With some abuse, we will say in this paper that
+% a \datalogo program {\em converges}, if the na\"ive algorithm terminates
+% in a finite number of steps; we do not consider ``convergence in the
+% limit'', for example in an $\omega$-continuous
+% semirings~\cite{DBLP:conf/pods/GreenKT07,DBLP:journals/jacm/EsparzaKL10}.
+
+Our second contribution is to extend the {\em semi-na\"ive algorithm} 
+to \datalogo, under certain restrictions on the POPS.  This
 should be viewed as an illustration of the potential for applying
-advanced optimizations to \datalogo: in a companion
-paper~\cite{DBLP:conf/sigmod/WangK0PS22}, we introduced a simple, yet
+advanced optimizations to \datalogo: in Chapter~\ref{chapter:fgh}
+we introduce a simple, yet
 powerful optimization technique for \datalogo, and showed, among other
 things, that magic set rewriting can be obtained using several
 applications of that rule.
 
 The remainder of this Chapter is organized as follows. 
 We define POPS in Sec.~\ref{sec:pops} and give several examples.
-In Sec.~\ref{sec:lfp} we consider the least fixpoint of monotone
-functions over posets, and prove an upper bound on the number of
-iterations needed to compute the least fixpoint.  We define \datalogo
-formally in Sec.~\ref{sec:datalogo}, and give several examples.
-The convergence results described in Theorem~\ref{th:main:intro} are
-stated formally and proven in Sec.~\ref{sec:complexity}.
-Sec.~\ref{sec:semi:naive} presents a generalization of semi-na\"ive
-evaluation to \datalogo.  We discuss how \datalogo can express Datalog
-queries with negation using 3-valued logic in
-Sec.~\ref{sec:fitting}.  Finally, we conclude in
-Sec.~\ref{sec:conclusions}.
+In Sec.~\ref{sec:datalogo} we define \datalogo formally, 
+ and give several examples.
+Sec.~\ref{sec:semi-naive} presents a generalization of semi-na\"ive
+evaluation to \datalogo.  
+Finally, we conclude this chapter in
+Sec.~\ref{sec:datalogo:conclusions}.
 
 \section{Partially Ordered Pre-Semirings (POPS)}
 \label{sec:pops}
@@ -168,7 +164,7 @@ $\bm S$ is {\em naturally ordered}.
 A key idea we introduce in this paper is the decoupling of the partial order from the
 algebraic structure of the (pre-)semiring.
 The decoupling allows us to inject a partial order when the (pre-)semiring is not
-naturally ordered, or when we need a {\em different} partial order than the natural order.
+naturally ordered, or when we need a {\em different} order from the natural order.
 
 \begin{defn}[POPS] \label{def:pops} A {\em partially ordered pre-semiring} (POPS) is a tuple
   $\bm P = (P, \oplus, \otimes, 0, 1, \sqsubseteq)$, where
@@ -188,52 +184,50 @@ $\bot \oplus \bot \sqsubseteq \bot \oplus 0 = \bot$, and
 $\bot \otimes \bot \sqsubseteq \bot \otimes 1 = \bot$.  We say that
 the multiplicative operator $\otimes$ is {\em strict} if the identity
 $x \otimes \bot = \bot$ holds for every $x \in P$.
-
 Throughout this paper we will assume that $\otimes$ is strict,
 unless otherwise stated.
-One of the reasons for insisting on the strictness assumption is that
-we can ``extract'' from any POPS a semiring called the {\em core semiring}\remy{Remove?}
- of the POPS,
-as shown in the following simple proposition.
 
-\begin{prop} \label{prop:s:plus:bot} Given an arbitrary POPS
-  $\bm P=(P,\oplus,\otimes,0,1,\sqsubseteq)$.  Define the subset
-  $P\oplus \bot \defeq \setof{x\oplus\bot}{x \in P} \subseteq P$.
-  Then, $(P\oplus \bot, \oplus, \otimes, 0\oplus \bot, 1 \oplus \bot)$
-  is a semiring.  We denote this semiring by $\bm P \oplus \bot$, and
-  refer to it as the {\em core} semiring of $\bm P$.
-\end{prop}
-%
-\begin{proof}
-  We use the fact that $\otimes$ is strict, and check that
-  $\bm P\oplus\bot$ is closed under $\oplus$ and $\otimes$:
-  $(x\oplus\bot)\oplus(y\oplus\bot)=(x\oplus
-  y)\oplus(\bot\oplus\bot)=(x\oplus y)\oplus\bot$, and similarly
-  $(x\oplus\bot)\otimes(y\oplus\bot)=(x\otimes y)\oplus (x\otimes\bot)
-  \oplus (y\otimes \bot) \oplus\bot = (x\otimes
-  y)\oplus\bot\oplus\bot\oplus\bot=(x\otimes y)\oplus\bot \in \bm P
-  \oplus \bot$.  Finally, it suffices to observe that $\bot= 0\oplus\bot$ is the identity
-  for $\oplus$ and $1\oplus\bot$ is the identity for $\otimes$.
-\end{proof}
+% One of the reasons for insisting on the strictness assumption is that
+% we can ``extract'' from any POPS a semiring called the {\em core semiring}
+%  of the POPS,
+% as shown in the following simple proposition.
 
-Every naturally ordered semiring is a POPS, where $\bot = 0$ and
-$\otimes$ is strict, and its core is itself, $\bm S \oplus 0 = \bm S$.
-The converse does not hold: some POPS are not naturally ordered; a
-simple example of a non-naturally ordered POPS is the set of {\em lifted
-  reals},
-$\R_\bot \defeq (\R \cup \set{\bot}, +, *, 0, 1, \sqsubseteq)$, where
-$x+\bot = x*\bot = \bot$ for all $x$, and $x \sqsubseteq y$ iff
-$x = \bot$ or $x=y$.  Its core semiring is the trivial semiring
-$\bm R_\bot + \bot = \set{\bot}$ consisting of a single element.  We
-will consider similarly the lifted natural numbers, $\N_\bot$.
+% \begin{prop} \label{prop:s:plus:bot} Given an arbitrary POPS
+%   $\bm P=(P,\oplus,\otimes,0,1,\sqsubseteq)$.  Define the subset
+%   $P\oplus \bot \defeq \setof{x\oplus\bot}{x \in P} \subseteq P$.
+%   Then, $(P\oplus \bot, \oplus, \otimes, 0\oplus \bot, 1 \oplus \bot)$
+%   is a semiring.  We denote this semiring by $\bm P \oplus \bot$, and
+%   refer to it as the {\em core} semiring of $\bm P$.
+% \end{prop}
+% %
+% \begin{proof}
+%   We use the fact that $\otimes$ is strict, and check that
+%   $\bm P\oplus\bot$ is closed under $\oplus$ and $\otimes$:
+%   $(x\oplus\bot)\oplus(y\oplus\bot)=(x\oplus
+%   y)\oplus(\bot\oplus\bot)=(x\oplus y)\oplus\bot$, and similarly
+%   $(x\oplus\bot)\otimes(y\oplus\bot)=(x\otimes y)\oplus (x\otimes\bot)
+%   \oplus (y\otimes \bot) \oplus\bot = (x\otimes
+%   y)\oplus\bot\oplus\bot\oplus\bot=(x\otimes y)\oplus\bot \in \bm P
+%   \oplus \bot$.  Finally, it suffices to observe that $\bot= 0\oplus\bot$ is the identity
+%   for $\oplus$ and $1\oplus\bot$ is the identity for $\otimes$.
+% \end{proof}
+
+% Every naturally ordered semiring is a POPS, where $\bot = 0$ and
+% $\otimes$ is strict, and its core is itself, $\bm S \oplus 0 = \bm S$.
+% The converse does not hold: some POPS are not naturally ordered; a
+% simple example of a non-naturally ordered POPS is the set of {\em lifted
+%   reals},
+% $\R_\bot \defeq (\R \cup \set{\bot}, +, *, 0, 1, \sqsubseteq)$, where
+% $x+\bot = x*\bot = \bot$ for all $x$, and $x \sqsubseteq y$ iff
+% $x = \bot$ or $x=y$.  Its core semiring is the trivial semiring
+% $\bm R_\bot + \bot = \set{\bot}$ consisting of a single element.  We
+% will consider similarly the lifted natural numbers, $\N_\bot$.
 
 \subsection{Polynomials over POPS}
 \label{subsec:polynomial}
 
-\remy{Remove this section?}
-
 Fix a POPS $\bm P = (P, \oplus, \otimes, 0, 1, \sqsubseteq)$.
-We are interested in analysing behaviors of vector-valued multivariate functions on $P$
+We are interested in vector-valued multivariate functions on $P$
 defined by composing $\oplus$ and $\otimes$.
 These functions are multivariate polynomials.
 Writing polynomials in $\bm P$ using the symbols $\oplus, \otimes$
@@ -333,7 +327,7 @@ while an $\R^+$-relation\footnote{Recall the $\R$ semiring is not a POPS.} is a 
 \label{subsec:sum-products}
 
 In the Boolean world, conjunctive queries and union of conjunctive
-queries are building-block queries.  Analogously, in the POPS world,
+queries are building-blocks for relational queries.  Analogously, in the POPS world,
 we introduce the concepts of {\em sum-product queries} and {\em
   sum-sum-product queries}.
 In the simplest setting, these queries
@@ -383,7 +377,7 @@ of the form $R_i(\bm X)$, where $R_i \in \sigma$ and $\bm X \in (V \cup D)^{\tex
   \end{align}
 %
   where $T$ is a new relation name of arity $k$, each $R_j(\bm X_j)$
-  is a $\sigma$-atom, and $\Phi$ is a first-order (FO) formula over\remy{What is the range of $\forall$?}
+  is a $\sigma$-atom, and $\Phi$ is a first-order (FO) formula over
   $\sigma_\B$, whose free variables are in
   $V = \set{X_1, \ldots, X_p}$.  The LHS of $\cd$ is called the {\em
     head}, and the RHS the {\em body} of the rule.  The variables
@@ -428,7 +422,7 @@ not a semiring, as we illustrate next.
   query~\cite{DBLP:books/aw/AbiteboulHV95} (where the semantics of
   quantification over $Y$ is explicitly written).  Here
   $\sigma = \set{E}$, and $\sigma_\B = \emptyset$: we do not need the
-  conditional term $\Phi$ yet.\remy{Remove this example?}
+  conditional term $\Phi$ yet.
 
   For the second example, consider the same graph given by $E(X,Y)$,
   and let $C(X)$ be an $\R_\bot$-relation associating to each node $X$
@@ -492,12 +486,12 @@ The {\em provenance polynomial}~\cite{DBLP:conf/pods/GreenKT07} of the output tu
 $T(\bm a) \in \ground(T,D_0)$ is the following:
 %
 \begin{align}
-  f_{T(\bm a)}(x_1, \ldots, x_N) \defeq &
+  f_{T(\bm a)}(X_1, \ldots, X_k) \defeq &
   \sum_{\substack{\theta: V \rightarrow D_0, \\ \theta(X_1,\ldots,X_k)=\bm a, \\ I_\B \models
   \Phi[\theta]}} \theta(\text{body}) \label{eq:grounding:polynomial}
 \end{align}
 %
-In other words, we consider only valuations $\theta$ that map the head\remy{Should the head vars be $X_1, \ldots, X_k$?}
+In other words, we consider only valuations $\theta$ that map the head
 variables to the tuple $\bm a$ and satisfy the FO sentence $\Phi$.
 There are $M$ provenance polynomials, one for each tuple in
 $\ground(T,D_0)$, and they define an $M$-tuple of polynomials in $N$
@@ -572,8 +566,10 @@ languages~\cite{DBLP:conf/popl/CousotC77}.
   and the operations $\oplus, \otimes$ are extended to $\bot$ by
   setting $x \oplus \bot = x \otimes \bot = \bot$.  Notice that
   $\bm S_\bot$ is not a semiring, because $0$ is not absorbing:
-  $0 \otimes \bot \neq 0$.  Its core semiring is the trivial semiring
-  $S_\bot \oplus \bot = \set{\bot}$.  Here $\bot$ represents {\em
+  $0 \otimes \bot \neq 0$.  
+  % Its core semiring is the trivial semiring
+  % $S_\bot \oplus \bot = \set{\bot}$.
+  Here $\bot$ represents {\em
     undefined}.
 
 \item[Representing Contradiction] The {\em completed POPS} is
@@ -582,9 +578,10 @@ languages~\cite{DBLP:conf/popl/CousotC77}.
   $y=\top$ and the operations $\oplus, \otimes$ are extended to
   $\bot, \top$ as follows: $x \oplus \bot = x \otimes \bot = \bot$ for
   all $x$ (including $x=\top$), and
-  $x \oplus \top = x \otimes \top = \top$ for all $x \neq \bot$.  As
-  before, its core semiring is the trivial semiring
-  $S_\bot^\top \oplus \bot = \set{\bot}$.  Here $\bot, \top$ represent
+  $x \oplus \top = x \otimes \top = \top$ for all $x \neq \bot$.  
+  % As before, its core semiring is the trivial semiring
+  % $S_\bot^\top \oplus \bot = \set{\bot}$.
+    Here $\bot, \top$ represent
   undefined and contradiction respectively.  Intuitively: $\bot$ is
   the empty set $\emptyset$, each element $x \in \bm S$ is a singleton
   set consisting of one value, and $\top$ is the entire set $S$.
@@ -593,8 +590,9 @@ languages~\cite{DBLP:conf/popl/CousotC77}.
   $\calP(\bm S) = (\calP(S), \oplus, \otimes, \set{0}, \set{1}, \subseteq)$.  It
   consists of all subsets of $\bm S$, ordered by set inclusion, where
   the operations $\oplus, \otimes$ are extended to sets, e.g.
-  $A \oplus B = \setof{x\oplus y}{x \in A, y \in B}$.  Its core
-  semiring is itself, $\calP(\bm S) \oplus \set{0} = \calP(\bm S)$.
+  $A \oplus B = \setof{x\oplus y}{x \in A, y \in B}$.  
+  % Its core
+  % semiring is itself, $\calP(\bm S) \oplus \set{0} = \calP(\bm S)$.
   Here $\bot=\emptyset$ represents undefined, $\top=S$ represents
   contradiction, and, more generally, every set represents some degree
   of incompleteness.
@@ -677,15 +675,19 @@ $\texttt{THREE} \defeq (\set{\bot, 0,  1}, \vee, \wedge,  0,
 %
 $\texttt{THREE}$ is not the same as the lifted Booleans, $\B_\bot$,
 because in the latter $0 \wedge \bot = \bot$, while in
-$\texttt{THREE}$ we have $0 \wedge \bot = 0$.  Its core semiring is
-$\texttt{THREE} \vee \bot = \set{\bot, 1}$, and is isomorphic to $\B$.
-We will return to this POPS in Sec.~\ref{sec:fitting}.
+$\texttt{THREE}$ we have $0 \wedge \bot = 0$.  
+\cite{DBLP:conf/pods/Khamis0PSW22} show how to use $\texttt{THREE}$ to support 
+ negation in \datalogo.
+% Its core semiring is
+% $\texttt{THREE} \vee \bot = \set{\bot, 1}$, and is isomorphic to $\B$.
+% We will return to this POPS in Sec.~\ref{sec:fitting}.
 
 \subsubsection{Stable Semirings}
 \label{subsec:stable:semirings}
 
 We illustrate here two examples of semirings that are {\em stable}, a
-property that we define formally in Sec.~\ref{sec:complexity}.  Both
+property defined formally in~\cite{DBLP:conf/pods/Khamis0PSW22}.  
+Both
 examples are adapted from~\cite[Example 7.1.4]{semiring_book}
 and~\cite[Chapt.8, Sec.1.3.2]{semiring_book} respectively.  If $A$ is
 a set and $p \geq 0$ a natural number, then we denote by $\calP_p(A)$
@@ -752,14 +754,14 @@ by:
   This implies that, an expression in the semiring $\trop^+_p$ can be
   computed as follows.  First, convert $\oplus, \otimes$ to
   $\uplus, +$ respectively, compute the resulting bag, then apply
-  $\min_p$ only once, on the final result. $\trop^+_p$ is naturally
-  ordered (see Prop~\ref{prop:trop:p:stable}) and therefore its core
-  semiring is itself, $\trop^+_p \oplus_p \bm 0_p = \trop^+_p$.
+  $\min_p$ only once, on the final result. 
+  % $\trop^+_p$ is naturally
+  % ordered (see Prop~\ref{prop:trop:p:stable}) and therefore its core
+  % semiring is itself, $\trop^+_p \oplus_p \bm 0_p = \trop^+_p$.
 %
 % \reinhard{As discussed on 14 December, we will introduce a name for the semiring obtained as the set of $x+\bot$ elements of a POPS.}
 %
-  When $p=0$, then $\trop^+_p = \trop^+$, which we introduced in
-  Example~\ref{ex:intro}.
+  When $p=0$, then $\trop^+_p = \trop^+$.
 \end{ex}
 
 \begin{ex} \label{ex:trop:eta} Fix a real number $\eta \geq 0$, and
@@ -807,11 +809,11 @@ by:
   respectively, compute the resulting set, and apply the
   $\min_{\leq\eta}$ operator only once, on the final result.
   %
-  $\trop^+_{\leq \eta}$ is naturally ordered (see
-  Prop.~\ref{prop:trop:eta:stable}) and therefore its core semiring is
-  itself,
-  $\trop^+_{\leq \eta}\oplus_{\leq \eta} \bm 0_{\leq \eta} =
-  \trop^+_{\leq\eta}$.
+  % $\trop^+_{\leq \eta}$ is naturally ordered (see
+  % Prop.~\ref{prop:trop:eta:stable}) and therefore its core semiring is
+  % itself,
+  % $\trop^+_{\leq \eta}\oplus_{\leq \eta} \bm 0_{\leq \eta} =
+  % \trop^+_{\leq\eta}$.
 %
 % \reinhard{Same as previous comment: we will have a name for this semiring inside a POPS.}
 %
@@ -825,39 +827,38 @@ reason is for consistency with~\cite{semiring_book}.  We could have
 defined either semirings on either sets or bags, and both
 identities~\eqref{eq:minp:identity} and ~\eqref{eq:mineta:identity}
 continue to hold, which is sufficient to prove the semiring
-identities.  However, the {\em stability} property which we define and
-prove later (Proposition~\ref{prop:trop:eta:stable}) holds for
+identities.  However, the {\em stability} property,
+defined and proved in~\cite{DBLP:conf/pods/Khamis0PSW22}, holds for
 $\trop^+_{\leq \eta}$ only if it is defined over sets; in contrast,
-$\trop^+_p$ is stable for either sets or bags
-(Proposition~\ref{prop:trop:p:stable}).
+$\trop^+_p$ is stable for either sets or bags.
 
-\subsubsection{Nontrivial Core Semiring}
+% \subsubsection{Nontrivial Core Semiring}
 
-In all our examples so far the core semiring $\bm P \oplus \bot$ is
-either $\set{\bot}$ or $\bm P$.  We show next that the core semiring
-may be non-trivial.  If $\bm P_1, \bm P_2$ are two POPS, then their
-Cartesian product $\bm P_1 \times \bm P_2$ is also a POPS: operations
-are defined element-wise, e.g.
-$(x_1,x_2) \oplus (y_1,y_2) \defeq (x_1\oplus_1 y_1, x_2 \oplus_2
-y_2)$, etc, the order is defined component-wise, and the smallest
-element is $(\bot_1, \bot_2)$.
+% In all our examples so far the core semiring $\bm P \oplus \bot$ is
+% either $\set{\bot}$ or $\bm P$.  We show next that the core semiring
+% may be non-trivial.  If $\bm P_1, \bm P_2$ are two POPS, then their
+% Cartesian product $\bm P_1 \times \bm P_2$ is also a POPS: operations
+% are defined element-wise, e.g.
+% $(x_1,x_2) \oplus (y_1,y_2) \defeq (x_1\oplus_1 y_1, x_2 \oplus_2
+% y_2)$, etc, the order is defined component-wise, and the smallest
+% element is $(\bot_1, \bot_2)$.
 
-\begin{ex} Consider the following two POPS.
-  \begin{itemize}
-  \item A naturally ordered semiring
-    $\bm S = (S, \oplus_S, \otimes_S, 0_S, 1_S, \sqsubseteq_S)$.  Its
-    core semiring is itself $\bm S \oplus_S 0_S=\bm S$.
-  \item Any POPS $\bm P$ where addition is strict:
-    $x \oplus_P \bot = \bot$.  (For example, any lifted semiring.)
-    Its core semiring is $\bm P \oplus_P \bot_P = \set{\bot_P}$.
-  \end{itemize}
-  %
-  Consider the Cartesian product $\bm S \times \bm P$.  The smallest
-  element is $(0_S,\bot_P)$, and the core semiring is
-  $(\bm S \times \bm P) \oplus (0_S,\bot_P) = \bm S \times
-  \set{\bot_P}$, which is a non-trivial subset of
-  $\bm S \times \bm P$.
-\end{ex}
+% \begin{ex} Consider the following two POPS.
+%   \begin{itemize}
+%   \item A naturally ordered semiring
+%     $\bm S = (S, \oplus_S, \otimes_S, 0_S, 1_S, \sqsubseteq_S)$.  Its
+%     core semiring is itself $\bm S \oplus_S 0_S=\bm S$.
+%   \item Any POPS $\bm P$ where addition is strict:
+%     $x \oplus_P \bot = \bot$.  (For example, any lifted semiring.)
+%     Its core semiring is $\bm P \oplus_P \bot_P = \set{\bot_P}$.
+%   \end{itemize}
+%   %
+%   Consider the Cartesian product $\bm S \times \bm P$.  The smallest
+%   element is $(0_S,\bot_P)$, and the core semiring is
+%   $(\bm S \times \bm P) \oplus (0_S,\bot_P) = \bm S \times
+%   \set{\bot_P}$, which is a non-trivial subset of
+%   $\bm S \times \bm P$.
+% \end{ex}
 
 \section{\datalogo}
 \label{sec:datalogo}
@@ -899,13 +900,13 @@ $F : \inst(\sigma,D,\bm P) \times \inst(\sigma_\B,D,\B) \times
 input an instance $(I, I_\B)$ of the EDBs and an instance $J$ of the
 IDBs, and computes a new instance $F(I,I_\B,J)$ of the IDBs by
 evaluating each sum-sum-product rule.  By fixing the EDBs, we will
-view the ICO as function from IDBs to IDBs, written as $F(J)$. We
-define the {\em semantics} of the \datalogo
+view the ICO as function from IDBs to IDBs, written as $F(J)$.\remy{Change I to J in semi-naive algorithm.}
+ We define the {\em semantics} of the \datalogo
 program~\eqref{eq:basic:datalogo} as the least fixpoint of the ICO
 $F$, when it exists.
 
 \begin{algorithm}[th]
-     $J^{(0)} \leftarrow \bot\mbox{;}$ \mbox{\hspace{2cm} // In a naturally ordered  semiring this becomes $J^{(0)} \leftarrow 0$}\\
+     $J^{(0)} \leftarrow \bot\mbox{;}$ \mbox{\hspace{2cm} // In a naturally ordered  semiring this is the same as $J^{(0)} \leftarrow 0$}\\
     \For {  $t \leftarrow 0$   {\bf to}   $\infty$ }
     {
          {$J^{(t+1)} \leftarrow F(J^{(t)})$}\;
@@ -935,133 +936,140 @@ $\bot \sqsubseteq F(\bot) \sqsubseteq F^{(2)}(\bot)
   converges}; in that case it returns the least fixpoint of $F$.
 Otherwise we say that the algorithm {\em diverges}.
 
+While every pure  Datalog program is guaranteed to have a least
+fixpoint, this no longer holds for \datalogo programs.  
+\cite{DBLP:conf/pods/Khamis0PSW22} fully characterizes the POPS that ensure
+ the convergence of every \datalogo program. 
+In short, every \datalogo program converges over a POPS $\bm P$ 
+ if and only if $\bm P$ is {\em stable}, a property defined in~\cite{DBLP:conf/pods/Khamis0PSW22}.
+
 % We will show in Sec.~\ref{sec:semi:naive} that, when evaluated over a
 % naturally ordered semiring with some additional properties, the naive
 % algorithm can be improved to a semi-na\"ive algorithm; in that case,
 % $\bot$ coincides with $\bm 0$, hence the first line of the na\"ive
 % algorithm becomes $I^{(0)} \leftarrow \bm 0$.
 
-\subsection{Convergence of \datalogo Programs}
+% \subsection{Convergence of \datalogo Programs}
 
-\label{subsec:five:cases}
+% \label{subsec:five:cases}
 
-% \hqn{``Divergence'' typically means going a way from convergence. Here we use ``divergence''
-% to mean ``not converged in a finite number of steps'', which can be mis-leading.
-% In many papers, the LFP for a monotone $f$
-% is defined to be $f^\omega := \lim_{n\to \infty} f^n$;
-% and in those cases I would say that sequence $f^n$ {\em converges}.
-% As mentioned in an earlier comment, we probably need 5 categories intead of 4.
-% }
-% \dan{Hung, did you want a discussion of the five cases here?  I wrote
-%   one, tentatively, but I believe it is more suited in
-%   Sec.~\ref{sec:complexity}, because we refer to the
-%   program~\eqref{eq:datalogo:linear}.  We have already a discussion
-%   there, we can just add a 5th case.  So feel free to delete this
-%   section, or integrate in Sec.~\ref{sec:complexity}.}
+% % \hqn{``Divergence'' typically means going a way from convergence. Here we use ``divergence''
+% % to mean ``not converged in a finite number of steps'', which can be mis-leading.
+% % In many papers, the LFP for a monotone $f$
+% % is defined to be $f^\omega := \lim_{n\to \infty} f^n$;
+% % and in those cases I would say that sequence $f^n$ {\em converges}.
+% % As mentioned in an earlier comment, we probably need 5 categories intead of 4.
+% % }
+% % \dan{Hung, did you want a discussion of the five cases here?  I wrote
+% %   one, tentatively, but I believe it is more suited in
+% %   Sec.~\ref{sec:complexity}, because we refer to the
+% %   program~\eqref{eq:datalogo:linear}.  We have already a discussion
+% %   there, we can just add a 5th case.  So feel free to delete this
+% %   section, or integrate in Sec.~\ref{sec:complexity}.}
 
-While every pure  Datalog program is guaranteed to have a least
-fixpoint, this no longer holds for \datalogo programs.  As we mentioned
-in the introduction, there are five possibilities, depending on the
-POPS $\bm P$:
+% While every pure  Datalog program is guaranteed to have a least
+% fixpoint, this no longer holds for \datalogo programs.  As we mentioned
+% in the introduction, there are five possibilities, depending on the
+% POPS $\bm P$:
 
-\begin{enumerate}[label=(\roman*)]
-\item $\bigvee_t J^{(t)}$ is not a fixpoint of the ICO; in this case
-  we say that the program {\em diverges}.
-%   For example, if we
-%   interpret the program~\eqref{eq:datalogo:linear} over $\N$ and set
-%   $c > 1$, then the sequence of IDBs computed by the na\"ive algorithm
-%   is $0 < 1+c < 1+c+c^2 < \cdots$, which has no least upper bound in
-%   $\N$.  One can construct POPS where $\bigvee_n J^{(n)}$ always
-%   exists, but is not the least fixpoint.
-\item $\bigvee_t J^{(t)}$ is always the least fixpoint, but the
-  na\"ive algorithm does not always terminate.  With some abuse we say
-  also in this case that the program {\em diverges}.
-  % lub is not reached in a finite number of steps; equivalently, the
-  % sequence $J^{(n)}$ is strictly increasing.  With some abuse we
-  % also say that the program {\em diverges}.  For example, if we
-  % interpret the program~\eqref{eq:datalogo:linear} over
-  % $\N \cup \set{\infty}$, then any increasing sequence has a lub,
-  % but if the lub is $\infty$ then the na\"ive algorithm will not
-  % terminate in a finite number of steps.
-\item The na\"ive algorithm always terminates, in which case we say
-  that it {\em converges}.  The number of steps depends on the input
-  EDB database, meaning {\em both} the number of ground atoms in the
-  EDB, and their values in $\bm P$.
-\item The na\"ive algorithm always terminates in a number of steps
-  that depends only on the number of ground atoms in the EDB, but not
-  on their values.
-\item The na\"ive algorithm always terminates in a number of steps
-  that is polynomial in the number of ground atoms in the EDB.
-\end{enumerate}
+% \begin{enumerate}[label=(\roman*)]
+% \item $\bigvee_t J^{(t)}$ is not a fixpoint of the ICO; in this case
+%   we say that the program {\em diverges}.
+% %   For example, if we
+% %   interpret the program~\eqref{eq:datalogo:linear} over $\N$ and set
+% %   $c > 1$, then the sequence of IDBs computed by the na\"ive algorithm
+% %   is $0 < 1+c < 1+c+c^2 < \cdots$, which has no least upper bound in
+% %   $\N$.  One can construct POPS where $\bigvee_n J^{(n)}$ always
+% %   exists, but is not the least fixpoint.
+% \item $\bigvee_t J^{(t)}$ is always the least fixpoint, but the
+%   na\"ive algorithm does not always terminate.  With some abuse we say
+%   also in this case that the program {\em diverges}.
+%   % lub is not reached in a finite number of steps; equivalently, the
+%   % sequence $J^{(n)}$ is strictly increasing.  With some abuse we
+%   % also say that the program {\em diverges}.  For example, if we
+%   % interpret the program~\eqref{eq:datalogo:linear} over
+%   % $\N \cup \set{\infty}$, then any increasing sequence has a lub,
+%   % but if the lub is $\infty$ then the na\"ive algorithm will not
+%   % terminate in a finite number of steps.
+% \item The na\"ive algorithm always terminates, in which case we say
+%   that it {\em converges}.  The number of steps depends on the input
+%   EDB database, meaning {\em both} the number of ground atoms in the
+%   EDB, and their values in $\bm P$.
+% \item The na\"ive algorithm always terminates in a number of steps
+%   that depends only on the number of ground atoms in the EDB, but not
+%   on their values.
+% \item The na\"ive algorithm always terminates in a number of steps
+%   that is polynomial in the number of ground atoms in the EDB.
+% \end{enumerate}
 
-In this paper we are interested in characterizing the POPS that ensure
-that every \datalogo program converges.  At a finer level, our goal is
-to characterize precisely
-cases~\ref{item:converge:3}-\ref{item:converge:5}.  We will do this in
-Sec.~\ref{sec:complexity}, and, for that purpose, we will use an
-equivalent definition of the semantics of a \datalogo program, namely as
-the least fixpoint of a tuple of polynomials, obtained by grounding
-the program.
+% In this paper we are interested in characterizing the POPS that ensure
+% that every \datalogo program converges.  At a finer level, our goal is
+% to characterize precisely
+% cases~\ref{item:converge:3}-\ref{item:converge:5}.  We will do this in
+% Sec.~\ref{sec:complexity}, and, for that purpose, we will use an
+% equivalent definition of the semantics of a \datalogo program, namely as
+% the least fixpoint of a tuple of polynomials, obtained by grounding
+% the program.
 
-\subsection{Least Fixpoint of the Grounded Program}
+% \subsection{Least Fixpoint of the Grounded Program}
 
-\label{subsec:grounded:program}
+% \label{subsec:grounded:program}
 
-In this paper we consider an equivalent semantics of \datalogo, which
-consists of first grounding the program, then computing its least
-fixpoint.
+% In this paper we consider an equivalent semantics of \datalogo, which
+% consists of first grounding the program, then computing its least
+% fixpoint.
 
+% % %
+% % \reinhard{
+% % As before, we just say "Fix a POPS P". Should we say "Fix a strict POPS P"?
+% % }
+% % \dan{we say early that all POPS are assumed to be strict in this paper}
+% % %
+% Fix an EDB instance $I, I_\B$, and let $D_0 \subseteq D$ be the finite
+% set consisting of its active domain plus all constants occurring in
+% the program $\Pi$.  Let $M = |\ground(\sigma,D_0)|$ and
+% $N = |\ground(\tau,D_0)|$ be the number of ground tuples of the EDBs
+% and the IDBs respectively.  We associate them in 1-to-1 correspondence
+% with $M+N$ POPS variables $z_1, \ldots, z_M$ and $x_1, \ldots, x_N$,
+% and use the same notation as in Sec.~\ref{subsec:sum-products} by
+% writing $x_{T_i(\bm a)}$ for the variable associated to the ground
+% tuple $T_i(\bm a)$.
+
+% Consider a rule $T_i(\cdots) \cd E_{i1} \oplus E_{i2} \oplus \cdots$
+% of the \datalogo program, with head relation $T_i$.  A {\em grounding}
+% of this rule is a rule of the form:
 % %
-% \reinhard{
-% As before, we just say "Fix a POPS P". Should we say "Fix a strict POPS P"?
-% }
-% \dan{we say early that all POPS are assumed to be strict in this paper}
+% \begin{align*}
+%   x_{T_i(\bm a)} \cd & f_{T_i(\bm a)}(z_1, \ldots, z_M, x_1, \ldots, x_N)
+% \end{align*}
 % %
-Fix an EDB instance $I, I_\B$, and let $D_0 \subseteq D$ be the finite
-set consisting of its active domain plus all constants occurring in
-the program $\Pi$.  Let $M = |\ground(\sigma,D_0)|$ and
-$N = |\ground(\tau,D_0)|$ be the number of ground tuples of the EDBs
-and the IDBs respectively.  We associate them in 1-to-1 correspondence
-with $M+N$ POPS variables $z_1, \ldots, z_M$ and $x_1, \ldots, x_N$,
-and use the same notation as in Sec.~\ref{subsec:sum-products} by
-writing $x_{T_i(\bm a)}$ for the variable associated to the ground
-tuple $T_i(\bm a)$.
-
-Consider a rule $T_i(\cdots) \cd E_{i1} \oplus E_{i2} \oplus \cdots$
-of the \datalogo program, with head relation $T_i$.  A {\em grounding}
-of this rule is a rule of the form:
-%
-\begin{align*}
-  x_{T_i(\bm a)} \cd & f_{T_i(\bm a)}(z_1, \ldots, z_M, x_1, \ldots, x_N)
-\end{align*}
-%
-where $T_i(\bm a) \in \ground(T_i,D_0)$ is a ground tuple, and
-$f_{T_i(\bm a)}$ is the {\em provenance polynomial} (defined in
-Sec.~\ref{subsec:sum-products}) of the rule's body
-$E_{i1} \oplus E_{i2} \oplus \cdots$ Since the value of each EDB
-variable $z_{R_i(\bm u)}$ is known, we can substitute it with its
-value, and the provenance polynomial simplifies to one that uses only
-IDB variables $x_j$; we will no longer refer to the EDB variables
-$z_i$.  The {\em grounded program} consists of all $N$ groundings, of
-all rules.  Using more friendly indexes, we write the grounded program
-as:
-%
-\begin{align}
-  x_1 \cd & f_1(x_1, \ldots, x_N) \nonumber\\
-          & \ldots \label{eq:grounded:pi} \\
-  x_N \cd & f_N(x_1, \ldots, x_N) \nonumber
-\end{align}
-%
-where each $f_i$ is a multivariate polynomial in the variables
-$x_1, \ldots, x_N$.  We write $\bm f = (f_1, \ldots, f_N)$ for the
-vector-valued function whose components are the $N$ provenance
-polynomials, and define the semantics of the \datalogo program as its
-least fixpoint, $\lfp(\bm f)$, when it exists,
-% \hqn{with $\oplus$ and  $\otimes$ monotone, $\bm f$ is monotone and thus $\lfp(\bm f)$  always exists} 
-where, as usual, we identify the tuple $\lfp(\bm f) \in \bm P^N$ with
-an IDB instance $\lfp(\bm f) \in \inst(\tau,D_0,\bm P)$.  By
-definition, $\lfp(\bm f)$ is equal to the least fixpoint of the ICO,
-as defined in Sec.~\ref{subsec:ico}.
+% where $T_i(\bm a) \in \ground(T_i,D_0)$ is a ground tuple, and
+% $f_{T_i(\bm a)}$ is the {\em provenance polynomial} (defined in
+% Sec.~\ref{subsec:sum-products}) of the rule's body
+% $E_{i1} \oplus E_{i2} \oplus \cdots$ Since the value of each EDB
+% variable $z_{R_i(\bm u)}$ is known, we can substitute it with its
+% value, and the provenance polynomial simplifies to one that uses only
+% IDB variables $x_j$; we will no longer refer to the EDB variables
+% $z_i$.  The {\em grounded program} consists of all $N$ groundings, of
+% all rules.  Using more friendly indexes, we write the grounded program
+% as:
+% %
+% \begin{align}
+%   x_1 \cd & f_1(x_1, \ldots, x_N) \nonumber\\
+%           & \ldots \label{eq:grounded:pi} \\
+%   x_N \cd & f_N(x_1, \ldots, x_N) \nonumber
+% \end{align}
+% %
+% where each $f_i$ is a multivariate polynomial in the variables
+% $x_1, \ldots, x_N$.  We write $\bm f = (f_1, \ldots, f_N)$ for the
+% vector-valued function whose components are the $N$ provenance
+% polynomials, and define the semantics of the \datalogo program as its
+% least fixpoint, $\lfp(\bm f)$, when it exists,
+% % \hqn{with $\oplus$ and  $\otimes$ monotone, $\bm f$ is monotone and thus $\lfp(\bm f)$  always exists} 
+% where, as usual, we identify the tuple $\lfp(\bm f) \in \bm P^N$ with
+% an IDB instance $\lfp(\bm f) \in \inst(\tau,D_0,\bm P)$.  By
+% definition, $\lfp(\bm f)$ is equal to the least fixpoint of the ICO,
+% as defined in Sec.~\ref{subsec:ico}.
 
 
 \subsection{Examples}
@@ -1267,8 +1275,8 @@ sum-product expressions.  This can be desugared to a sum-sum-product:
   T(x_1, \ldots, x_k) &\cd \setof{E_1}{C_1} \oplus \setof{E_2}{\neg C_1 \wedge C_2} \oplus\cdots \oplus \setof{E_n}{\neg C_1 \wedge \neg C_2 \cdots}
 \end{align*}
 %
-and therefore the least fixpoint semantics and our convergence results
-in Sec.~\ref{sec:complexity} continue to hold.
+and therefore the least fixpoint semantics and the convergence results
+in~\cite{DBLP:conf/pods/Khamis0PSW22} continue to hold.
 %
 For example, we may compute the prefix-sum of a vector $V$ of length
 100 as follows:
@@ -1316,8 +1324,9 @@ illustrate with an example, which uses two POPS: $\R_+$ and $\B$.
   $[\Phi] \in \R_+$, which returns 0 when the predicate $\Phi$ is
   false, and 1 otherwise.  All rules are monotone, w.r.t. to the
   natural orders on $\R_+$ and $\B$, and, thus, the least-fixpoint
-  semantics continues to apply to this program. But the results in
-  Sec.~\ref{sec:complexity} apply only to fixpoints of polynomials,
+  semantics continues to apply to this program. 
+  But the convergence results in~\cite{DBLP:conf/pods/Khamis0PSW22}
+   apply only to fixpoints of polynomials,
   while the grounding of our program is no longer a polynomial.
 \end{ex}
 
@@ -1393,112 +1402,112 @@ $\trop^+$:
 %
   The key variable $C$ became an atom over the tropical semiring.
 
-\section{Convergence of \datalogo}
-\label{sec:convergence}
+% \section{Convergence of \datalogo}
+% \label{sec:convergence}
 
-At its essence, a \datalogo program consists of solving a fixpoint
-equation in a semiring, which is a problem that was studied in a variety
-of areas, like automata theory, program analysis, and many
-others~\cite{MR1470001,DBLP:conf/popl/CousotC77,MR1728440,MR1059930,
-  DBLP:conf/lics/HopkinsK99, DBLP:journals/tcs/Lehmann77,
-  semiring_book,MR609751}.  The existence of the fixpoint is usually
-ensured by requiring the semiring to be $\omega$-continuous. For
-example, Green et al.~\cite{DBLP:conf/pods/GreenKT07} studied the
-provenance of Datalog on $K$-relations, while Esparza et
-al.~\cite{DBLP:journals/jacm/EsparzaKL10} studied dataflow equations,
-in both cases requiring the semiring to be $\omega$-continuous.  This
-guarantees that the least fixpoint exists, even if the na\"ive algorithm
-diverges.
-We do not use $\omega$-continuity in this paper,
- and will not define it formally.
-Instead, we are interested in the cases 
- where the na\"ive algorithm converges to the least fixpoint.
+% At its essence, a \datalogo program consists of solving a fixpoint
+% equation in a semiring, which is a problem that was studied in a variety
+% of areas, like automata theory, program analysis, and many
+% others~\cite{MR1470001,DBLP:conf/popl/CousotC77,MR1728440,MR1059930,
+%   DBLP:conf/lics/HopkinsK99, DBLP:journals/tcs/Lehmann77,
+%   semiring_book,MR609751}.  The existence of the fixpoint is usually
+% ensured by requiring the semiring to be $\omega$-continuous. For
+% example, Green et al.~\cite{DBLP:conf/pods/GreenKT07} studied the
+% provenance of Datalog on $K$-relations, while Esparza et
+% al.~\cite{DBLP:journals/jacm/EsparzaKL10} studied dataflow equations,
+% in both cases requiring the semiring to be $\omega$-continuous.  This
+% guarantees that the least fixpoint exists, even if the na\"ive algorithm
+% diverges.
+% We do not use $\omega$-continuity in this paper,
+%  and will not define it formally.
+% Instead, we are interested in the cases 
+%  where the na\"ive algorithm converges to the least fixpoint.
 
-Computing the least fixpoint of \datalogo using the na\"ive algorithm
- is quite similar to Datalog:
-initialize all IDBs to $\bot$,
-then repeatedly apply all rules of the \datalogo program, obtaining an
-increasing chain of IDB instances,
-$J^{(0)} \sqsubseteq J^{(1)} \sqsubseteq J^{(2)} \sqsubseteq \cdots$
-When $J^{(t)} = J^{(t+1)}$, then the algorithm stops and returns
-$J^{(t)}$; in that case we say that the \datalogo program converges in
-$t$ steps, or we just say that it converges; otherwise we say that it
-diverges.  Traditional Datalog always converges, but this is no longer
-the case for \datalogo programs.  There are five possibilities,
-depending on the choice of the POPS $\bm P$:
-%
-\begin{enumerate}[label=(\roman*)]
-\item \label{item:converge:1} For some \datalogo programs, $\bigvee_t J^{(t)}$ is not the least fixpoint.
-\item \label{item:converge:2} Every \datalogo program has the least fixpoint $\bigvee_t J^{(t)}$, but may not necessarily converge.
-\item \label{item:converge:3} Every \datalogo program converges.
-\item \label{item:converge:4} Every \datalogo program converges in a
-  number of steps that depends only on $|\adom(I)|$.
-\item \label{item:converge:5} Every \datalogo program converges in a
-  number of steps that is polynomial in $|\adom(I)|$.
-\end{enumerate}
-%
-In this paper, we will only consider
-data-complexity~\cite{DBLP:conf/stoc/Vardi82}, where the \datalogo
-program is assumed to be fixed, and the input consists only of the EDB
-instance $I$.
+% Computing the least fixpoint of \datalogo using the na\"ive algorithm
+%  is quite similar to Datalog:
+% initialize all IDBs to $\bot$,
+% then repeatedly apply all rules of the \datalogo program, obtaining an
+% increasing chain of IDB instances,
+% $J^{(0)} \sqsubseteq J^{(1)} \sqsubseteq J^{(2)} \sqsubseteq \cdots$
+% When $J^{(t)} = J^{(t+1)}$, then the algorithm stops and returns
+% $J^{(t)}$; in that case we say that the \datalogo program converges in
+% $t$ steps, or we just say that it converges; otherwise we say that it
+% diverges.  Traditional Datalog always converges, but this is no longer
+% the case for \datalogo programs.  There are five possibilities,
+% depending on the choice of the POPS $\bm P$:
+% %
+% \begin{enumerate}[label=(\roman*)]
+% \item \label{item:converge:1} For some \datalogo programs, $\bigvee_t J^{(t)}$ is not the least fixpoint.
+% \item \label{item:converge:2} Every \datalogo program has the least fixpoint $\bigvee_t J^{(t)}$, but may not necessarily converge.
+% \item \label{item:converge:3} Every \datalogo program converges.
+% \item \label{item:converge:4} Every \datalogo program converges in a
+%   number of steps that depends only on $|\adom(I)|$.
+% \item \label{item:converge:5} Every \datalogo program converges in a
+%   number of steps that is polynomial in $|\adom(I)|$.
+% \end{enumerate}
+% %
+% In this paper, we will only consider
+% data-complexity~\cite{DBLP:conf/stoc/Vardi82}, where the \datalogo
+% program is assumed to be fixed, and the input consists only of the EDB
+% instance $I$.
 
-We study algebraic properties of the POPS $\bm P$ that ensure that we
-are in one of the cases~\ref{item:converge:3}-\ref{item:converge:5};
-we do not address cases~\ref{item:converge:1}-\ref{item:converge:2} in
-this paper.  We give next a necessary and sufficient condition for
-each of the cases~\ref{item:converge:3} and~\ref{item:converge:4}, and
-give a sufficient condition for case~\ref{item:converge:5}.  
-For any POPS $\bm P$, the set
-$\bm P \oplus \bot \defeq \setof{u\oplus \bot}{u \in P}$ is a
-semiring (Proposition~\ref{prop:s:plus:bot}); our characterization is based entirely on a certain
-property, called {\em stability}, of the semiring $\bm P \oplus \bot$,
-which we describe here.
+% We study algebraic properties of the POPS $\bm P$ that ensure that we
+% are in one of the cases~\ref{item:converge:3}-\ref{item:converge:5};
+% we do not address cases~\ref{item:converge:1}-\ref{item:converge:2} in
+% this paper.  We give next a necessary and sufficient condition for
+% each of the cases~\ref{item:converge:3} and~\ref{item:converge:4}, and
+% give a sufficient condition for case~\ref{item:converge:5}.  
+% For any POPS $\bm P$, the set
+% $\bm P \oplus \bot \defeq \setof{u\oplus \bot}{u \in P}$ is a
+% semiring (Proposition~\ref{prop:s:plus:bot}); our characterization is based entirely on a certain
+% property, called {\em stability}, of the semiring $\bm P \oplus \bot$,
+% which we describe here.
 
-Given a semiring $\bm S$ and $u \in S$, denote by
-$u^{(p)} := 1 \oplus u \oplus u^2 \oplus \cdots \oplus u^{p}$, where
-$u^{i} := u \otimes u \otimes \cdots \otimes u$ ($i$ times).  We say
-that $u$ is {\em $p$-stable} if $u^{(p)}=u^{(p+1)}$; we say that the
-semiring $\bm S$ is {\em $p$-stable} if every element $u \in S$ is $p$-stable, and
-we say that $\bm S$ is {\em stable} if every element $u$ is stable for some
-$p$ that may depend on $u$.
-A \datalogo program is {\em linear} if every rule has at most one IDB predicate in the body.
-We prove:
+% Given a semiring $\bm S$ and $u \in S$, denote by
+% $u^{(p)} := 1 \oplus u \oplus u^2 \oplus \cdots \oplus u^{p}$, where
+% $u^{i} := u \otimes u \otimes \cdots \otimes u$ ($i$ times).  We say
+% that $u$ is {\em $p$-stable} if $u^{(p)}=u^{(p+1)}$; we say that the
+% semiring $\bm S$ is {\em $p$-stable} if every element $u \in S$ is $p$-stable, and
+% we say that $\bm S$ is {\em stable} if every element $u$ is stable for some
+% $p$ that may depend on $u$.
+% A \datalogo program is {\em linear} if every rule has at most one IDB predicate in the body.
+% We prove:
 
-\begin{thm} \label{th:main:intro} Given a POPS $\bm P$, the following hold.
-  \begin{itemize}
-  \item Every \datalogo program converges iff the semiring $\bm P\oplus \bot$ is stable.
-  \item Every program converges in a number of steps that depends only
-    on $|\adom(I)|$ iff $\bm P \oplus \bot$ is $p$-stable for some
-    $p$.  More precisely, every \datalogo program converges in
-    $\sum_{i=1}^{N}(p+2)^i$ steps, where $N$ is the number of ground
-    tuples consisting of IDB predicates and constants from $\adom(I)$.
-    Furthermore, if the program is linear, then it converges in $\sum_{i=1}^N(p+1)^i$ steps.
-  \item If $\bm P\oplus \bot$ is $0$-stable, then every \datalogo
-    program converges in $N$ steps; in particular, the program runs in
-    polynomial time in the size of the input database.
-  \end{itemize}
-\end{thm}
+% \begin{thm} \label{th:main:intro} Given a POPS $\bm P$, the following hold.
+%   \begin{itemize}
+%   \item Every \datalogo program converges iff the semiring $\bm P\oplus \bot$ is stable.
+%   \item Every program converges in a number of steps that depends only
+%     on $|\adom(I)|$ iff $\bm P \oplus \bot$ is $p$-stable for some
+%     $p$.  More precisely, every \datalogo program converges in
+%     $\sum_{i=1}^{N}(p+2)^i$ steps, where $N$ is the number of ground
+%     tuples consisting of IDB predicates and constants from $\adom(I)$.
+%     Furthermore, if the program is linear, then it converges in $\sum_{i=1}^N(p+1)^i$ steps.
+%   \item If $\bm P\oplus \bot$ is $0$-stable, then every \datalogo
+%     program converges in $N$ steps; in particular, the program runs in
+%     polynomial time in the size of the input database.
+%   \end{itemize}
+% \end{thm}
 
-In a nutshell, the theorem says that convergence of \datalogo is
-intimately related to the notion of stability.  The proof, provided in
-Sec.~\ref{sec:complexity}, consists of an analysis of the infinite
-powerseries resulting from unfolding the fixpoint definition; for
-the proof of the first item we also use Parikh's
-theorem~\cite{MR209093}.  As mentioned earlier, most prior work on
-fixpoint equations assumes an $\omega$-continuous semiring; when
-convergence is desired, one usually offers the Ascending Chain
-Condition, ACC (see Sec.~\ref{sec:lfp}) as a sufficient condition for
-convergence.  Our theorem implies that ACC is only a sufficient, but
-not a necessary condition for convergence, for example $\trop^+$ is
-$0$-stable, and therefore every \datalogo program converges on
-$\trop^+$, yet it does not satisfy the ACC condition.  A somewhat
-related result is proven by Luttenberger and
-Schlund~\cite{DBLP:journals/iandc/LuttenbergerS16} who showed that, if
-$1$ is $p$-stable, then Newton's method requires at most
-$N + \log\log p$ iterations.  As mentioned earlier, each step of
-Newton's method requires the computation of another least fixpoint,
-hence that result does not inform us on the convergence of the na\"ive
-algorithm.
+% In a nutshell, the theorem says that convergence of \datalogo is
+% intimately related to the notion of stability.  The proof, provided in
+% Sec.~\ref{sec:complexity}, consists of an analysis of the infinite
+% powerseries resulting from unfolding the fixpoint definition; for
+% the proof of the first item we also use Parikh's
+% theorem~\cite{MR209093}.  As mentioned earlier, most prior work on
+% fixpoint equations assumes an $\omega$-continuous semiring; when
+% convergence is desired, one usually offers the Ascending Chain
+% Condition, ACC (see Sec.~\ref{sec:lfp}) as a sufficient condition for
+% convergence.  Our theorem implies that ACC is only a sufficient, but
+% not a necessary condition for convergence, for example $\trop^+$ is
+% $0$-stable, and therefore every \datalogo program converges on
+% $\trop^+$, yet it does not satisfy the ACC condition.  A somewhat
+% related result is proven by Luttenberger and
+% Schlund~\cite{DBLP:journals/iandc/LuttenbergerS16} who showed that, if
+% $1$ is $p$-stable, then Newton's method requires at most
+% $N + \log\log p$ iterations.  As mentioned earlier, each step of
+% Newton's method requires the computation of another least fixpoint,
+% hence that result does not inform us on the convergence of the na\"ive
+% algorithm.
 
 \section{Semi-na\"ive Evaluation for \datalogo}
 \label{sec:semi-naive}
@@ -1798,3 +1807,6 @@ Specifically, we replace every $t-2$ with $t-1$
  in each delta rule and in Algorithm~\ref{algo:seminaive}.
 At this point, we recover exactly the semi-na\"ive algorithm for classic Datalog
  which is the same as \datalogo over the POPS $\B$.
+
+% \section{Conclusions}
+% \label{sec:datalogo:conclusions}
