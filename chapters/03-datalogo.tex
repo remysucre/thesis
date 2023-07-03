@@ -109,8 +109,8 @@ In Sec.~\ref{sec:datalogo} we define \datalogo formally,
  and give several examples.
 Sec.~\ref{sec:semi-naive} presents a generalization of semi-na\"ive
 evaluation to \datalogo.  
-Finally, we conclude this chapter in
-Sec.~\ref{sec:datalogo:conclusions}.
+% Finally, we conclude this chapter in
+% Sec.~\ref{sec:datalogo:conclusions}.
 
 \section{Partially Ordered Pre-Semirings (POPS)}
 \label{sec:pops}
@@ -1344,9 +1344,9 @@ domain $D$, as illustrated by this simple example:
   %
 Here $\texttt{date}+1$ is an interpreted function applied to
 $\texttt{date}$.  Interpreted functions over $D$ may cause the active
-domain to grow indefinitely, leading to divergence; our results in
-Sec.~\ref{sec:complexity} apply only when the active domain is fixed,
-enabling us to define the grounding~\eqref{eq:grounded:pi} of the
+domain to grow indefinitely, leading to divergence; the results in~\cite{DBLP:conf/pods/Khamis0PSW22} 
+apply only when the active domain is fixed,
+enabling a definition of the grounding of the
 \datalogo program.
 
 %   {\bf Cast Operator} Each \datalogo rule is over a single POPS $\bm S$.
@@ -1512,21 +1512,21 @@ $\trop^+$:
 \section{Semi-na\"ive Evaluation for \datalogo}
 \label{sec:semi-naive}
 
-Next, we introduce an extension of the semi-na\"ive evaluation
+We now introduce an extension of the semi-na\"ive evaluation
 algorithm to \datalogo.  It is known that the na\"ive evaluation
-algorithm is inefficient in practice, because at each iteration it
-repeats all the computations that it has done at the previous
+algorithm is inefficient, because at each iteration it
+repeats all the computations from the previous
 iterations.  Most Datalog systems implement an improvement called the
 {\em semi-na\"ive} evaluation, which keeps track of the change between
-the successive states of the IDBs, and applies the Datalog rules as a
-function of these changes to obtain the new change in the next iteration.
+the successive states of the IDBs, and applies the Datalog rules 
+over this change to obtain the new change in the next iteration.
 Semi-na\"ive evaluation is one of the major optimization techniques
 for evaluating Datalog, however, it is defined only for programs that
 are monotone under set inclusion, and the systems that implement it
 enforce monotonicity, preventing the use of aggregation in
-recursion. We how to adapt the
+recursion. We adapt the
 semi-na\"ive algorithm to \datalogo, under certain restrictions of the
-POPS $\bm P$, thus enabling the semi-na\"ive algorithm to be applied
+POPS $\bm P$, thus enabling the algorithm to be applied
 to programs with aggregation in recursion.
 Specifically, our semi-na\"ive algorithm applies to \datalogo programs
  over any {\em sparse} POPS, defined below.
@@ -1538,28 +1538,30 @@ Surprisingly, it also works when the semiring is unordered,
 
 % A {\em sparse} POPS is one where $\bot$ coincides with $0$:
 %
-\begin{defn}[Sparse POPS]
+\begin{defn}
   \label{def:sparse}
   A POPS $\bm P$ is {\em sparse} if $\bot = 0$.
 \end{defn}
 %
 Every naturally ordered POPS is sparse, but the converse is not true.
 For example, 
- consider the POPS $\bm S = (\N \times \N, +^2, \times^2, (0, 0), (1, 1))$,
+ consider the POPS $\bm N^2 \defeq (\N^2, +^2, \times^2, (0, 0), (1, 1))$,
  where $+^2$ and $\times^2$ mean to apply the operations component-wise,
- and the elements in $\bm S$ are ordered lexicographically.
-$\bm S$ is sparse but not naturally ordered, 
+ and the elements in $\bm N^2$ are ordered lexicographically.
+$\bm N^2$ is sparse but not naturally ordered, 
  because $(1, 2) \leq (2, 1)$ but
- $\not \exists x \in {\bm S} : (1, 2) + x = (2, 1)$.
-Moreover, even if we require the sparse POPS to be stable, 
- its order may still not be the natural order.
-For example, $\bm S^{\leq 10} = \setof{(x_1, x_2) \in \N \times \N }{ x_1 \leq 10, x_2 \leq 10}$, 
- and ${\bm S}^{\leq 10} = (S^{\leq 10}, +^{\leq 10}, \times^{\leq 10}, 0, 1)$
- where $(x_1, x_2) +^{\leq 10} (y_1, y_2) = (\min(10, x_1 + y_1), \min(10, x_2 + y_2))$
- and similarly for $\times^{\leq 10}$.
-As for $\bm S$, the elements in $\bm S^{\leq 10}$ are lexicographically ordered.
-It is easy to verify ${\bm S}^{\leq 10}$ is a stable POPS, 
-  but it is not naturally ordered.
+ $\not \exists x \in {\bm N^2} : (1, 2) + x = (2, 1)$.
+
+% Moreover, even if we require the sparse POPS to be stable, 
+%  its order may still not be the natural order.
+% For example, $\bm S^{\leq 10} = \setof{(x_1, x_2) \in \N \times \N }{ x_1 \leq 10, x_2 \leq 10}$, 
+%  and ${\bm S}^{\leq 10} = (S^{\leq 10}, +^{\leq 10}, \times^{\leq 10}, 0, 1)$
+%  where $(x_1, x_2) +^{\leq 10} (y_1, y_2) = (\min(10, x_1 + y_1), \min(10, x_2 + y_2))$
+%  and similarly for $\times^{\leq 10}$.
+% As for $\bm S$, the elements in $\bm S^{\leq 10}$ are lexicographically ordered.
+% It is easy to verify ${\bm S}^{\leq 10}$ is a stable POPS, 
+%   but it is not naturally ordered.
+
 % This may appear to contradict Theorem ?? which states
 %   every stable POPS is naturally ordered.
 % However, a POPS being naturally ordered only means 
@@ -1605,17 +1607,17 @@ We can now define the semi-na\"ive algorithm using these delta rules,
  as shown in Algorithm~\ref{algo:seminaive}.
 %
 \begin{algorithm}[t]
-  $I^{(0)} \leftarrow \bm 0$\;
-  $I^{(1)} \leftarrow F(\bm 0)$, $\delta I^{(1)} \gets F(\bm 0)$ \;
+  $J^{(0)} \leftarrow \bm 0$\;
+  $J^{(1)} \leftarrow F(\bm 0)$, $\delta J^{(1)} \gets F(\bm 0)$ \;
  \For {  $t \leftarrow 2$   {\bf to}   $\infty$ }
  {
-     {$\delta^{(t)} \leftarrow \delta F(I^{(t-2)}, \delta I^{(t-1)})$} \label{algo:sn:delta} \; 
-     {$I^{(t)} \leftarrow I^{(t-1)} \oplus \delta^{(t)}$}\;
+     {$\delta^{(t)} \leftarrow \delta F(J^{(t-2)}, \delta J^{(t-1)})$} \label{algo:sn:delta} \; 
+     {$J^{(t)} \leftarrow J^{(t-1)} \oplus \delta^{(t)}$}\;
      \If { $\delta^{(t)} = \bm 0$ }{
         break
      }
  }
- \Return $I^{(t)}$
+ \Return $J^{(t)}$
  \caption{Semi-na\"ive evaluation for \datalogo over sparse POPS}
  \label{algo:seminaive}
 \end{algorithm}
@@ -1627,7 +1629,11 @@ In each iteration of the for-loop, we apply the delta rules to compute the
  new delta relations $\delta^{(t)}$.
 We then update the IDB relations by adding the delta relations to them. 
 We repeat until the delta relations are all empty, 
- which means the IDB relations have converged.
+ which means the evaluation has converged.
+Note that the current algorithm lacks the difference operator 
+ from the classic semi-na\"ive algorithm for Datalog.
+We will introduce a generalized difference $\ominus$ as an 
+ additional optimization in Sec.~\ref{sec:redundant}.
 
 To guarantee the semi-na\"ive algorithm is correct,
 the key property of the delta rule is that it computes the difference
@@ -1647,7 +1653,7 @@ The proposition holds at $t=0$.
 For $t\geq 1$, we assume w.l.o.g.\ that $F$ is a single monomial $T_1 T_2 \cdots T_n$.
 Then we have:
 \begin{align*}
-T_i^{(t+1)} & = T_1^{(t)} T_2^{(t)} \cdots T_n^{(t)} && \text{by na\"ive evaluation} \\ 
+T_i^{(t+1)} & = T_1^{(t)} T_2^{(t)} \cdots T_n^{(t)} && \text{by definition of na\"ive evaluation} \\ 
  & = (T_1^{(t-1)} + \delta_1^{(t)}) \cdots (T_n^{(t-1)} + \delta_n^{(t)}) && \text{by the inductive hypothesis} \\
  & = T_i^{(t)} + \delta_i^{(t+1)} && \text{by definition of $\delta_i^{(t+1)}$}
 \end{align*}
@@ -1681,9 +1687,9 @@ A tuple in the delta relation whose value is 0 is also shown in gray.
 Recall $0 = \bot$ in a sparse semiring,
  and therefore a tuple whose value is 0 is not stored.
 This means we indeed avoid (re-)computing the grayed-out entries.
-In this example the overhead of keeping track of both $T$ 
- and $\delta$ cancels out the savings, 
- but it is not hard to construct examples where the savings are significant. 
+% In this example the overhead of keeping track of both $T$ 
+%  and $\delta$ cancels out the savings, 
+%  but it is not hard to construct examples where the savings are significant. 
 \end{ex}
 
 \begin{figure*}
@@ -1716,7 +1722,7 @@ In this example the overhead of keeping track of both $T$
 \label{fig:bom}
 \end{figure*}
 
-The present definition of the delta rule contains
+The current definition of the delta rule contains
  exponentially many terms in the number of IDB predicates, 
  which is prohibitive for long rules.
 An improved definition requires only linearly many terms.
@@ -1764,7 +1770,7 @@ For example, in the lifted semiring $\R_\bot$
 Since we must reserve the meaning of a missing tuple 
  to indicate that tuple has value $\bot$,
  we cannot omit tuples with value $0$.
-The semi-na\"ive algorithm still produces the correct result,
+The semi-na\"ive algorithm for $\R_\bot$ still produces the correct result,
  but it does not save any work.
 % In other words, the semi-na\"ive algorithm 
 %  does not apply because $\R_\bot$ is not sparse.
@@ -1794,8 +1800,10 @@ $$\delta^{(t)} \gets \delta F(I^{(t-2)}, \delta I^{(t-1)}) \ominus I^{(t-1)}$$
 %
 For the POPS $\N$, the only value $x$ such that $x \ominus y = 0$ is $x = 0$. 
 One example where we can remove non-zero elements with $\ominus$ 
- is the POPS ${\N}^{\leq 10}$.
-Let $x = 1$, then $x \ominus 10 = 0$ because $x +^{\leq} 10 = 10$.
+ is the POPS ${\N}^{\leq 10} \defeq (\setof{n \in \N}{n \leq 10}, +^{\leq 10}, \times^{\leq 10}, 0, 1)$, 
+ where $x +^{\leq 10}y \defeq \min(10, x + y)$ and similar for $\times^{\leq 10}$.
+In other words, $\N^{\leq 10}$ is the POPS $\N$ ``capped at'' 10.
+Let $x \in \N^{\leq 10} = 1$, then $x \ominus 10 = 0$ because $x +^{\leq} 10 = 10$.
 % Note ${\bm S}^{\leq 10}$ is not idempotent.
 Another example is the tropical semiring $\trop^+$
  where $\forall x \geq y : x \ominus y = 0$.
