@@ -1,12 +1,15 @@
 \chapter{Background}
 \label{sec:background}
 
-This Chapter introduces basic concepts in relational databases.
+This Chapter introduces basic concepts in relational query processing. 
+We cover relations and (unions of) conjunctive queries in Section~\ref{sec:relations-and-conjunctive-queries},
+ relational algebra with an emphasis on joins in Section~\ref{sec:join},
+ and Datalog in Section~\ref{sec:datalog}.
 By the end of this chapter, 
  the reader will have the knowledge necessary
  to build a very simple evaluator for Datalog.
 
-\section{Relations and Conjunctive Queries}
+\section{Relations and (Unions of) Conjunctive Queries}
 \label{sec:relations-and-conjunctive-queries}
 
 Let $D$ be a set of values, for example the set of natural numbers,
@@ -40,9 +43,11 @@ Given a set of relations $R_1, R_2, \ldots, R_n$,
 \[
   Q(\bm{x}) \cd R_1(\bm{x}_1), R_2(\bm{x}_2), \ldots, R_n(\bm{x}_n).
 \]
-where each $\bm{x}_i$ (and $\bm{x}$) is a tuple of variables.
+where each $\bm{x}_i$ (and $\bm{x}$) is a tuple consisting of variables and constants.
 $\bm{x}_i$ must have the same arity as $R_i$,
  and the arity of $\bm{x}$ is called the {\em arity} of the query.
+Each $R_i({\bm x_i})$ (and $Q({\bm x})$) is called an {\em atom}.
+For simplicity, we assume no $\bm{x}_i$ (or $\bm{x}$) contains duplicate variables.
 When the context is clear, 
  we will use $Q$ to refer to both the query and its output relation.
 The query $Q$ is called {\em safe} if each variable in $\bm{x}$ also appears in some $\bm{x}_i$.
@@ -66,7 +71,11 @@ SELECT E1.head, E2.tail
 \end{lstlisting}
 \end{ex}
 
-\section{Join}
+Finally, a set of multiple conjunctive queries with the same head relation
+ defines a {\em union of conjunctive queries} (UCQ).
+As the name suggests, it computes the union of each conjunctive query.
+
+\section{Relational Algebra}
 \label{sec:join}
 
 Relational queries are compiled to relational algebra 
@@ -76,9 +85,13 @@ The relational join is the central operation in relational algebra,
  and composes computation from different queries.
 In this section we describe the semantics of the join
  as well as a simple algorithm to compute it.
+We also review other relational algebra operators
+ including selection, projection, and union.
 
-Given a {\em full} conjunctive query $Q$, 
+Given a {\em full} conjunctive query $Q$ containing no constants, 
  the {\em natural join} over $Q$ computes exactly the query result.
+We will only consider the natural join in this thesis, 
+ and will simply call it {\em join}.
 A {\em binary} join is a join involving only two relations.
 We can compute the natural join of multiple relations 
  by joining two relations at a time.
@@ -90,18 +103,30 @@ Q_3({\bm x_1} \cup {\bm x_2} \cup {\bm x_3}) &\cd Q_2({\bm x_1} \cup {\bm x_2}),
 & \vdots \\
 Q_n({\bm x_1} \cup {\bm x_2} \cup \cdots \cup {\bm x_n}) &\cd Q_{n-1}({\bm x_1} \cup {\bm x_2} \cup \cdots \cup {\bm x_{n-1}}), R_n({\bm x_n})
 \end{align*}
-Then $Q_n = Q$. 
+We abuse ``${\bm t_1} \cup {\bm t_2}$'' to mean a tuple containing 
+ all variables in ${\bm t_1}$ and ${\bm t_2}$ without duplicates, in any order, 
+ and similarly for ``${\bm t_1} \cap {\bm t_2}$''.
+It is easy to check that $Q_n = Q$. 
 Indeed, most modern database systems compute the natural join of multiple relations 
- by joining two relations at a time. 
+ by joining two relations at a time, 
+ while reordering the binary joins carefully for efficiency. 
 
-A simple yet effective algorithm to compute the binary join is called the {\em hash join},
+A simple yet effective algorithm to compute the binary join is called {\em hash join},
  and it is implemented in nearly every database system.
-Given a full conjunctive query of two relations $Q({\bm x_1} \cup {\bm x_2}) \cd R({\bm x_1}), S({\bm x_2})$,
- let ${\bm x} \defeq {\bm x_1} \cap {\bm x_2}$.
+Algorithm~\ref{algo:hash-join} shows the pseudocode for hash join.
+Given a full conjunctive query (without constants) 
+ of two relations $Q({\bm x_1} \cup {\bm x_2}) \cd R({\bm x_1}), S({\bm x_2})$,
+ let ${\bm x} \defeq {\bm x_1} \cap {\bm x_2}$,
+ and let ${\bm i}$ be the positions of each ${\bm x}$ in ${\bm x_2}$.
 We pick one of the relations to be the {\em left} relation and the other to be the {\em right} relation.
 Suppose we pick $R$ to be the left relation, and $S$ to be the right relation.
-We first construct a hash map where each key is a tuple of values in ${\bm x}$,
- and the key maps to a set of tuples in $S$ that have the same values in ${\bm x}$:
+We first construct a hash map where each key is a tuple of values at positions ${\bm i}$ in $S$,
+ and the key maps to a set of tuples in $S$ that have the same values in ${\bm x}$.
+Then, we iterate over each tuple in $R$,
+ binding the values to ${\bm x_2}$,
+ and looking up the hash map to find all tuples in $S$ that match the values in ${\bm x}$.
+For each match, we concatenate the tuples from each relation,
+ and output the result.
 %
 \begin{algorithm}[th]
     $s \gets$ new hash map\;
@@ -116,10 +141,191 @@ We first construct a hash map where each key is a tuple of values in ${\bm x}$,
             output $({\bm x_1}\cup {\bm x_2})$\;
         }
     }
-    \caption{Hash join.}
+    \caption{Hash join of relations $R$ and $S$, using $S$ as the right relation.}
     \label{algo:hash-join}
 \end{algorithm}
 
+To support conjunctive queries with constants, 
+ duplicate variables, and that are not full,
+ we need two additional operators from relational algebra, 
+ namely selection ($\sigma$) and projection ($\pi$).
+The selection operator $\sigma$ takes as arguments an atom $R({\bm x})$
+ and a predicate $\theta$ over ${\bm x}$,
+ and returns a subset of the relation $R$ containing only the tuples that satisfy $\theta$.
+For example, $\sigma_{x = 1}E(x, y)$ returns all edges in $E$ that start at vertex 1.
+For another example, $\sigma_{x = y}E(x, y)$ returns all edges in $E$ that are self-loops;
+ it is equivalent to repeating the variable $x$, i.e., $E(x, x)$.
+The projection operator $\pi$ takes as arguments an atom $R({\bm x})$
+ and a set of variables ${\bm y} \subseteq {\bm x}$,
+ and returns a relation containing only attributes corresponding 
+ to the variables in ${\bm y}$.
+For example, $\pi_{x}E(x, y)$ returns all source vertices in $E$.
+Both selection and projection can be implemented with a simple loop over the tuples in $R$.
+Finally, computing UCQs requires the union operator $\cup$,
+ which is the set union of the relations.
+Popular databases also implement several additional relational algebra operators 
+ such as aggregation.
+In Chapter~\ref{chap:datalogo} we will show how to support aggregation
+ as a generalization of projection, 
+ when we extend the relational algebra with semirings.
+
+\begin{ex}
+\label{ex:selection}
+To compute the query $Q(x) \cd E(x, y), E(y, x)$ 
+ (vertices that loop back to themselves in two steps),
+ we first compute the join $J(x, y, z) \cd E(x, y), E(y, z)$, 
+ then project out $y$ with $P(x, z) \cd \pi_{x, z} J(x, y, z)$,
+ and finally select the tuples where $x = z$ with $Q(x) \cd \sigma_{x=z} P(x, z)$.
+\end{ex}
+ 
+Although we have presented the computation of a query 
+ by computing a sequence of intermediate queries, 
+ like $J$ and $P$ in Example~\ref{ex:selection},
+ in practice the database system will combine
+ the different relational algebra operators 
+ and compute the result ``in one go''.
+This approach to avoid the intermediates 
+ is called {\em pipelining}.
+For example, to compute $Q$ in Example~\ref{ex:selection},
+ we may fuse together the inner loop of the join
+ with the loops of the projection and selection, 
+ as shown in Algorithm~\ref{algo:pipeline}.
+
+\begin{algorithm}
+$e \gets $ new hash map \;
+\For { $(y, z) \in E$ }
+{
+    $e[y].insert((y, z))$\;
+}
+\For { $(x, y) \in E$ }
+{
+    \For { $(y, z) \in e[y]$ }
+    {
+        \If { $x = z$ }
+        {
+            output $z$\;
+        }
+    }
+}
+\caption{Pipelined execution of $Q$ in Example~\ref{ex:selection}.}
+\label{algo:pipeline} 
+\end{algorithm}
 
 \section{Datalog}
 \label{sec:datalog}
+
+Many applications in modern data analytics require recursion.
+For example, we may want to detect unreachable nodes in a network.
+This can be achieved by computing the transitive closure 
+ of the edges in the network,
+ which can be expressed as a recursive query.
+Datalog is a query language designed to support recursion, 
+ and we review its semantics and exeuction algorithm in this section.
+
+A Datalog program is a set of conjunctive queries.
+Each conjunctive is also called a {\em rule}.
+Different rules may share the same head atom, 
+ and some rules may have empty bodies.
+Recall that every head variable must appear in the body,
+ so a rule with an empty body must only have constants in the head.
+We call such rules {\em facts}.
+If a relation never appears in any head that is not a fact,
+ we call it an input relation or an {\em extensional database} (EDB) relation.
+Otherwise, we call it an output relation or an {\em intensional database} (IDB) relation.
+
+\begin{ex}
+\label{ex:datalog}
+The following Datalog program computes the transitive closure of the graph $E$ 
+ which is a chain of 4 edges through 5 vertices.
+\begin{align*}
+  &E(1, 2). \, E(2, 3). \, E(3, 4). \, E(4, 5).\\
+  &P(x, y) \cd E(x, y).\\
+  &P(x, z) \cd P(x, y), E(y, z).
+\end{align*}
+\end{ex}
+
+We will sometimes omit the facts when they are clear from the context.
+The meaning of a Datalog program can be defined as the solution (or {\em model}) of 
+ a set of logical constraints.
+This is known as the {\em model theoretic semantics} of Datalog.
+Specifically, we interpret each atom as a predicate,
+ and treat each rule as a logical implication
+ from the conjunction of the body atoms to the head atom.
+Recall that a fact is a rule with an empty body,
+ so we interpret it as an implication from \texttt{true}, 
+ i.e., an assertion.
+Then the result of the Datalog program is the {\em smallest} relations 
+ such that all constraints are satisfied.
+The emphasis on {\em smallest} is important, 
+ because otherwise we may simply set every relation to contain all tuples
+ to satisfy the constraints.
+In fact, an SMT solver would return such a solution if given our constraints.
+
+\begin{ex}
+\label{ex:tc}
+The Datalog program in Example~\ref{ex:datalog}
+ computes the set of all paths in the graph $E$, 
+ namely $P = \setof{(x, y)}{1 \leq x < y \leq 5}$. 
+\end{ex}
+
+An alternative semantics for Datalog is the {\em fixpoint semantics}.
+It is equivalent to the model theoretic semantics,
+ but it tells us how to evaluate the Datalog program.
+For each relation $R_i$, the set of all rules with $R_i$ in the head 
+ form a union of conjunctive queries.
+This UCQ computes a function $F_i$ from the relations in the rule bodies to $R_i$,
+ which we can extend to be a function from all relations to $R_i$ 
+ (relations not in the bodies are simply ignored). 
+We write $F$ for the set of all $F_i$, 
+ and $F$ is then a function from all relations to all relations.
+We call $F$ the immediate consequence operator (ICO) of the Datalog program.
+To evaluate the Datalog program, as shown in Algorithm~\ref{algo:fixpoint},
+ we initialize all relations to be empty,
+ then repeatedly apply $F$ to update the relations, 
+ until the relations no longer change.
+This is also known as the {\em na\"ive evaluation} of the Datalog program.
+\begin{algorithm}
+$I \gets \emptyset$\;
+\While { $I$ changes }
+{
+    $I \gets F(I)$\;
+}
+\Return{$I$}
+\caption{Na\"ive evaluation of a Datalog program.}
+\label{algo:fixpoint}
+\end{algorithm}
+
+\begin{ex}
+\label{ex:tc-fixpoint}
+The evaluation of the transitive closure program is shown here:
+%
+\begin{align*}
+    &
+    \begin{array}{l c c } 
+                       & E & P \\ 
+        \text{iter } 0 & \emptyset & \emptyset \\ 
+        \text{iter } 1 & \set{(1, 2), (2, 3), (3, 4), (4, 5)} & \emptyset \\ 
+        \text{iter } 2 & \set{(1, 2), (2, 3), (3, 4), (4, 5)} & \set{(1, 2), (2, 3), (3, 4), (4, 5)} \\ 
+        \text{iter } 3 & \cdots & P^{(2)} \cup \set{ (1, 3), (2, 4), (3, 5)} \\
+        \text{iter } 4 & \cdots & P^{(3)} \cup \set{ (1, 4), (2, 5) } \\
+        \text{iter } 5 & \cdots & P^{(4)} \cup \set{ (1, 5) } \\
+    \end{array}
+\end{align*}
+%
+Here we use $P^{(i)}$ to mean the content of relation $P$ at iteration $i$.
+Note that in each iteration, each relation contains all tuples from the previous iteration.
+This is always true for any Datalog program, 
+ and we say that Datalog evaluation is {\em inflationary}.
+\end{ex}
+
+
+An important property of Datalog is that the na\"ive evaluation 
+ always terminates, and it does so in polynomial time.
+However, the na\"ive evaluation is inefficient in practice.
+As shown in Example~\ref{ex:tc-fixpoint},
+ each iteration computes the relations from scratch 
+ even though most tuples are already in the relations from the previous iteration.
+A more efficient algorithm, the {\em semi-na\"ive evaluation},
+ computes only the {\em new} tuples in each iteration.
+We will present a generalization of the semi-na\"ive algorithm 
+ that also supports recursive aggregation in Chapter~\ref{chap:datalogo}.
