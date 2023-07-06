@@ -54,9 +54,11 @@
 \graphicspath{{_build/}{figures/}}
 
 \usepackage{amsmath}
+\usepackage{amsthm}
+\theoremstyle{definition}
 \newtheorem{defn}{Definition}[chapter]
 \newtheorem{thm}{Theorem}[chapter]
-\newtheorem{proof}{Proof}[chapter]
+% \newtheorem{proof}{Proof}[chapter]
 \newtheorem{prop}{Proposition}[chapter]
 \newtheorem{lmm}{Lemma}[chapter]
 \newtheorem{ex}{Example}[chapter]
@@ -202,7 +204,7 @@ Thank you!
 \renewcommand{\sectionmark}[1]{\markright{\sc{\thesection.\ #1}}{}}
 % \listoftodos
 % \input{chapters/01-intro}
-% \input{chapters/02-background}
+\input{chapters/02-background}
 \input{chapters/03-datalogo.tex}
 % \input{chapters/04-free-join.tex}
 % \input{chapters/05-spores.tex}

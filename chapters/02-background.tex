@@ -1,13 +1,125 @@
 \chapter{Background}
 \label{sec:background}
 
-What goes here? Datalog, Join, and query optimization? Also show their limitations.
+This Chapter introduces basic concepts in relational databases.
+By the end of this chapter, 
+ the reader will have the knowledge necessary
+ to build a very simple evaluator for Datalog.
 
-\section{Datalog}
-\label{sec:datalog}
+\section{Relations and Conjunctive Queries}
+\label{sec:relations-and-conjunctive-queries}
+
+Let $D$ be a set of values, for example the set of natural numbers,
+ or the set of ASCII strings.
+A {\em tuple} over $D$ is of the form $(t_1, t_2, \ldots, t_k)$
+ where each $t_i$ is a value in $D$,
+ and $k$ is called the {\em arity} of the tuple.
+A {\em relation} over $D$ is a set of tuples over $D$,
+ each with the same arity which we call the arity of the relation.
+Note that many popular database systems allow duplicate tuples in a relation;
+ in other words they follow the so-called {\em bag semantics}.
+We will focus on the set semantics in this section,
+ and in Chapter~\ref{chap:datalogo} we will show how to
+ support bag semantics by extending the relations
+ with an algebraic structure called {\em semiring}.
+Many databases also prescribe a {\em schema} for each relation.
+We omit the schema because it is not necessary for the 
+ conjunctive query notation that we follow in this thesis.
+However, we will occasionally use SQL queries in our examples 
+ to make them more readible to SQL programmers.
+
+\begin{ex}
+\label{ex:relation}
+Let $D = \set{1, 2, \ldots, n}$ represent a set of $n$ vertices in a graph.
+A binary relation $E$ over $D$ represents the (directed) edges in the graph.
+Let $E \defeq \setof{(x, y)}{x, y \in D}$, then $E$ is the complete graph on $D$.
+\end{ex}
+
+Given a set of relations $R_1, R_2, \ldots, R_n$, 
+ a {\em conjunctive query} (CQ) is of the form:
+\[
+  Q(\bm{x}) \cd R_1(\bm{x}_1), R_2(\bm{x}_2), \ldots, R_n(\bm{x}_n).
+\]
+where each $\bm{x}_i$ (and $\bm{x}$) is a tuple of variables.
+$\bm{x}_i$ must have the same arity as $R_i$,
+ and the arity of $\bm{x}$ is called the {\em arity} of the query.
+When the context is clear, 
+ we will use $Q$ to refer to both the query and its output relation.
+The query $Q$ is called {\em safe} if each variable in $\bm{x}$ also appears in some $\bm{x}_i$.
+$Q$ is called a {\em full} conjunctive query if each variable in $\bm{x}_i$ also appears in $\bm{x}$.
+We will only consider safe queries in this thesis.
+The conjunctive query computes in $Q$ the set $\setof{\bm x}{\bigwedge_{i \in [1 \ldots n]} {\bm x_i} \in R_i}$.
+
+\begin{ex}
+\label{ex:cq}
+Using the relation $E$ from Example~\ref{ex:relation},
+ the query $Q(x, z) \cd E(x, y), E(y, z).$
+ computes all pairs of vertices $(x, z)$ 
+ such that there is another vertex $y$ 
+ connected to both $x$ and $z$;
+ in other words, it finds all paths of length 2 in the graph.
+The equivalent SQL query, assuming $E$ has schema \texttt{(head, tail)}, is the following:
+\begin{lstlisting}[language=SQL]
+SELECT E1.head, E2.tail
+  FROM E AS E1, E AS E2
+ WHERE E1.tail = E2.head
+\end{lstlisting}
+\end{ex}
 
 \section{Join}
 \label{sec:join}
 
-\section{Query Optimization}
-\label{sec:query-optimization}
+Relational queries are compiled to relational algebra 
+ before they can be executed by a database system.
+The relational join is the central operation in relational algebra,
+ as it connects data from different relations 
+ and composes computation from different queries.
+In this section we describe the semantics of the join
+ as well as a simple algorithm to compute it.
+
+Given a {\em full} conjunctive query $Q$, 
+ the {\em natural join} over $Q$ computes exactly the query result.
+A {\em binary} join is a join involving only two relations.
+We can compute the natural join of multiple relations 
+ by joining two relations at a time.
+Given a conjunctive $Q(\bm{x}) \cd R_1(\bm{x}_1), R_2(\bm{x}_2), \ldots, R_n(\bm{x}_n)$,
+ define the following queries:
+\begin{align*}
+Q_2({\bm x_1} \cup {\bm x_2}) &\cd R_1({\bm x_1}), R_2({\bm x_2})\\
+Q_3({\bm x_1} \cup {\bm x_2} \cup {\bm x_3}) &\cd Q_2({\bm x_1} \cup {\bm x_2}), R_3({\bm x_3})\\
+& \vdots \\
+Q_n({\bm x_1} \cup {\bm x_2} \cup \cdots \cup {\bm x_n}) &\cd Q_{n-1}({\bm x_1} \cup {\bm x_2} \cup \cdots \cup {\bm x_{n-1}}), R_n({\bm x_n})
+\end{align*}
+Then $Q_n = Q$. 
+Indeed, most modern database systems compute the natural join of multiple relations 
+ by joining two relations at a time. 
+
+A simple yet effective algorithm to compute the binary join is called the {\em hash join},
+ and it is implemented in nearly every database system.
+Given a full conjunctive query of two relations $Q({\bm x_1} \cup {\bm x_2}) \cd R({\bm x_1}), S({\bm x_2})$,
+ let ${\bm x} \defeq {\bm x_1} \cap {\bm x_2}$.
+We pick one of the relations to be the {\em left} relation and the other to be the {\em right} relation.
+Suppose we pick $R$ to be the left relation, and $S$ to be the right relation.
+We first construct a hash map where each key is a tuple of values in ${\bm x}$,
+ and the key maps to a set of tuples in $S$ that have the same values in ${\bm x}$:
+%
+\begin{algorithm}[th]
+    $s \gets$ new hash map\;
+    \For { ${\bm x_2} \in S$ }
+    {
+        $s$[${\bm x}$].insert(${\bm x_2}$)\;
+    }
+    \For { ${\bm x_1} \in R$ }
+    {
+        \For { ${\bm x_2}$ $\in$ $s[{\bm x}]$ }
+        {
+            output $({\bm x_1}\cup {\bm x_2})$\;
+        }
+    }
+    \caption{Hash join.}
+    \label{algo:hash-join}
+\end{algorithm}
+
+
+\section{Datalog}
+\label{sec:datalog}
