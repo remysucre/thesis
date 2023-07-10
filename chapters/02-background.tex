@@ -51,18 +51,23 @@ For simplicity, we assume no $\bm{x}_i$ (or $\bm{x}$) contains duplicate variabl
 When the context is clear, 
  we will use $Q$ to refer to both the query and its output relation.
 The query $Q$ is called {\em safe} if each variable in $\bm{x}$ also appears in some $\bm{x}_i$.
-$Q$ is called a {\em full} conjunctive query if each variable in $\bm{x}_i$ also appears in $\bm{x}$.
 We will only consider safe queries in this thesis.
-The conjunctive query computes in $Q$ the set $\setof{\bm x}{\bigwedge_{i \in [1 \ldots n]} {\bm x_i} \in R_i}$.
+A variable only appearing in the body is called a {\em free} variable.
+Otherwise, it is called a {\em bound} variable. 
+$Q$ is called a {\em full} conjunctive query if it has no free variables.
+The conjunctive query computes in $Q$ the set 
+ $\setof{\bm x}{\exists_{\bm x_\text{free}} : \bigwedge_{i \in [1 \ldots n]} {\bm x_i} \in R_i}$
+ where ${\bm x_\text{free}}$ is the set of free variables.
 
 \begin{ex}
 \label{ex:cq}
 Using the relation $E$ from Example~\ref{ex:relation},
  the query $Q(x, z) \cd E(x, y), E(y, z).$
  computes all pairs of vertices $(x, z)$ 
- such that there is another vertex $y$ 
- connected to both $x$ and $z$;
- in other words, it finds all paths of length 2 in the graph.
+ such that there is a vertex $y$ 
+ connected to both $x$ and $z$.
+Formally, the set $\setof{(x, z)}{\exists y : (x, y) \in E \wedge (y, z) \in E}$
+In other words, it finds all paths of length 2 in the graph.
 The equivalent SQL query, assuming $E$ has schema \texttt{(head, tail)}, is the following:
 \begin{lstlisting}[language=SQL]
 SELECT E1.head, E2.tail
@@ -85,8 +90,8 @@ The relational join is the central operation in relational algebra,
  and composes computation from different queries.
 In this section we describe the semantics of the join
  as well as a simple algorithm to compute it.
-We also review other relational algebra operators
- including selection, projection, and union.
+We also review other relational algebra operators,
+ namely selection, projection, and union.
 
 Given a {\em full} conjunctive query $Q$ containing no constants, 
  the {\em natural join} over $Q$ computes exactly the query result.
@@ -109,22 +114,27 @@ We abuse ``${\bm t_1} \cup {\bm t_2}$'' to mean a tuple containing
 It is easy to check that $Q_n = Q$. 
 Indeed, most modern database systems compute the natural join of multiple relations 
  by joining two relations at a time, 
- while reordering the binary joins carefully for efficiency. 
+ after reordering the binary joins carefully for efficiency. 
 
 A simple yet effective algorithm to compute the binary join is called {\em hash join},
  and it is implemented in nearly every database system.
 Algorithm~\ref{algo:hash-join} shows the pseudocode for hash join.
 Given a full conjunctive query (without constants) 
  of two relations $Q({\bm x_1} \cup {\bm x_2}) \cd R({\bm x_1}), S({\bm x_2})$,
- let ${\bm x} \defeq {\bm x_1} \cap {\bm x_2}$,
- and let ${\bm i}$ be the positions of each ${\bm x}$ in ${\bm x_2}$.
+ let ${\bm x} \defeq {\bm x_1} \cap {\bm x_2}$.
+%  and let ${\bm i}$ be the positions of each ${\bm x}$ in ${\bm x_2}$.
 We pick one of the relations to be the {\em left} relation and the other to be the {\em right} relation.
 Suppose we pick $R$ to be the left relation, and $S$ to be the right relation.
-We first construct a hash map where each key is a tuple of values at positions ${\bm i}$ in $S$,
- and the key maps to a set of tuples in $S$ that have the same values in ${\bm x}$.
-Then, we iterate over each tuple in $R$,
- binding the values to ${\bm x_2}$,
- and looking up the hash map to find all tuples in $S$ that match the values in ${\bm x}$.
+We first initialize $s$ to be a empty hash map
+ where each key will be (a portion of) a tuple in $S$,
+ mapped to a vector of tuples in $S$.
+Then we iterate over each tuple in $S$, 
+ binding the values to ${\bm x_2}$.
+In each iteration,
+ we insert ${\bm x_2}$ to the vector mapped to by the key ${\bm x}$ (recall ${\bm x}$ contains a subset of the variables in ${\bm x_2}$).
+Next, we iterate over each tuple in $R$,
+ binding the values to ${\bm x_1}$,
+ and look up the hash map to find all tuples in $s$ that match the values in ${\bm x}$.
 For each match, we concatenate the tuples from each relation,
  and output the result.
 %
@@ -141,12 +151,12 @@ For each match, we concatenate the tuples from each relation,
             output $({\bm x_1}\cup {\bm x_2})$\;
         }
     }
-    \caption{Hash join of relations $R$ and $S$, using $S$ as the right relation.}
+    \caption{Hash join of $R({\bm x_1})$ and $S({\bm x_2})$, using $S$ as the right relation.}
     \label{algo:hash-join}
 \end{algorithm}
 
 To support conjunctive queries with constants, 
- duplicate variables, and that are not full,
+ duplicate variables, and those that are not full,
  we need two additional operators from relational algebra, 
  namely selection ($\sigma$) and projection ($\pi$).
 The selection operator $\sigma$ takes as arguments an atom $R({\bm x})$
@@ -160,9 +170,9 @@ The projection operator $\pi$ takes as arguments an atom $R({\bm x})$
  and returns a relation containing only attributes corresponding 
  to the variables in ${\bm y}$.
 For example, $\pi_{x}E(x, y)$ returns all source vertices in $E$.
-Both selection and projection can be implemented with a simple loop over the tuples in $R$.
+Both selection and projection can be implemented with a simple loop over the tuples in the input relation.
 Finally, computing UCQs requires the union operator $\cup$,
- which is the set union of the relations.
+ which simply takes the set union of the relations.
 Popular databases also implement several additional relational algebra operators 
  such as aggregation.
 In Chapter~\ref{chap:datalogo} we will show how to support aggregation
@@ -174,13 +184,13 @@ In Chapter~\ref{chap:datalogo} we will show how to support aggregation
 To compute the query $Q(x) \cd E(x, y), E(y, x)$ 
  (vertices that loop back to themselves in two steps),
  we first compute the join $J(x, y, z) \cd E(x, y), E(y, z)$, 
- then project out $y$ with $P(x, z) \cd \pi_{x, z} J(x, y, z)$,
- and finally select the tuples where $x = z$ with $Q(x) \cd \sigma_{x=z} P(x, z)$.
+ then select the tuples where $x = z$ with $S(x, y, z) \cd \sigma_{x=z} J(x, y, z)$.
+ then project out $y$ and $z$ with $Q(x) \cd \pi_{x} S(x, y, z)$,
 \end{ex}
  
-Although we have presented the computation of a query 
+Although we have presented the evaluation of a query 
  by computing a sequence of intermediate queries, 
- like $J$ and $P$ in Example~\ref{ex:selection},
+ like $J$ and $S$ in Example~\ref{ex:selection},
  in practice the database system will combine
  the different relational algebra operators 
  and compute the result ``in one go''.
@@ -188,7 +198,7 @@ This approach to avoid the intermediates
  is called {\em pipelining}.
 For example, to compute $Q$ in Example~\ref{ex:selection},
  we may fuse together the inner loop of the join
- with the loops of the projection and selection, 
+ with the loops of the selection and projection, 
  as shown in Algorithm~\ref{algo:pipeline}.
 
 \begin{algorithm}
@@ -203,7 +213,7 @@ $e \gets $ new hash map \;
     {
         \If { $x = z$ }
         {
-            output $z$\;
+            output $x$\;
         }
     }
 }
@@ -220,15 +230,16 @@ This can be achieved by computing the transitive closure
  of the edges in the network,
  which can be expressed as a recursive query.
 Datalog is a query language designed to support recursion, 
- and we review its semantics and exeuction algorithm in this section.
+ and we review its semantics and exeuction in this section.
 
 A Datalog program is a set of conjunctive queries.
-Each conjunctive is also called a {\em rule}.
+Each conjunctive query is also called a {\em rule}.
 Different rules may share the same head atom, 
  and some rules may have empty bodies.
 Recall that every head variable must appear in the body,
  so a rule with an empty body must only have constants in the head.
 We call such rules {\em facts}.
+We will sometimes omit the facts when they are clear from the context.
 If a relation never appears in any head that is not a fact,
  we call it an input relation or an {\em extensional database} (EDB) relation.
 Otherwise, we call it an output relation or an {\em intensional database} (IDB) relation.
@@ -244,22 +255,24 @@ The following Datalog program computes the transitive closure of the graph $E$
 \end{align*}
 \end{ex}
 
-We will sometimes omit the facts when they are clear from the context.
 The meaning of a Datalog program can be defined as the solution (or {\em model}) of 
  a set of logical constraints.
 This is known as the {\em model theoretic semantics} of Datalog.
 Specifically, we interpret each atom as a predicate,
- and treat each rule as a logical implication
+ and treat each rule as a $\forall$-quantified logical implication
  from the conjunction of the body atoms to the head atom.
+For example, the last rule in Example~\ref{ex:datalog} 
+ is interpreted as $\forall x, y, z : P(x, y), E(y, z) \implies P(x, z)$.
 Recall that a fact is a rule with an empty body,
  so we interpret it as an implication from \texttt{true}, 
  i.e., an assertion.
 Then the result of the Datalog program is the {\em smallest} relations 
  such that all constraints are satisfied.
 The emphasis on {\em smallest} is important, 
- because otherwise we may simply set every relation to contain all tuples
+ because otherwise we may simply set every relation $R$ with arity $k$ 
+ to contain all tuples $\setof{(t_1, t_2, \ldots, t_k)}{t_i \in D \text{ for each } i}$
  to satisfy the constraints.
-In fact, an SMT solver would return such a solution if given our constraints.
+% In fact, an SMT solver would return such a solution if given our constraints.
 
 \begin{ex}
 \label{ex:tc}
@@ -273,7 +286,7 @@ It is equivalent to the model theoretic semantics,
  but it tells us how to evaluate the Datalog program.
 For each relation $R_i$, the set of all rules with $R_i$ in the head 
  form a union of conjunctive queries.
-This UCQ computes a function $F_i$ from the relations in the rule bodies to $R_i$,
+This UCQ defines a function $F_i$ from the relations in the rule bodies to $R_i$,
  which we can extend to be a function from all relations to $R_i$ 
  (relations not in the bodies are simply ignored). 
 We write $F$ for the set of all $F_i$, 
@@ -297,7 +310,7 @@ $I \gets \emptyset$\;
 
 \begin{ex}
 \label{ex:tc-fixpoint}
-The evaluation of the transitive closure program is shown here:
+The evaluation of the program in Example~\ref{ex:datalog} is shown here:
 %
 \begin{align*}
     &
