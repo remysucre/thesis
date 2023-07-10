@@ -4,13 +4,13 @@
 Fifty years after its initial proposal by Edgar F. Codd,
  the relational model has cemeted its status as the de-facto data model 
  in nearly all modern databases.
-It provides data independence 
- which has allowed data systems to scale to unprecedented scales,
+It provides {\em data independence}, 
+ which has allowed data systems to scale to unprecedented sizes
  while guaranteeing performance and correctness.
 The success of the relational model is witnessed 
- by the popularity of SQL 
- which is uniquitous in computing systems 
- of any size from smartphones to data centers.
+ by the popularity of SQL, 
+ uniquitous in computing systems 
+ from smartphones to data centers.
 
  Nevertheless, traditional relational databases are struggling 
   to meet the demands of modern data analytics.
@@ -21,95 +21,144 @@ For example, machine learning workloads involve linear algebra operations
 For another example, graph analytics require iterative algorithms
  over graph data.
 Running these workloads in existing relational databases 
- is both cumbersome 
- (because SQL is a poor language for expressing the computation),
- and slow (because the systems are not optimized for such workloads).
+ is both cumbersome and slow:
+ SQL is a poor language for expressing the computation
+ and the systems are not optimized for such workloads.
 
-This dissertation is motivated by the following question: 
+This dissertation is motivated by the question: 
 {\em How can we renew relational database systems 
  to support modern data analytics?}
-In this dissertation, I propose a new language 
+Towards that end, I propose a new language foundation
  for writing relational programs;
  a new algorithm for the relational join;
  and techniques to optimize relational queries. 
+Together, these three ingredients make up 
+ the basis for a new generation of relational systems
+ that are more expressive and more efficient.
+Using these systems,
+ the analyst may author entire application programs
+ instead of simple queries {\em relationally},
+ entering the era of {\em relational programming}.
 
-\section{Motivation}
+\section{Motivation and Contributions}
 \label{sec:intro:motivation}
 
-There are tons of specialized systems for the tasks 
- in modern data analytics.
-For example (list machine learning systems), and (list graph databases).
-Given the abundance of such options,
- why do we still care about the relational systems?
-It's the same reason that made relational successful 
- for traditional data management: data independence.
-At a high level, data independence decouples
- how computation is specified from how it is carried out. 
-More specifically, the programmer writes a high-level,
- declarative program {\em once},
- and the relational system automatically 
- compiles and optimizes the program to execute 
- in a variety of environments:
- over data in-memory or on-disk;
- the data may be distributed over several machines,
- or it may arrive in a stream;
- and the system may take advantage of a large number of parallel threads,
- or specialized accelerators like the GPU.
-Other concerns include indexing, view materialization,
- approximation, and fault-toleration.
-In short, the users of a relational database need only focus on
- specifying {\em what} to compute, 
- and the database systems automatically figures out {\em how}. 
+% For fifty years, the relational data model has been the main choice for
+% representing, modeling, and processing data.  
+The main query language for relational databases, SQL, 
+ is found today in a wide range of applications and
+ devices. 
+%  from smart phones, to database servers, to distributed
+%  cloud-based clusters.
+The reason for its success is the {\em data
+  independence principle}, which separates the declarative model from
+the physical implementation~\cite{DBLP:journals/cacm/Codd70}, and
+enables advanced implementation techniques, such as cost-based
+optimizations, indices, materialized views, incremental view
+maintenance, parallel evaluation, and many others, while keeping the
+same simple, declarative interface to the data unchanged.
 
-Database systems have been roughly catergorized as {\em transactional},
- or OLTP, and {\em analytic}, or OLAP.
-In this dissertation we focus on the latter category.
-The main objective of the user of an OLAP database 
- is to analyze the stored data to gain insight about it.
-For example, the owner of an online store may hope to 
- analyze historic sales data to understand 
- the affect of promotion campaigns.
-An OLAP query often touches large amount of data,
- performing complex operations over them.
-In other words, we run big queries over big data. 
+But analysts today often need to perform tasks that require
+iteration over the data.
+Gradient descent, clustering, page-rank, network centrality, inference
+in knowledge graphs are some examples of common tasks in data science
+that require iteration.  While SQL has introduced recursion since 1999
+(through Common Table Expressions, CTE), it has many cumbersome
+limitations and is little used in practice~\cite{frankmcsherry-2022}.
 
-Over the past decade, the landscape of data analytics has changed.
-On one hand, people are working with many new forms of data, 
- in the form of graphs, matrices and tensors.
-On the other, they are running new kinds of computation 
- over such data, including linear/tensor algebra operations 
- and iterative graph algorithms.
-Initially designed and optimized for loop-free queries over tabular data,
- relational databases struggle to support modern data analytics. 
-They struggle in two levels: 
- at the interface between the system and the human,  
- the SQL language is not designed to express linear algebra operations 
- and iteration. 
-SQL queries expressing such computation are complex,
- brittle and ugly.
-At the interface between the system and the machine,
- traditional systems are not optimized for the workloads 
- central to modern analytics.
-For example, linear algebra extensively uses aggregation 
- which is rarely optimized in existing databases.
-For another example, most graph algorithms are iterative,
- yet existing databases only provide na\"ive optimizations for iterations. 
-Namely, most systems optimize within each iteration independently;
- the few systems that do optimize across iterations 
- only implement classic techniques like the magic-set transformation. 
+The need to support recursion in a declarative language led to the
+development of Datalog in the mid 80s~\cite{DBLP:conf/pods/Vianu21}.
+Datalog adds recursion to the relational query language, yet enjoys several elegant
+properties: it has a simple, declarative semantics; its na\"ive
+bottom-up evaluation algorithm always terminates; and it admits a few
+powerful optimizations, such as semi-na\"ive evaluation and magic set
+rewriting.  Datalog has been extensively studied in the literature;
+see~\cite{DBLP:journals/ftdb/GreenHLZ13} for a survey
+and~\cite{DBLP:books/mc/18/MaierTKW18,DBLP:conf/pods/Vianu21} for historical notes.
+We will also briefly review the semantics and execution of Datalog in
+ Chapter~\ref{chap:background}.
 
-Facing these challenges, a relational system modernized 
- for today's data analytics 
- should therefore provide an ergonomic language 
- for specifying a variety of computation 
- over different forms of data,
- and at the same time optimize it for efficient execution. 
+However, Datalog is not the answer to modern needs, because it only
+supports monotone queries over sets.  Most tasks in data science today
+require the interleaving of recursion and aggregate computation.
+Aggregates are not monotone under set inclusion, and therefore they
+are not supported by the framework of pure Datalog.  Neither SQL'99
+nor popular open-source Datalog systems like
+Souffl\'e~\cite{DBLP:conf/cav/JordanSS16} allow recursive queries to
+have aggregates.  While several proposals have been made to extend
+Datalog with
+aggregation~\cite{DBLP:conf/pods/GangulyGZ91,DBLP:conf/pods/RossS92,DBLP:journals/jcss/GangulyGZ95,DBLP:journals/vldb/MazuranSZ13,DBLP:conf/icde/ShkapskyYZ15,DBLP:conf/sigmod/ShkapskyYICCZ16,DBLP:conf/amw/ZanioloYDI16,DBLP:journals/tplp/ZanioloYDSCI17,DBLP:conf/amw/ZanioloYIDSC18,DBLP:journals/tplp/CondieDISYZ18,DBLP:conf/sigmod/0001WMSYDZ19,DBLP:journals/corr/abs-1910-08888,DBLP:journals/corr/abs-1909-08249,DBLP:journals/debu/ZanioloD0LL021},
+these extensions are at odds with the elegant properties of Datalog
+and have not been adopted by either Datalog systems or SQL engines.
 
-\section{Contributions}
-\label{sec:intro:contributions}
+\textbf{
+The first contribution of this dissertation is a foundation for a query language that
+supports both recursion and aggregation.}  
+Our language, called \datalogo, 
+ retains many of the elegant properties of Datalog,
+ while extending its expressiveness to support aggregation.
+Our proposal is based on the
+concept of $K$-relations, introduced in a seminal
+paper by Green, Karvounarakis, and Tannen~\cite{DBLP:conf/pods/GreenKT07}.
+In a $K$-relation, tuples are
+mapped to a fixed semiring. Standard relations (sets) are
+$\B$-relations where tuples are mapped to the Boolean semiring $\B$,
+relations with duplicates (bags) are $\N$-relations, sparse tensors
+are $\R$-relations, and so on.  Queries over $K$-relations are the
+familiar relational queries, where the operations $\wedge, \vee$ are
+replaced by the operations $\otimes, \oplus$ in the semiring;
+importantly, an existential quantifier $\exists$ becomes an
+$\oplus$-aggregate operator.
+$K$-relations are a very powerful abstraction, because they open up
+the possibility of adapting query processing and optimization
+techniques to other domains~\cite{DBLP:conf/pods/KhamisNR16}.
 
-Make intro accessible, expand the section for someone who doesn't follow 
- the work. 
+To evaluate any relational program, 
+ including \datalogo programs,
+ classic Datalog programs, 
+ or even SQL queries without recursion, 
+ the key operation is the relational join.
+The join allows us to combine data from different sources, 
+ as well as compose computation from multiple programs.
+Most mainstream databases today evaluate a query 
+ by joining two relations at a time.
+In other words, they implement {\em binary join} algorithms.
+Over the last decade, worst-case optimal join (\WCOJ)~\cite{
+  DBLP:conf/pods/NgoPRR12,
+  DBLP:conf/icdt/Veldhuizen14, 
+  DBLP:journals/sigmod/NgoRR13, 
+  DBLP:conf/pods/000118}
+ has emerged as
+ a breakthrough in the design of efficient join algorithms.  
+It can be
+asymptotically faster than traditional binary joins, all the while
+remaining simple to understand and
+implement~\cite{DBLP:journals/sigmod/NgoRR13}.  
+\WCOJ has opened up a flourishing field of research, leading to both theoretical
+results~\cite{DBLP:journals/sigmod/NgoRR13,DBLP:conf/pods/Khamis0S17}
+and practical
+implementations~\cite{DBLP:conf/icdt/Veldhuizen14,DBLP:journals/tods/AbergerLTNOR17,DBLP:journals/pvldb/FreitagBSKN20, DBLP:journals/pvldb/MhedhbiS19}.
+However, traditional binary join algorithms have benefited from 
+  decades of research and engineering.
+Techniques like column-oriented layout, vectorization, 
+  and query optimization
+  have contributed compounding constant-factor speedups,
+  making it challenging for \WCOJ to be competitive in practice.
+
+\textbf{
+The second contribution of this dissertation is a new join algorithm,
+  called \FJ, that unifies \WCOJ and binary join.}
+We propose several new techniques to make \FJ outperform
+both binary join and \WCOJ:
+\begin{enumerate}
+\item An algorithm to convert any binary join plan to a \FJ
+  plan that runs as fast or faster.
+\item A new data structure called
+\COLT (for \emph{Column-Oriented Lazy Trie}), adapting the classic
+column-oriented layout to improve the trie data structure used in
+\WCOJ.
+\item A vectorized execution algorithm for \FJ.
+\end{enumerate}
 
 \section{Related Work}
 \label{sec:intro:related-work}
