@@ -1,7 +1,7 @@
 \chapter{Introduction}
 \label{sec:intro}
 
-Fifty years after its initial proposal by Edgar F. Codd,
+Fifty years after its initial proposal by Edgar F. Codd~\cite{DBLP:journals/cacm/Codd70},
  the relational model has cemeted its status as the de-facto data model 
  in nearly all modern databases.
 It provides {\em data independence}, 
@@ -22,13 +22,13 @@ For another example, graph analytics require iterative algorithms
  over graph data.
 Running these workloads in existing relational databases 
  is both cumbersome and slow:
- SQL is a poor language for expressing the computation
+ SQL is a poor language for expressing the computation,
  and the systems are not optimized for such workloads.
 
 This dissertation is motivated by the question: 
 {\em How can we renew relational database systems 
  to support modern data analytics?}
-Towards that end, I propose a new language foundation
+Towards that end, we propose a new language foundation
  for writing relational programs;
  a new algorithm for the relational join;
  and techniques to optimize relational queries. 
@@ -45,7 +45,7 @@ Using these systems,
 
 % For fifty years, the relational data model has been the main choice for
 % representing, modeling, and processing data.  
-The main query language for relational databases, SQL, 
+The main query language for relational data, SQL, 
  is found today in a wide range of applications and
  devices. 
 %  from smart phones, to database servers, to distributed
@@ -94,32 +94,23 @@ and have not been adopted by either Datalog systems or SQL engines.
 \textbf{
 The first contribution of this dissertation is a foundation for a query language that
 supports both recursion and aggregation.}  
-Our language, called \datalogo, 
- retains many of the elegant properties of Datalog,
+Our language, called \datalogo, is a generalization of Datalog. 
+Intuitively, Datalog works over sets which are functions from tuples to booleans.
+\datalogo instead works over functions from tuples to values from a semiring.
+For example, setting the semiring to be the reals allows us to define recursive 
+ tensor programs in \datalogo,
+ and the using the min-plus tropical semiring $(\N \cup \set{\infty}, \min, +, \infty, 0)$
+ lets us compute shortest paths over weighted graphs.
+\datalogo retains many of the elegant properties of Datalog,
  while extending its expressiveness to support aggregation.
-Our proposal is based on the
-concept of $K$-relations, introduced in a seminal
-paper by Green, Karvounarakis, and Tannen~\cite{DBLP:conf/pods/GreenKT07}.
-In a $K$-relation, tuples are
-mapped to a fixed semiring. Standard relations (sets) are
-$\B$-relations where tuples are mapped to the Boolean semiring $\B$,
-relations with duplicates (bags) are $\N$-relations, sparse tensors
-are $\R$-relations, and so on.  Queries over $K$-relations are the
-familiar relational queries, where the operations $\wedge, \vee$ are
-replaced by the operations $\otimes, \oplus$ in the semiring;
-importantly, an existential quantifier $\exists$ becomes an
-$\oplus$-aggregate operator.
-$K$-relations are a very powerful abstraction, because they open up
-the possibility of adapting query processing and optimization
-techniques to other domains~\cite{DBLP:conf/pods/KhamisNR16}.
 
 To evaluate any relational program, 
  including \datalogo programs,
  classic Datalog programs, 
  or even SQL queries without recursion, 
- the key operation is the relational join.
+ a key operation is the relational join.
 The join allows us to combine data from different sources, 
- as well as compose computation from multiple programs.
+ as well as compose computation from different programs.
 Most mainstream databases today evaluate a query 
  by joining two relations at a time.
 In other words, they implement {\em binary join} algorithms.
@@ -161,7 +152,7 @@ column-oriented layout to improve the trie data structure used in
 \end{enumerate}
 
 While a faster join algorithm improves the performance of 
- relational programs at a low level,
+ relational programs at the operator level,
  modern data analytics presents abundant opportunities
  for higher-level optimizations.
 For example, machine learning pipelines heavily rely on 
@@ -197,7 +188,7 @@ fashion.  However, such syntactic rules fail on the simplest
 variations, for example SystemML fails to optimize $sum((X+UV^T)^2)$,
 where we just replaced $-$ with $+$.  Moreover, rules may interact
 with each other in complex ways.  In addition, complex ML programs
-often have many common subexpressions (CSE), that further interact
+often have many common subexpressions (CSE) that further interact
 with syntactic rules, for example the same expression $UV^T$ may occur
 in multiple contexts, each requiring different optimization rules.
 
@@ -212,10 +203,13 @@ the resulting Relational Algebra expressions, using only standard
 identities in RA.  Finally, the resulting RA expression is converted
 back to LA, and executed.
 
-Stepping back, the motivation for designing \datalogo 
- is to support recursion in modern workloads.
+Beyond linear algebra, 
+ the prevalence of recursion in modern workloads
+ also calls for novel optimization techniques.
+% Recall that supporting recursion and aggregation 
+%  motivated us to design \datalogo.
 Yet the optimization problem for recursive queries is little studied.
-Although various data analytics systems support recursion and iteration
+Although various data systems support recursion and iteration
  in one form or another, 
  most systems only optimize within each iteration.
 The few systems that optimize across iterations
@@ -239,8 +233,13 @@ which extends the reach of the FGH-rule, and also show how to use
 global constraints on the data for semantic optimizations using the
 FGH-rule.  
 
-\section{Related Work}
-\label{sec:intro:related-work}
+\section{Chapter Organization}
 
-Include miniKanren. Prolog v.s. Datalog: top-down v.s.
-bottom-up. Left recursion doesn't work in prolog. 
+The rest of this dissertation is organized as follows:
+\begin{itemize}
+  \item Chapter~\ref{chap:background} reviews the basics of relational data processing.
+  \item Chapter~\ref{chap:datalogo} introduces the \datalogo language as well as an algorithm to evaluate its programs. 
+  \item Chapter~\ref{chap:free-join} presents the \FJ algorithm.
+  \item Chapter~\ref{chapter:spores} presents the \sys system for optimizing linear algebra programs.
+  \item Chapter~\ref{chapter:fgh} presents our approach to optimizing recursive queries using the FGH-rule.
+\end{itemize}

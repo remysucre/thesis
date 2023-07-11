@@ -1,50 +1,7 @@
 \chapter{The \datalogo Language}
 \label{chap:datalogo}
 
-For fifty years, the relational data model has been the main choice for
-representing, modeling, and processing data.  Its main query
-language, SQL, is found today in a wide range of applications and
-devices, from smart phones, to database servers, to distributed
-cloud-based clusters.  The reason for its success is the {\em data
-  independence principle}, which separates the declarative model from
-the physical implementation~\cite{DBLP:journals/cacm/Codd70}, and
-enables advanced implementation techniques, such as cost-based
-optimizations, indices, materialized views, incremental view
-maintenance, parallel evaluation, and many others, while keeping the
-same simple, declarative interface to the data unchanged.
-
-But scientists today often need to perform tasks that require
-iteration over the data.
-Gradient descent, clustering, page-rank, network centrality, inference
-in knowledge graphs are some examples of common tasks in data science
-that require iteration.  While SQL has introduced recursion since 1999
-(through Common Table Expressions, CTE), it has many cumbersome
-limitations and is little used in practice~\cite{frankmcsherry-2022}.
-
-The need to support recursion in a declarative language led to the
-development of Datalog in the mid 80s~\cite{DBLP:conf/pods/Vianu21}.
-Datalog adds recursion to the relational query language, yet enjoys several elegant
-properties: it has a simple, declarative semantics; its na\"ive
-bottom-up evaluation algorithm always terminates; and it admits a few
-powerful optimizations, such as semi-na\"ive evaluation and magic set
-rewriting.  Datalog has been extensively studied in the literature;
-see~\cite{DBLP:journals/ftdb/GreenHLZ13} for a survey
-and~\cite{DBLP:books/mc/18/MaierTKW18,DBLP:conf/pods/Vianu21} for historical notes.
-
-However, Datalog is not the answer to modern needs, because it only
-supports monotone queries over sets.  Most tasks in data science today
-require the interleaving of recursion and aggregate computation.
-Aggregates are not monotone under set inclusion, and therefore they
-are not supported by the framework of pure Datalog.  Neither SQL'99
-nor popular open-source Datalog systems like
-Souffl\'e~\cite{DBLP:conf/cav/JordanSS16} allow recursive queries to
-have aggregates.  While several proposals have been made to extend
-Datalog with
-aggregation~\cite{DBLP:conf/pods/GangulyGZ91,DBLP:conf/pods/RossS92,DBLP:journals/jcss/GangulyGZ95,DBLP:journals/vldb/MazuranSZ13,DBLP:conf/icde/ShkapskyYZ15,DBLP:conf/sigmod/ShkapskyYICCZ16,DBLP:conf/amw/ZanioloYDI16,DBLP:journals/tplp/ZanioloYDSCI17,DBLP:conf/amw/ZanioloYIDSC18,DBLP:journals/tplp/CondieDISYZ18,DBLP:conf/sigmod/0001WMSYDZ19,DBLP:journals/corr/abs-1910-08888,DBLP:journals/corr/abs-1909-08249,DBLP:journals/debu/ZanioloD0LL021},
-these extensions are at odds with the elegant properties of Datalog
-and have not been adopted by either Datalog systems or SQL engines.
-
-In this paper\remy{change paper to thesis.} we propose a foundation for a query language that
+In this Chapter we propose a foundation for a query language that
 supports both recursion and aggregation.  Our proposal is based on the
 concept of $K$-relations, introduced in a seminal
 paper by Green, Karvounarakis, and Tannen~\cite{DBLP:conf/pods/GreenKT07}.
@@ -900,7 +857,7 @@ $F : \inst(\sigma,D,\bm P) \times \inst(\sigma_\B,D,\B) \times
 input an instance $(I, I_\B)$ of the EDBs and an instance $J$ of the
 IDBs, and computes a new instance $F(I,I_\B,J)$ of the IDBs by
 evaluating each sum-sum-product rule.  By fixing the EDBs, we will
-view the ICO as function from IDBs to IDBs, written as $F(J)$.\remy{Change I to J in semi-naive algorithm.}
+view the ICO as function from IDBs to IDBs, written as $F(J)$.
  We define the {\em semantics} of the \datalogo
 program~\eqref{eq:basic:datalogo} as the least fixpoint of the ICO
 $F$, when it exists.
