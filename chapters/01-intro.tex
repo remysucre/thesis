@@ -160,6 +160,85 @@ column-oriented layout to improve the trie data structure used in
 \item A vectorized execution algorithm for \FJ.
 \end{enumerate}
 
+While a faster join algorithm improves the performance of 
+ relational programs at a low level,
+ modern data analytics presents abundant opportunities
+ for higher-level optimizations.
+For example, machine learning pipelines heavily rely on 
+ linear algebra operations,
+ and the order to carry out these operations
+ can have a significant impact on performance.
+Consider the Linear Algebra (LA) expression $sum((X-UV^T)^2)$ which
+defines a typical loss function for approximating a matrix $X$ with a
+low-rank matrix $UV^T$. Here, $sum()$ computes the sum of all matrix
+entries in its argument, and $A^2$ squares the matrix $A$
+element-wise. Suppose $X$ is a sparse, 1M x 500k matrix, and suppose
+$U$ and $V$ are dense vectors of dimensions 1M and 500k respectively.
+Thus, $UV^T$ is a rank 1 matrix of size 1M x 500k, and computing it
+naively requires 0.5 trillion multiplications, plus memory allocation.
+Fortunately, the expression is equivalent to
+$sum(X^2) - 2U^TXV + U^TU * V^TV$.  Here $U^TXV$ is a scalar that can
+be computed efficiently by taking advantage of the sparsity of $X$,
+and, similarly, $U^TU$ and $V^TV$ are scalar values requiring only 1M
+and 500k multiplications respectively.
+
+Optimization opportunities like this are ubiquitous in machine
+learning programs. State-of-the-art optimizing compilers such as
+SystemML~\cite{DBLP:reference/bdt/Boehm19},
+OptiML\cite{DBLP:conf/icml/SujeethLBRCWAOO11}, and
+Cumulon\cite{DBLP:conf/sigmod/HuangB013} commonly implement syntactic
+rewrite rules that exploit the algebraic properties of the LA
+expressions. For example, SystemML includes a rule that rewrites the
+preceding example to a specialized operator\footnote{See the
+  \href{https://systemml.apache.org/docs/0.12.0/engine-dev-guide.html}{SystemML
+    Engine Developer Guide} for details on the weighted-square loss
+  operator \texttt{wsloss}. } to compute the result in a streaming
+fashion.  However, such syntactic rules fail on the simplest
+variations, for example SystemML fails to optimize $sum((X+UV^T)^2)$,
+where we just replaced $-$ with $+$.  Moreover, rules may interact
+with each other in complex ways.  In addition, complex ML programs
+often have many common subexpressions (CSE), that further interact
+with syntactic rules, for example the same expression $UV^T$ may occur
+in multiple contexts, each requiring different optimization rules.
+
+\textbf{The third contribution of this paper is \sys, a novel optimization approach for
+complex linear algebra programs} that leverages relational algebra as
+an intermediate representation to completely represent the search
+space.
+SPORES first transforms LA expressions into traditional
+Relational Algebra (RA) expressions consisting of joins, unions 
+and aggregates.  It then performs a cost-based optimizations on
+the resulting Relational Algebra expressions, using only standard
+identities in RA.  Finally, the resulting RA expression is converted
+back to LA, and executed.
+
+Stepping back, the motivation for designing \datalogo 
+ is to support recursion in modern workloads.
+Yet the optimization problem for recursive queries is little studied.
+Although various data analytics systems support recursion and iteration
+ in one form or another, 
+ most systems only optimize within each iteration.
+The few systems that optimize across iterations
+ apply limited techniques, like magic set optimization
+ or semi-na\"ive evaluation,
+ which are restricted to postitive queries.
+
+
+\textbf{The fourth and final contribution of this dissertation is a new query optimization framework for
+recursive queries.}
+Our framework replaces a recursive program with
+another, equivalent recursive program, whose body may be quite
+different, and thus focuses on optimizing the recursive program as a
+whole, not on optimizing its body in isolation; the latter can be done
+separately, using standard query optimization techniques.  Our
+optimization is based on a novel rewrite rule for recursive programs,
+called the FGH-rule, which we implement using {\em program synthesis},
+a technique developed in the programming languages and verification
+communities. We introduce a new method for inferring loop invariants,
+which extends the reach of the FGH-rule, and also show how to use
+global constraints on the data for semantic optimizations using the
+FGH-rule.  
+
 \section{Related Work}
 \label{sec:intro:related-work}
 
