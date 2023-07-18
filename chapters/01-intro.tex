@@ -217,6 +217,45 @@ The few systems that optimize across iterations
  or semi-na\"ive evaluation,
  which are restricted to postitive queries.
 
+For example, consider the following Datalog query, 
+ computing the distance between all pairs of nodes in a graph: 
+%
+\begin{lstlisting}[mathescape=true]
+path(X,Y,L) :- edge(X,Y,L).
+path(X,Y,L) :- edge(X,Z,L$_1$), path(Z,Y,L$_2$), L=L$_1$+L$_2$.
+dist(X,Y,D) :- D=min { L | path(X,Y,L) }.
+\end{lstlisting}
+%
+We will cover the semantics of Datalog in Chapter~\ref{chap:background},
+ but intuitively explain the query here.
+The first rule says that there is a path of length $L$ from $X$ to $Y$
+ if there is an edge from $X$ to $Y$ of length $L$.
+The second rule says that there is a path of length $L_1 + L_2$ from $X$ to $Y$
+ if there is an edge from $X$ to $Z$ of length $L_1$,
+ and a path of length $L_2$ from $Z$ to $Y$.
+Finally, the last rule says that the distance from $X$ to $Y$ is the minimum
+ length of all paths from $X$ to $Y$.
+The program is intuitive yet inefficient:
+ to find the shortest path between two nodes,
+ it first computes {\em all} paths between the nodes.
+A graph with cycles also contains an infinite number of paths,
+ and the program will not terminate.
+A different query, in our new \datalogo language, 
+ computes the shortest paths more efficiently:
+%
+\begin{lstlisting}[mathescape=true]
+path(X, Y) = min (edge(X, Y), min$_\texttt{Z}$ { edge(X, Z) + path(Z, Y) })
+\end{lstlisting}
+%
+Here we treat \lstinline|path| and \lstinline|edge| as functions
+ from pairs of nodes to some length.
+The program essentially follows the Bellman-Ford algorithm.
+Initially we assign the distance of every pair to be the length of the edge between them. 
+Then, in each iteration, we update the distance in a breadth-first manner,
+ adding the length of an edge from a previously found distance. 
+This new program is more efficient and terminates on cyclic graphs with postitive lengths.
+It is natural to hope a query optimizer can rewrite the first program to the second,
+ and perform similar optimization for other recursive queries.
 
 \textbf{The fourth and final contribution of this dissertation is a new query optimization framework for
 recursive queries.}

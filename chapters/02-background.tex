@@ -47,7 +47,7 @@ where each $\bm{x}_i$ (and $\bm{x}$) is a tuple consisting of variables and cons
 $\bm{x}_i$ must have the same arity as $R_i$,
  and the arity of $\bm{x}$ is called the {\em arity} of the query.
 Each $R_i({\bm x_i})$ (and $Q({\bm x})$) is called an {\em atom}.
-For simplicity, we assume no $\bm{x}_i$ (or $\bm{x}$) contains duplicate variables.
+% For simplicity, we assume no $\bm{x}_i$ (or $\bm{x}$) contains duplicate variables.
 When the context is clear, 
  we will use $Q$ to refer to both the query and its output relation.
 The query $Q$ is called {\em safe} if each variable in $\bm{x}$ also appears in some $\bm{x}_i$.
@@ -78,7 +78,13 @@ SELECT E1.head, E2.tail
 
 Finally, a set of multiple conjunctive queries with the same head relation
  defines a {\em union of conjunctive queries} (UCQ).
-As the name suggests, it computes the union of each conjunctive query.
+It has the form:
+\begin{align*}
+  Q(\bm{x}) & \cd R_{i_1}(\bm{x}_1), R_{i_2}(\bm{x}_2), \ldots, R_{i_m}(\bm{x}_m) \\
+  Q(\bm{y}) & \cd R_{j_1}(\bm{y}_1), R_{j_2}(\bm{y}_2), \ldots, R_{j_n}(\bm{y}_n) \\
+  & \hspace{4em} \cdots
+\end{align*}
+As the name suggests, a UCQ computes the union of each conjunctive query.
 
 \section{Relational Algebra}
 \label{sec:join}
@@ -93,8 +99,9 @@ In this section we describe the semantics of the join
 We also review other relational algebra operators,
  namely selection, projection, and union.
 
-Given a {\em full} conjunctive query $Q$ containing no constants, 
- the {\em natural join} over $Q$ computes exactly the query result.
+A {\em full} conjunctive query $Q$ where 
+ no atom contains constants or duplicate variables
+ is called a {\em natural join} over the relations in $Q$.
 We will only consider the natural join in this thesis, 
  and will simply call it {\em join}.
 A {\em binary} join is a join involving only two relations.
