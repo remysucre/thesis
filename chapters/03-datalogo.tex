@@ -471,7 +471,10 @@ Traditionally, these spurious monomials are harmless, because their
 value is 0.  However, in our setting, their value is $\bot$, and they
 may change the result.  This is precisely the role of the conditional
 $\Phi$ in~\eqref{eq:t:monomial}: to control the range of the variables
-and ensure that the semantics is domain independent.  All examples in
+and ensure that the semantics is {\em domain independent},
+ meaning a query produces the same result for every domain 
+ that contains the active domain.
+  All examples in
 this paper are written such that they are domain independent.
 
 Finally, (conditional) sum-sum-product queries are defined in the natural way:
@@ -642,10 +645,13 @@ $\texttt{THREE}$ we have $0 \wedge \bot = 0$.
 \subsubsection{Stable Semirings}
 \label{subsec:stable:semirings}
 
-We illustrate here two examples of semirings that are {\em stable}, a
+We illustrate two examples of semirings that are {\em stable}, a
 property defined formally in~\cite{DBLP:conf/pods/Khamis0PSW22}.  
-Both
-examples are adapted from~\cite[Example 7.1.4]{semiring_book}
+In short, a semiring $\bm S$ is stable if for every $u \in \bm S$, 
+ the sequence $u^{(i)} \defeq 1 \oplus u \oplus u^2 \oplus \cdots \oplus u^i$ converges after $p$ terms, 
+ where $u^i \defeq u \otimes u \otimes \cdots \otimes u$ ($i$ times).
+That is, $u^{(p)}$ = $u^{(p+1)}$ for some $p$.
+Both examples are adapted from~\cite[Example 7.1.4]{semiring_book}
 and~\cite[Chapt.8, Sec.1.3.2]{semiring_book} respectively.  If $A$ is
 a set and $p \geq 0$ a natural number, then we denote by $\calP_p(A)$
 the set of subsets of $A$ of size $p$, and by $\calB_p(A)$ the set of

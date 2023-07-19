@@ -560,7 +560,7 @@ rules, as follows.  A {\em sum-product} query is an expression
 %
 \begin{align}
   T(x_1, \ldots, x_k) &\cd \bigoplus_{x_{k+1}, \ldots,x_p \in D} A_1 \otimes  \cdots \otimes A_m
-                        \label{eq:t:monomial}
+                        \label{eq:t:mono}
 \end{align}
 %
 where each $A_u$ is a {\em relational atom} of the form
@@ -568,7 +568,7 @@ $R_i(x_{t_{1_{i}}}, \ldots, x_{t_{k_i}})$, or some interpreted predicate such as
 $x_i > 5x_j+3$.  The variables $x_1, \ldots, x_k$ are called {\em
   free variables}, or {\em head variables}, and the others are called
 {\em bound variables}.
-% The body of the query (RHS of~\eqref{eq:t:monomial}) is a {\em
+% The body of the query (RHS of~\eqref{eq:t:mono}) is a {\em
 % sum-product expression}.
 A {\em sum-sum-product} query has the form:
 %
@@ -594,13 +594,13 @@ $Q$.
   pre-semiring.} A $\name$ program consists of a set of (possibly
 recursive) sum-sum-product rules~\eqref{eq:sum:sum:product}
 \update{over $\bm S$-relations.} \update{We allow two extensions to
-  the expressions~\eqref{eq:t:monomial}
+  the expressions~\eqref{eq:t:mono}
   and~\eqref{eq:sum:sum:product}}: the summation
-in~\eqref{eq:t:monomial} may be restricted by some Boolean predicate,
+in~\eqref{eq:t:mono} may be restricted by some Boolean predicate,
 % an atom $A_i$ may be a variable
 % $x_j$, if the type of the variable is the value domain (i.e., the
 % semiring $\bm S$); 
-and we also allow \update{an atom $A$ in~\eqref{eq:t:monomial} to be
+and we also allow \update{an atom $A$ in~\eqref{eq:t:mono} to be
   an {\em interpreted function}.  One important interpreted function
   is the cast operator $[-]_{\zero}^{\one} : \B \rightarrow \bm S$,
   which maps $0$ to $\zero$ and $1$ to $\one$ and therefore, for any
@@ -2200,7 +2200,7 @@ Eq.~\eqref{eq:sum:sum:product},
 \end{align*}
 %
 where each $G_i(X)$ is a sum-product expression,
-Eq.~\eqref{eq:t:monomial}, using the IDBs $X$ and/or the EDBs.
+Eq.~\eqref{eq:t:mono}, using the IDBs $X$ and/or the EDBs.
 
 To generate $\texttt{normalize}(H(G(X)))$, \update{we group its
   sum-products by the number of occurrences of $Y$:}
