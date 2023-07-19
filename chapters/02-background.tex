@@ -41,32 +41,32 @@ Let $E \defeq \setof{(x, y)}{x, y \in D}$, then $E$ is the complete graph on $D$
 Given a set of relations $R_1, R_2, \ldots, R_n$, 
  a {\em conjunctive query} (CQ) is of the form:
 \[
-  Q(\bm{x}) \cd R_1(\bm{x}_1), R_2(\bm{x}_2), \ldots, R_n(\bm{x}_n).
+  Q(\bm{X}) \cd R_1(\bm{X}_1), R_2(\bm{X}_2), \ldots, R_n(\bm{X}_n).
 \]
-where each $\bm{x}_i$ (and $\bm{x}$) is a tuple consisting of variables and constants.
-$\bm{x}_i$ must have the same arity as $R_i$,
- and the arity of $\bm{x}$ is called the {\em arity} of the query.
-Each $R_i({\bm x_i})$ (and $Q({\bm x})$) is called an {\em atom}.
+where each $\bm{X}_i$ (and $\bm{X}$) is a tuple consisting of variables and constants.
+$\bm{X}_i$ must have the same arity as $R_i$,
+ and the arity of $\bm{X}$ is called the {\em arity} of the query.
+Each $R_i({\bm X_i})$ (and $Q({\bm X})$) is called an {\em atom}.
 % For simplicity, we assume no $\bm{x}_i$ (or $\bm{x}$) contains duplicate variables.
 When the context is clear, 
  we will use $Q$ to refer to both the query and its output relation.
-The query $Q$ is called {\em safe} if each variable in $\bm{x}$ also appears in some $\bm{x}_i$.
+The query $Q$ is called {\em safe} if each variable in $\bm{X}$ also appears in some $\bm{X}_i$.
 We will only consider safe queries in this thesis.
-A variable only appearing in the body is called a {\em free} variable.
-Otherwise, it is called a {\em bound} variable. 
-$Q$ is called a {\em full} conjunctive query if it has no free variables.
+A variable only appearing in the body is called a {\em bound} variable.
+Otherwise, it is called a {\em free} variable. 
+$Q$ is called a {\em full} conjunctive query if it has no bound variables.
 The conjunctive query computes in $Q$ the set 
- $\setof{\bm x}{\exists_{\bm x_\text{free}} : \bigwedge_{i \in [1 \ldots n]} {\bm x_i} \in R_i}$
- where ${\bm x_\text{free}}$ is the set of free variables.
+ $\setof{\bm X}{\exists_{\bm X_\text{bound}} : \bigwedge_{i \in [1 \ldots n]} {\bm X_i} \in R_i}$
+ where ${\bm X_\text{bound}}$ is the set of bound variables.
 
 \begin{ex}
 \label{ex:cq}
 Using the relation $E$ from Example~\ref{ex:relation},
- the query $Q(x, z) \cd E(x, y), E(y, z).$
- computes all pairs of vertices $(x, z)$ 
- such that there is a vertex $y$ 
- connected to both $x$ and $z$.
-Formally, the set $\setof{(x, z)}{\exists y : (x, y) \in E \wedge (y, z) \in E}$
+ the query $Q(X, Z) \cd E(X, Y), E(Y, Z).$
+ computes all pairs of vertices $(X, Z)$ 
+ such that there is a vertex $Y$ 
+ connected to both $X$ and $Z$.
+Formally, the set $\setof{(x, z)}{\exists y : (x, y) \in E \wedge (y, z) \in E}$.
 In other words, it finds all paths of length 2 in the graph.
 The equivalent SQL query, assuming $E$ has schema \texttt{(head, tail)}, is the following:
 \begin{lstlisting}[language=SQL]
@@ -80,8 +80,8 @@ Finally, a set of multiple conjunctive queries with the same head relation
  defines a {\em union of conjunctive queries} (UCQ).
 It has the form:
 \begin{align*}
-  Q(\bm{x}) & \cd R_{i_1}(\bm{x}_1), R_{i_2}(\bm{x}_2), \ldots, R_{i_m}(\bm{x}_m) \\
-  Q(\bm{y}) & \cd R_{j_1}(\bm{y}_1), R_{j_2}(\bm{y}_2), \ldots, R_{j_n}(\bm{y}_n) \\
+  Q(\bm{X}) & \cd R_{i_1}(\bm{X}_1), R_{i_2}(\bm{X}_2), \ldots, R_{i_m}(\bm{X}_m) \\
+  Q(\bm{Y}) & \cd R_{j_1}(\bm{Y}_1), R_{j_2}(\bm{Y}_2), \ldots, R_{j_n}(\bm{Y}_n) \\
   & \hspace{4em} \cdots
 \end{align*}
 As the name suggests, a UCQ computes the union of each conjunctive query.
@@ -107,17 +107,17 @@ We will only consider the natural join in this thesis,
 A {\em binary} join is a join involving only two relations.
 We can compute the natural join of multiple relations 
  by joining two relations at a time.
-Given a conjunctive $Q(\bm{x}) \cd R_1(\bm{x}_1), R_2(\bm{x}_2), \ldots, R_n(\bm{x}_n)$,
+Given a conjunctive $Q(\bm{X}) \cd R_1(\bm{X}_1), R_2(\bm{X}_2), \ldots, R_n(\bm{X}_n)$,
  define the following queries:
 \begin{align*}
-Q_2({\bm x_1} \cup {\bm x_2}) &\cd R_1({\bm x_1}), R_2({\bm x_2})\\
-Q_3({\bm x_1} \cup {\bm x_2} \cup {\bm x_3}) &\cd Q_2({\bm x_1} \cup {\bm x_2}), R_3({\bm x_3})\\
+Q_2({\bm X_1} \cup {\bm X_2}) &\cd R_1({\bm X_1}), R_2({\bm X_2})\\
+Q_3({\bm X_1} \cup {\bm X_2} \cup {\bm X_3}) &\cd Q_2({\bm X_1} \cup {\bm X_2}), R_3({\bm X_3})\\
 & \vdots \\
-Q_n({\bm x_1} \cup {\bm x_2} \cup \cdots \cup {\bm x_n}) &\cd Q_{n-1}({\bm x_1} \cup {\bm x_2} \cup \cdots \cup {\bm x_{n-1}}), R_n({\bm x_n})
+Q_n({\bm X_1} \cup {\bm X_2} \cup \cdots \cup {\bm X_n}) &\cd Q_{n-1}({\bm X_1} \cup {\bm X_2} \cup \cdots \cup {\bm X_{n-1}}), R_n({\bm X_n})
 \end{align*}
-We abuse ``${\bm t_1} \cup {\bm t_2}$'' to mean a tuple containing 
- all variables in ${\bm t_1}$ and ${\bm t_2}$ without duplicates, in any order, 
- and similarly for ``${\bm t_1} \cap {\bm t_2}$''.
+We abuse ``${\bm X_1} \cup {\bm X_2}$'' to mean a tuple containing 
+ all variables in ${\bm X_1}$ and ${\bm X_2}$ without duplicates, in any order, 
+ and similarly for ``${\bm X_1} \cap {\bm X_2}$''.
 It is easy to check that $Q_n = Q$. 
 Indeed, most modern database systems compute the natural join of multiple relations 
  by joining two relations at a time, 
@@ -127,8 +127,8 @@ A simple yet effective algorithm to compute the binary join is called {\em hash 
  and it is implemented in nearly every database system.
 Algorithm~\ref{algo:hash-join} shows the pseudocode for hash join.
 Given a full conjunctive query (without constants) 
- of two relations $Q({\bm x_1} \cup {\bm x_2}) \cd R({\bm x_1}), S({\bm x_2})$,
- let ${\bm x} \defeq {\bm x_1} \cap {\bm x_2}$.
+ of two relations $Q({\bm X_1} \cup {\bm X_2}) \cd R({\bm X_1}), S({\bm X_2})$,
+ let ${\bm X} \defeq {\bm X_1} \cap {\bm X_2}$.
 %  and let ${\bm i}$ be the positions of each ${\bm x}$ in ${\bm x_2}$.
 We pick one of the relations to be the {\em left} relation and the other to be the {\em right} relation.
 Suppose we pick $R$ to be the left relation, and $S$ to be the right relation.
@@ -136,29 +136,29 @@ We first initialize $s$ to be a empty hash map
  where each key will be (a portion of) a tuple in $S$,
  mapped to a vector of tuples in $S$.
 Then we iterate over each tuple in $S$, 
- binding the values to ${\bm x_2}$.
+ binding the values to ${\bm X_2}$.
 In each iteration,
- we insert ${\bm x_2}$ to the vector mapped to by the key ${\bm x}$ (recall ${\bm x}$ contains a subset of the variables in ${\bm x_2}$).
+ we insert ${\bm X_2}$ to the vector mapped to by the key ${\bm X}$ (recall ${\bm X}$ contains a subset of the variables in ${\bm X_2}$).
 Next, we iterate over each tuple in $R$,
- binding the values to ${\bm x_1}$,
- and look up the hash map to find all tuples in $s$ that match the values in ${\bm x}$.
+ binding the values to ${\bm X_1}$,
+ and look up the hash map to find all tuples in $s$ that match the values in ${\bm X}$.
 For each match, we concatenate the tuples from each relation,
  and output the result.
 %
 \begin{algorithm}[th]
     $s \gets$ new hash map\;
-    \For { ${\bm x_2} \in S$ }
+    \For { ${\bm X_2} \in S$ }
     {
-        $s$[${\bm x}$].insert(${\bm x_2}$)\;
+        $s$[${\bm X}$].insert(${\bm X_2}$)\;
     }
-    \For { ${\bm x_1} \in R$ }
+    \For { ${\bm X_1} \in R$ }
     {
-        \For { ${\bm x_2}$ $\in$ $s[{\bm x}]$ }
+        \For { ${\bm X_2}$ $\in$ $s[{\bm X}]$ }
         {
-            output $({\bm x_1}\cup {\bm x_2})$\;
+            output $({\bm X_1}\cup {\bm X_2})$\;
         }
     }
-    \caption{Hash join of $R({\bm x_1})$ and $S({\bm x_2})$, using $S$ as the right relation.}
+    \caption{Hash join of $R({\bm X_1})$ and $S({\bm X_2})$, using $S$ as the right relation.}
     \label{algo:hash-join}
 \end{algorithm}
 
@@ -166,17 +166,17 @@ To support conjunctive queries with constants,
  duplicate variables, and those that are not full,
  we need two additional operators from relational algebra, 
  namely selection ($\sigma$) and projection ($\pi$).
-The selection operator $\sigma$ takes as arguments an atom $R({\bm x})$
- and a predicate $\theta$ over ${\bm x}$,
+The selection operator $\sigma$ takes as arguments an atom $R({\bm X})$
+ and a predicate $\theta$ over ${\bm X}$,
  and returns a subset of the relation $R$ containing only the tuples that satisfy $\theta$.
-For example, $\sigma_{x = 1}E(x, y)$ returns all edges in $E$ that start at vertex 1.
-For another example, $\sigma_{x = y}E(x, y)$ returns all edges in $E$ that are self-loops;
- it is equivalent to repeating the variable $x$, i.e., $E(x, x)$.
-The projection operator $\pi$ takes as arguments an atom $R({\bm x})$
- and a set of variables ${\bm y} \subseteq {\bm x}$,
+For example, $\sigma_{X = 1}E(X, Y)$ returns all edges in $E$ that start at vertex 1.
+For another example, $\sigma_{X = Y}E(X, Y)$ returns all edges in $E$ that are self-loops;
+ it is equivalent to repeating the variable $X$, i.e., $E(X, X)$.
+The projection operator $\pi$ takes as arguments an atom $R({\bm X})$
+ and a set of variables ${\bm Y} \subseteq {\bm X}$,
  and returns a relation containing only attributes corresponding 
- to the variables in ${\bm y}$.
-For example, $\pi_{x}E(x, y)$ returns all source vertices in $E$.
+ to the variables in ${\bm Y}$.
+For example, $\pi_{X}E(X, Y)$ returns all source vertices in $E$.
 Both selection and projection can be implemented with a simple loop over the tuples in the input relation.
 Finally, computing UCQs requires the union operator $\cup$,
  which simply takes the set union of the relations.
@@ -188,11 +188,11 @@ In Chapter~\ref{chap:datalogo} we will show how to support aggregation
 
 \begin{ex}
 \label{ex:selection}
-To compute the query $Q(x) \cd E(x, y), E(y, x)$ 
- (vertices that loop back to themselves in two steps),
- we first compute the join $J(x, y, z) \cd E(x, y), E(y, z)$, 
- then select the tuples where $x = z$ with $S(x, y, z) \cd \sigma_{x=z} J(x, y, z)$.
- then project out $y$ and $z$ with $Q(x) \cd \pi_{x} S(x, y, z)$,
+To compute the query $Q(X) \cd E(X, Y), E(Y, X)$ 
+ (set of vertices that loop back to themselves in two steps),
+ we first compute the join $J(X, Y, Z) \cd E(X, Y), E(Y, Z)$, 
+ then select the tuples where $X = Z$ with $S(X, Y, Z) \cd \sigma_{X=Z} J(X, Y, Z)$.
+ then project out $Y$ and $Z$ with $Q(X) \cd \pi_{X} S(X, Y, Z)$.
 \end{ex}
  
 Although we have presented the evaluation of a query 
@@ -210,17 +210,17 @@ For example, to compute $Q$ in Example~\ref{ex:selection},
 
 \begin{algorithm}
 $e \gets $ new hash map \;
-\For { $(y, z) \in E$ }
+\For { $(Y, Z) \in E$ }
 {
-    $e[y].insert((y, z))$\;
+    $e[Y].insert((Y, Z))$\;
 }
-\For { $(x, y) \in E$ }
+\For { $(X, Y) \in E$ }
 {
-    \For { $(y, z) \in e[y]$ }
+    \For { $(Y, Z) \in e[Y]$ }
     {
-        \If { $x = z$ }
+        \If { $X = Z$ }
         {
-            output $x$\;
+            output $X$\;
         }
     }
 }
@@ -257,8 +257,8 @@ The following Datalog program computes the transitive closure of the graph $E$
  which is a chain of 4 edges through 5 vertices.
 \begin{align*}
   &E(1, 2). \, E(2, 3). \, E(3, 4). \, E(4, 5).\\
-  &P(x, y) \cd E(x, y).\\
-  &P(x, z) \cd P(x, y), E(y, z).
+  &P(X, Y) \cd E(X, Y).\\
+  &P(X, Z) \cd P(X, Y), E(Y, Z).
 \end{align*}
 \end{ex}
 
@@ -269,7 +269,7 @@ Specifically, we interpret each atom as a predicate,
  and treat each rule as a $\forall$-quantified logical implication
  from the conjunction of the body atoms to the head atom.
 For example, the last rule in Example~\ref{ex:datalog} 
- is interpreted as $\forall x, y, z : P(x, y), E(y, z) \implies P(x, z)$.
+ is interpreted as $\forall X, Y, Z : P(X, Y), E(Y, Z) \implies P(X, Z)$.
 Recall that a fact is a rule with an empty body,
  so we interpret it as an implication from \texttt{true}, 
  i.e., an assertion.

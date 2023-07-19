@@ -223,7 +223,7 @@ For example, consider the following Datalog query,
 \begin{lstlisting}[mathescape=true]
 path(X,Y,L) :- edge(X,Y,L).
 path(X,Y,L) :- edge(X,Z,L$_1$), path(Z,Y,L$_2$), L=L$_1$+L$_2$.
-dist(X,Y,D) :- D=min { L | path(X,Y,L) }.
+dist(X,Y,D) :- D=min{ L | path(X,Y,L) }.
 \end{lstlisting}
 %
 We will cover the semantics of Datalog in Chapter~\ref{chap:background},
@@ -244,7 +244,7 @@ A different query, in our new \datalogo language,
  computes the shortest paths more efficiently:
 %
 \begin{lstlisting}[mathescape=true]
-path(X, Y) = min (edge(X, Y), min$_\texttt{Z}$ { edge(X, Z) + path(Z, Y) })
+path(X, Y) = min(edge(X, Y), min$_\texttt{Z}${ edge(X, Z) + path(Z, Y) })
 \end{lstlisting}
 %
 Here we treat \lstinline|path| and \lstinline|edge| as functions
