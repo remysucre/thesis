@@ -240,23 +240,16 @@ Datalog is a query language designed to support recursion,
  and we review its semantics and exeuction in this section.
 
 A Datalog program is a set of conjunctive queries.
-Each conjunctive query is also called a {\em rule}.
-Different rules may share the same head atom, 
- and some rules may have empty bodies.
-Recall that every head variable must appear in the body,
- so a rule with an empty body must only have constants in the head.
-We call such rules {\em facts}.
-We will sometimes omit the facts when they are clear from the context.
-If a relation never appears in any head that is not a fact,
+Each conjunctive query is also called a {\em rule}, 
+ where different rules may share the same head atom. 
+If a relation never appears in any head atom,
  we call it an input relation or an {\em extensional database} (EDB) relation.
 Otherwise, we call it an output relation or an {\em intensional database} (IDB) relation.
 
 \begin{ex}
 \label{ex:datalog}
-The following Datalog program computes the transitive closure of the graph $E$ 
- which is a chain of 4 edges through 5 vertices.
+The following Datalog program computes the transitive closure of the graph $E$. 
 \begin{align*}
-  &E(1, 2). \, E(2, 3). \, E(3, 4). \, E(4, 5).\\
   &P(X, Y) \cd E(X, Y).\\
   &P(X, Z) \cd P(X, Y), E(Y, Z).
 \end{align*}
@@ -270,9 +263,6 @@ Specifically, we interpret each atom as a predicate,
  from the conjunction of the body atoms to the head atom.
 For example, the last rule in Example~\ref{ex:datalog} 
  is interpreted as $\forall X, Y, Z : P(X, Y), E(Y, Z) \implies P(X, Z)$.
-Recall that a fact is a rule with an empty body,
- so we interpret it as an implication from \texttt{true}, 
- i.e., an assertion.
 Then the result of the Datalog program is the {\em smallest} relations 
  such that all constraints are satisfied.
 The emphasis on {\em smallest} is important, 
@@ -283,7 +273,8 @@ The emphasis on {\em smallest} is important,
 
 \begin{ex}
 \label{ex:tc}
-The Datalog program in Example~\ref{ex:datalog}
+Setting $E \defeq \set{(1, 2), (2, 3), (3, 4), (4, 5)}$,
+ the Datalog program in Example~\ref{ex:datalog}
  computes the set of all paths in the graph $E$, 
  namely $P = \setof{(x, y)}{1 \leq x < y \leq 5}$. 
 \end{ex}
@@ -291,18 +282,18 @@ The Datalog program in Example~\ref{ex:datalog}
 An alternative semantics for Datalog is the {\em fixpoint semantics}.
 It is equivalent to the model theoretic semantics,
  but it tells us how to evaluate the Datalog program.
-For each relation $R_i$, the set of all rules with $R_i$ in the head 
+For each IDB relation $R_i$, the set of all rules with $R_i$ in the head 
  form a union of conjunctive queries.
 This UCQ defines a function $F_i$ from the relations in the rule bodies to $R_i$,
- which we can extend to be a function from all relations to $R_i$ 
+ which we can extend to be a function from all IDB relations to $R_i$ 
  (relations not in the bodies are simply ignored). 
 We write $F$ for the set of all $F_i$, 
- and $F$ is then a function from all relations to all relations.
+ and $F$ is then a function from all IDB relations to all IDB relations.
 We call $F$ the immediate consequence operator (ICO) of the Datalog program.
 To evaluate the Datalog program, as shown in Algorithm~\ref{algo:fixpoint},
- we initialize all relations to be empty,
- then repeatedly apply $F$ to update the relations, 
- until the relations no longer change.
+ we initialize all IDB relations to be empty,
+ then repeatedly apply $F$ to update them, 
+ until they no longer change.
 This is also known as the {\em na\"ive evaluation} of the Datalog program.
 \begin{algorithm}
 $I \gets \emptyset$\;
@@ -311,7 +302,7 @@ $I \gets \emptyset$\;
     $I \gets F(I)$\;
 }
 \Return{$I$}
-\caption{Na\"ive evaluation of a Datalog program.}
+\caption{Na\"ive evaluation of a Datalog program. $I$ is the set of IDB relations.}
 \label{algo:fixpoint}
 \end{algorithm}
 
@@ -321,14 +312,13 @@ The evaluation of the program in Example~\ref{ex:datalog} is shown here:
 %
 \begin{align*}
     &
-    \begin{array}{l c c } 
-                       & E & P \\ 
-        \text{iter } 0 & \emptyset & \emptyset \\ 
-        \text{iter } 1 & \set{(1, 2), (2, 3), (3, 4), (4, 5)} & \emptyset \\ 
-        \text{iter } 2 & \set{(1, 2), (2, 3), (3, 4), (4, 5)} & \set{(1, 2), (2, 3), (3, 4), (4, 5)} \\ 
-        \text{iter } 3 & \cdots & P^{(2)} \cup \set{ (1, 3), (2, 4), (3, 5)} \\
-        \text{iter } 4 & \cdots & P^{(3)} \cup \set{ (1, 4), (2, 5) } \\
-        \text{iter } 5 & \cdots & P^{(4)} \cup \set{ (1, 5) } \\
+    \begin{array}{l c } 
+                       & P \\ 
+        \text{iter } 1 & \set{(1, 2), (2, 3), (3, 4), (4, 5)} \\ 
+        \text{iter } 2 & P^{(1)} \cup \set{ (1, 3), (2, 4), (3, 5)} \\
+        \text{iter } 3 & P^{(2)} \cup \set{ (1, 4), (2, 5) } \\
+        \text{iter } 4 & P^{(3)} \cup \set{ (1, 5) } \\
+        \text{iter } 5 & P^{(4)} \\
     \end{array}
 \end{align*}
 %
@@ -346,6 +336,71 @@ As shown in Example~\ref{ex:tc-fixpoint},
  each iteration computes the relations from scratch 
  even though most tuples are already in the relations from the previous iteration.
 A more efficient algorithm, the {\em semi-na\"ive evaluation},
- computes only the {\em new} tuples in each iteration.
-We will present a generalization of the semi-na\"ive algorithm 
- that also supports recursive aggregation in Chapter~\ref{chap:datalogo}.
+ computes only the new tuples in each iteration.
+It works by tracking a {\em delta relation} for each relation,
+ which contains the new tuples in each iteration.
+To compute a delta relation, 
+ every rule in the Datalog program is replaced with a set of delta rules.
+Given a rule containing $n$ IDB relations and $m$ EDB relations:
+\[
+  R({\bm X}) \cd R_1({\bm X}_1), R_2({\bm X}_2), \ldots, R_n({\bm X}_n), S_1({\bm Y}_1), S_2({\bm Y}_2), \ldots, S_m({\bm Y}_m).
+\]
+we generate $n$ delta rules, where the $i$-th rule has a delta relation for the $i$-th IDB atom,
+ and all other atoms are unchanged:
+%
+\begin{align*}
+\Delta R({\bm X}) &\cd \Delta R_1({\bm X}_1)\color{gray}, R_2({\bm X}_2), \ldots, R_n({\bm X}_n), S_1({\bm Y}_1), S_2({\bm Y}_2), \ldots, S_m({\bm Y}_m). \\
+\Delta R({\bm X}) &\cd {\color{gray} R_1({\bm X}_1),} \Delta R_2({\bm X}_2)\color{gray}, \ldots, R_n({\bm X}_n), S_1({\bm Y}_1), S_2({\bm Y}_2), \ldots, S_m({\bm Y}_m). \\
+\Delta R({\bm X}) &\cd {\color{gray} R_1({\bm X}_1), R_2({\bm X}_2), \ldots,} \Delta R_n({\bm X}_n)\color{gray}, S_1({\bm Y}_1), S_2({\bm Y}_2), \ldots, S_m({\bm Y}_m). \\
+\end{align*}
+%
+Taking these delta rules, we define a new ``delta ICO'' for the program which we denote $\delta F$.
+Given IDB relations $I$ and their delta relations $\Delta I$,
+ $\delta F(I, \Delta I)$ computes the new delta relations.
+The semi-na\"ive evaluation then proceeds as shown in Algorithm~\ref{algo:semi-naive}.
+%
+\begin{algorithm}
+$I \gets F(\emptyset)$, $\Delta I \gets F(\emptyset)$ \label{algo:sn:init} \;
+\While { $\Delta I \neq \emptyset$ }
+{
+    $\Delta I \gets \delta F(I, \Delta I) - I$\;
+    $I \gets I \cup \Delta I$
+}
+\Return{$I$}
+\caption{Semi-na\"ive evaluation of a Datalog program.}
+\label{algo:semi-naive}
+\end{algorithm}
+%
+In each iteration, we apply the delta rules to compute the delta relations $\Delta I$,
+ while taking care to remove already-discovered tuples in $I$ from $\Delta I$.
+We take the union of $\Delta I$ and the previous $I$ to compute the new $I$,
+ and stop when $\Delta I$ is empty. 
+
+\begin{ex}
+\label{ex:tc-sn}
+The delta rules for the program in Example~\ref{ex:datalog} are as follows:
+\begin{align*}
+\Delta P(X, Y) &\cd E(X, Y). \\
+\Delta P(X, Z) &\cd \Delta P(X, Y), E(Y, Z).
+\end{align*}
+The execution of semi-na\"ive evaluation is shown here:
+%
+\begin{align*}
+    &
+    \begin{array}{l c c} 
+                       & \Delta P & P \\ 
+        \text{iter } 1 & \set{(1, 2), (2, 3), (3, 4), (4, 5)} & \Delta P^{(1)} \\
+        \text{iter } 2 & \set{(1, 3), (2, 4), (3, 5)} & P^{(1)} \cup \Delta P^{(2)} \\
+        \text{iter } 3 & \set{(1, 4), (2, 5)} & P^{(2)} \cup \Delta P^{(3)} \\
+        \text{iter } 4 & \set{(1, 5)} & P^{(3)} \cup \Delta P^{(4)} \\
+        \text{iter } 5 & \emptyset & P^{(4)} 
+    \end{array}
+\end{align*}
+%
+For consistency with the na\"ive algorithm, we count the initialization code in line~\ref{algo:sn:init} 
+ of Algorithm~\ref{algo:semi-naive} as ``iteration 1''.
+In every iteration, although we compute the same $P$ relation as the na\"ive algorithm,
+ we only need to join $\Delta P$ with $E$.
+As $\Delta P$ gets smaller as time goes on, 
+ every iteration runs faster in the semi-na\"ive algorithm.
+\end{ex}
