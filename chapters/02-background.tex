@@ -120,8 +120,7 @@ We abuse ``${\bm X_1} \cup {\bm X_2}$'' to mean a tuple containing
  and similarly for ``${\bm X_1} \cap {\bm X_2}$''.
 It is easy to check that $Q_n = Q$. 
 Indeed, most modern database systems compute the natural join of multiple relations 
- by joining two relations at a time, 
- after reordering the binary joins carefully for efficiency. 
+ by joining two relations at a time. 
 
 A simple yet effective algorithm to compute the binary join is called {\em hash join},
  and it is implemented in nearly every database system.
@@ -161,6 +160,19 @@ For each match, we concatenate the tuples from each relation,
     \caption{Hash join of $R({\bm X_1})$ and $S({\bm X_2})$, using $S$ as the right relation.}
     \label{algo:hash-join}
 \end{algorithm}
+
+For each binary join, the decision of which relation to be the left and which to be the right
+ can have a significant impact on performance.
+Because we need to build a hash map for the right relation,
+ using a large relation on the right incurs heavy overhead.
+And when the right relation is itself a join,
+ we would have to materialize the join before we can build the hash map.
+Instead, when a ``sub-join'' is on the left, 
+ we can simply iterate over its results as they are produced.
+For this reason, databases frequently implement the so-called 
+ {\em left-deep linear} join, 
+ where every right relation is a base relation,
+ and the left-most relation is (usually) the largest relation.
 
 To support conjunctive queries with constants, 
  duplicate variables, and those that are not full,

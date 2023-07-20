@@ -148,16 +148,12 @@ This finer-grained view of join algorithms allows \FJ
 
 Next, we address the main source of
   inefficiency in \GJ: the need to construct a trie on each relation
-  in the query.  In contrast,  
-a binary join plan needs to build a hash map only for each relation 
+  in the query~\cite{DBLP:journals/pvldb/MhedhbiS19,DBLP:journals/pvldb/FreitagBSKN20}.  
+In contrast,  a binary join plan needs to build a hash map only for each relation 
   on the right-hand side of a join,
   and simply iterates over the relation on the left.
-In practice, trie-building has been observed to be a major 
-  bottleneck for \GJ~\cite{DBLP:journals/pvldb/MhedhbiS19,DBLP:journals/pvldb/FreitagBSKN20}, 
-  making it slower than binary join.
-This is because each trie is more expensive to build than a hash map,
-  and the left relation is usually chosen to be a large relation 
-  by the query optimizer.
+As a result, query optimizers commonly places the largest relations on the left
+ to minimize the cost of building hash maps.
 One simple optimization in \FJ is that we do not built a trie for
 tables that are left children, mimicking the binary plans.
 %
@@ -1111,8 +1107,8 @@ Note that Fig.~\ref{fig:bj-loop}
 % We will describe in the next section a simple optimization that allows us to
 % cover the full spectrum in Fig.~\ref{fig:design-space}.  
 One
-limitation so far is our assumption that the cover is chosen during
-the {\em build phase}.  This was convenient for us to illustrate how
+limitation so far is our assumption that the cover is chosen at
+optimization time.  This was convenient for us to illustrate how
 to avoid constructing some hash maps, by storing the last level of a
 \GHT as vector, when it corresponds to a cover.  In contrast, \GJ
 computes the intersection $R_1.x\cap R_2.x\cap \cdots$ by iterating
