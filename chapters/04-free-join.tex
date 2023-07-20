@@ -17,10 +17,11 @@ implementations~\cite{DBLP:conf/icdt/Veldhuizen14,DBLP:journals/tods/AbergerLTNO
 
 Over time, a common belief took hold: 
   ``\WCOJ is designed for cyclic queries''.
-This belief is rooted in the observation that 
+This belief is rooted in the observation that,
+ when the query satisfies a property called {\em cyclic},
   \WCOJ enjoys lower asymptotic complexity 
-  than traditional algorithms for cyclic queries~\cite{DBLP:journals/sigmod/NgoRR13}, 
-  but when the query is acyclic, 
+  than traditional algorithms~\cite{DBLP:journals/sigmod/NgoRR13}.
+But when the query is acyclic, 
   classic algorithms like the Yannakakis algorithm~\cite{DBLP:conf/vldb/Yannakakis81} 
   are already asymptotically optimal. 
 Moreover, traditional binary join algorithms have benefited from 
@@ -98,7 +99,7 @@ A crucial difference between \GJ and binary join lies
   in the way they process each join operation. 
 Binary join processes two relations at a time, 
   and joins on \emph{all attributes} 
-  in the join condition between these two relations. 
+  shared between these two relations. 
 In contrast, \GJ processes one attribute at a time, 
   and joins \emph{all relations} that share that attribute.
 This suggests a design space of join algorithms, 
@@ -152,8 +153,8 @@ Next, we address the main source of
 In contrast,  a binary join plan needs to build a hash map only for each relation 
   on the right-hand side of a join,
   and simply iterates over the relation on the left.
-As a result, query optimizers commonly places the largest relations on the left
- to minimize the cost of building hash maps.
+As a result, query optimizers commonly place the largest relations on the left
+ to minimize the cost of hash building.
 One simple optimization in \FJ is that we do not built a trie for
 tables that are left children, mimicking the binary plans.
 %
@@ -210,13 +211,15 @@ compared it with two baselines:
   While optimizers for binary plans have been developed and improved
   over decades~\cite{DBLP:conf/sigmod/SelingerACLP79}, little
   is known about optimizing \GJ.  A \GJ plan consists of a total order
-  on its variables, and its run time does depend on the choice of this
+  on its variables, and its run time depends on the choice of this
   order.  But since the theoretical analysis of \GJ guarantees worst
   case optimality for {\em any} variable order, it is a folklore
-  belief that \GJ is more robust than binary join plans to poor
-  choices of the optimizer.  We also conduced experiments measuring
-  the robustness of the three types of plans (binary, \GJ, \FJ) to
-  poor choices of the optimizer.  We found that \GJ is indeed the
+  belief that \GJ is more robust than binary join plans 
+  when the optimizer makes a bad choice.
+  To test the robustness of binary join, \GJ, and \FJ, 
+  We also conducted experiments measuring their 
+  performance when given a bad query plan.
+  We found that \GJ is indeed the
   least sensitive, while \FJ, like binary joins, suffers more from the
   poor optimization choices of the optimizer, since both rely on a
   cost-based optimized plan.  However, \GJ starts from worse baseline
@@ -233,7 +236,7 @@ In summary, we make the following contributions in this dissertation:
 % \rw{Fixed.}
 \begin{enumerate}
   \item \FJ, a framework unifying existing join algorithms (Section~\ref{sec:free-join}).
-  \item An algorithm to converting any binary join plan into an
+  \item An algorithm to converting a binary plan into an
     optimized \FJ plan (Section~\ref{sec:bj-to-fj}).
   \item \COLT, a column-oriented lazy trie data structure (Section~\ref{sec:colt}).
   \item A vectorized execution algorithm for \FJ (Section~\ref{sec:vectorized-execution}).
