@@ -248,7 +248,7 @@ Otherwise, we call it an output relation or an {\em intensional database} (IDB) 
 
 \begin{ex}
 \label{ex:datalog}
-The following Datalog program computes the transitive closure of the graph $E$. 
+The following Datalog program computes the transitive closure of the relation $E$. 
 \begin{align*}
   &P(X, Y) \cd E(X, Y).\\
   &P(X, Z) \cd P(X, Y), E(Y, Z).
@@ -261,7 +261,7 @@ This is known as the {\em model theoretic semantics} of Datalog.
 Specifically, we interpret each atom as a predicate,
  and treat each rule as a $\forall$-quantified logical implication
  from the conjunction of the body atoms to the head atom.
-For example, the last rule in Example~\ref{ex:datalog} 
+For example, the second rule in Example~\ref{ex:datalog} 
  is interpreted as $\forall X, Y, Z : P(X, Y), E(Y, Z) \implies P(X, Z)$.
 Then the result of the Datalog program is the {\em smallest} relations 
  such that all constraints are satisfied.
@@ -281,7 +281,7 @@ Setting $E \defeq \set{(1, 2), (2, 3), (3, 4), (4, 5)}$,
 
 An alternative semantics for Datalog is the {\em fixpoint semantics}.
 It is equivalent to the model theoretic semantics,
- but it tells us how to evaluate the Datalog program.
+ but also tells us how to evaluate the Datalog program.
 For each IDB relation $R_i$, the set of all rules with $R_i$ in the head 
  form a union of conjunctive queries.
 This UCQ defines a function $F_i$ from the relations in the rule bodies to $R_i$,
@@ -333,7 +333,7 @@ An important property of Datalog is that the na\"ive evaluation
  always terminates, and it does so in polynomial time.
 However, the na\"ive evaluation is inefficient in practice.
 As shown in Example~\ref{ex:tc-fixpoint},
- each iteration computes the relations from scratch 
+ each iteration computes the relations from scratch, 
  even though most tuples are already in the relations from the previous iteration.
 A more efficient algorithm, the {\em semi-na\"ive evaluation},
  computes only the new tuples in each iteration.
@@ -341,12 +341,12 @@ It works by tracking a {\em delta relation} for each relation,
  which contains the new tuples in each iteration.
 To compute a delta relation, 
  every rule in the Datalog program is replaced with a set of delta rules.
-Given a rule containing $n$ IDB relations and $m$ EDB relations:
+Given a rule containing $n$ IDB atoms ($R_1$ to $R_n$) and $m$ EDB atoms ($S_1$ to $S_m$):
 \[
   R({\bm X}) \cd R_1({\bm X}_1), R_2({\bm X}_2), \ldots, R_n({\bm X}_n), S_1({\bm Y}_1), S_2({\bm Y}_2), \ldots, S_m({\bm Y}_m).
 \]
 we generate $n$ delta rules, where the $i$-th rule has a delta relation for the $i$-th IDB atom,
- and all other atoms are unchanged:
+ and all EDB atoms are unchanged:
 %
 \begin{align*}
 \Delta R({\bm X}) &\cd \Delta R_1({\bm X}_1)\color{gray}, R_2({\bm X}_2), \ldots, R_n({\bm X}_n), S_1({\bm Y}_1), S_2({\bm Y}_2), \ldots, S_m({\bm Y}_m). \\
@@ -401,6 +401,6 @@ For consistency with the na\"ive algorithm, we count the initialization code in 
  of Algorithm~\ref{algo:semi-naive} as ``iteration 1''.
 In every iteration, although we compute the same $P$ relation as the na\"ive algorithm,
  we only need to join $\Delta P$ with $E$.
-As $\Delta P$ gets smaller as time goes on, 
+Because $\Delta P$ gets smaller as time goes on, 
  every iteration runs faster in the semi-na\"ive algorithm.
 \end{ex}
