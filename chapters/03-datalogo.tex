@@ -24,7 +24,7 @@ $K$-relations.  We call the language \datalogo
  where the superscript
 $\circ$ represents a (semi)-ring. \datalogo has a declarative semantics
 based on the least fixpoint, and supports both recursion and
-aggregates.  We illustrate throughout this paper its utility through
+aggregates.  We illustrate throughout this chapter its utility through
 several examples that are typical for recursive data processing.  In
 order to define the least fixpoint semantics of \datalogo, the semiring
 needs to be partially ordered.  For this purpose, we introduce an
@@ -45,7 +45,7 @@ not naturally ordered.
 % a certain algebraic property called {\em
 %   stability}~\cite{semiring_book}.  The result is based on an analysis
 % of the fixpoint of a vector-valued polynomial function over a semiring, which is of
-% independent interest.  With some abuse, we will say in this paper that
+% independent interest.  With some abuse, we will say in this chapter that
 % a \datalogo program {\em converges}, if the na\"ive algorithm terminates
 % in a finite number of steps; we do not consider ``convergence in the
 % limit'', for example in an $\omega$-continuous
@@ -90,7 +90,7 @@ for all $x \in S$, we call $\bm S$ a {\em semiring}.\footnote{Some
   semiring without absorption.}
 %
 When $\otimes$ is commutative, then we say that the
-pre-semiring is {\em commutative}.  In this paper we only consider
+pre-semiring is {\em commutative}.  In this dissertation we only consider
 commutative pre-semirings, and we will simply refer to them as
 pre-semirings.
 \end{defn}
@@ -130,7 +130,7 @@ naturally ordered, or when we need a {\em different} order from the natural orde
   $x\sqsubseteq x'$ and $y \sqsubseteq y'$ imply $x\oplus y \sqsubseteq x' \oplus y'$
   and $x \otimes y \sqsubseteq x' \otimes y'$.}
   operators under $\sqsubseteq$.
-  In this paper, we will assume that every poset $(P, \sqsubseteq)$ has a minimum
+  In this dissertation, we will assume that every poset $(P, \sqsubseteq)$ has a minimum
   element denoted by $\bot$.
 \end{defn}
 
@@ -141,7 +141,7 @@ $\bot \oplus \bot \sqsubseteq \bot \oplus 0 = \bot$, and
 $\bot \otimes \bot \sqsubseteq \bot \otimes 1 = \bot$.  We say that
 the multiplicative operator $\otimes$ is {\em strict} if the identity
 $x \otimes \bot = \bot$ holds for every $x \in P$.
-Throughout this paper we will assume that $\otimes$ is strict,
+Throughout this dissertation we will assume that $\otimes$ is strict,
 unless otherwise stated.
 
 % One of the reasons for insisting on the strictness assumption is that
@@ -271,7 +271,7 @@ $D_0 \subseteq D$; by convention, this function is extended to the
 entire set $\ground(\sigma, D)$ by setting $I(a) := \bot$ for all
 $a \in \ground(\sigma,D) \setminus \ground(\sigma,D_0)$.  The set
 $\inst(\sigma, D_0, \bm P)$ is isomorphic to $P^N$, where
-$N=|\ground(\sigma, D_0)|$, and, throughout this paper, we will
+$N=|\ground(\sigma, D_0)|$, and, throughout this dissertation, we will
 identify a $\bm P$-instance with a tuple in $P^N$.
 
 Thus, a $\bm P$-instance involves two domains: $D$, which is called
@@ -475,7 +475,7 @@ and ensure that the semantics is {\em domain independent},
  meaning a query produces the same result for every domain 
  that contains the active domain.
   All examples in
-this paper are written such that they are domain independent.
+this dissertation are written such that they are domain independent.
 
 Finally, (conditional) sum-sum-product queries are defined in the natural way:
 
@@ -965,7 +965,7 @@ In short, every \datalogo program converges over a POPS $\bm P$
 %   that is polynomial in the number of ground atoms in the EDB.
 % \end{enumerate}
 
-% In this paper we are interested in characterizing the POPS that ensure
+% In this dissertation we are interested in characterizing the POPS that ensure
 % that every \datalogo program converges.  At a finer level, our goal is
 % to characterize precisely
 % cases~\ref{item:converge:3}-\ref{item:converge:5}.  We will do this in
@@ -978,7 +978,7 @@ In short, every \datalogo program converges over a POPS $\bm P$
 
 % \label{subsec:grounded:program}
 
-% In this paper we consider an equivalent semantics of \datalogo, which
+% In this dissertation we consider an equivalent semantics of \datalogo, which
 % consists of first grounding the program, then computing its least
 % fixpoint.
 
@@ -986,7 +986,7 @@ In short, every \datalogo program converges over a POPS $\bm P$
 % % \reinhard{
 % % As before, we just say "Fix a POPS P". Should we say "Fix a strict POPS P"?
 % % }
-% % \dan{we say early that all POPS are assumed to be strict in this paper}
+% % \dan{we say early that all POPS are assumed to be strict in this dissertation}
 % % %
 % Fix an EDB instance $I, I_\B$, and let $D_0 \subseteq D$ be the finite
 % set consisting of its active domain plus all constants occurring in
@@ -1381,7 +1381,7 @@ $\trop^+$:
 % in both cases requiring the semiring to be $\omega$-continuous.  This
 % guarantees that the least fixpoint exists, even if the na\"ive algorithm
 % diverges.
-% We do not use $\omega$-continuity in this paper,
+% We do not use $\omega$-continuity in this dissertation,
 %  and will not define it formally.
 % Instead, we are interested in the cases 
 %  where the na\"ive algorithm converges to the least fixpoint.
@@ -1409,7 +1409,7 @@ $\trop^+$:
 %   number of steps that is polynomial in $|\adom(I)|$.
 % \end{enumerate}
 % %
-% In this paper, we will only consider
+% In this dissertation, we will only consider
 % data-complexity~\cite{DBLP:conf/stoc/Vardi82}, where the \datalogo
 % program is assumed to be fixed, and the input consists only of the EDB
 % instance $I$.
@@ -1417,7 +1417,7 @@ $\trop^+$:
 % We study algebraic properties of the POPS $\bm P$ that ensure that we
 % are in one of the cases~\ref{item:converge:3}-\ref{item:converge:5};
 % we do not address cases~\ref{item:converge:1}-\ref{item:converge:2} in
-% this paper.  We give next a necessary and sufficient condition for
+% this dissertation.  We give next a necessary and sufficient condition for
 % each of the cases~\ref{item:converge:3} and~\ref{item:converge:4}, and
 % give a sufficient condition for case~\ref{item:converge:5}.  
 % For any POPS $\bm P$, the set

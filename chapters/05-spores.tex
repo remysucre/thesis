@@ -35,7 +35,7 @@ often have many common subexpressions (CSE), that further interact
 with syntactic rules, for example the same expression $UV^T$ may occur
 in multiple contexts, each requiring different optimization rules.
 
-In this paper we describe \sys, a novel optimization approach for
+In this chapter we describe \sys, a novel optimization approach for
 complex linear algebra programs that leverages relational algebra as
 an intermediate representation to completely represent the search
 space. SPORES first transforms LA expressions into traditional
@@ -48,7 +48,7 @@ back to LA, and executed.
 A major advantage of \sys\ is that the rewrite rules in RA are
 complete.  Linear Algebra seems to require an endless supply of clever
 rewrite rules, but, in contrast, by converting to RA, we can prove
-that our set of just 13 rules are complete. The RA expressions in this paper are
+that our set of just 13 rules are complete. The RA expressions in this dissertation are
 over $K$-relations~\cite{DBLP:conf/pods/GreenKT07}; a tuple $X(i,j)$
 is no longer true or false, but has a numerical value, e.g. $5$,
 %
@@ -73,7 +73,7 @@ than bags; we present here a simple and self-contained proof in
 Sec.~\ref{ranf}.  We note that, in contrast, {\em containment} of two
 UCQs with bag semantics is
 undecidable~\cite{DBLP:journals/tods/IoannidisR95}; we do not consider
-containment in this paper.
+containment in this dissertation.
 }
 Finally, we prove that our optimizer rules are
 sufficient to convert any RA expression into its {\em canonical form},
@@ -103,7 +103,7 @@ improvement compared with more mature heuristic-based optimizers. Our
 optimizer rediscovers all optimizations by the latter, and also finds
 new optimizations that contribute to \rvo{up to 10X speedup}.
 
-We make the following contributions in this paper:
+We make the following contributions in this dissertation:
 \begin{enumerate}
 \item We describe a novel approach for optimizing complex Linear
   Algebra expressions by converting them to Relational Algebra, \rvo{and
@@ -231,7 +231,7 @@ interpret point-wise multiply as natural join; addition as union; sum
 as aggregate; and matrix multiply as aggregate over a join\footnote{In
   the implementation, we use outer join for point-wise multiply and
   addition, where we multiply and add the matrix entries
-  accordingly. In this paper we use join and union to simplify
+  accordingly. In this chapter we use join and union to simplify
   presentation.}.
 %
 Table~\ref{matrixkrel} illustrates the correspondence between LA and
@@ -810,7 +810,7 @@ compression in SPORES to efficiently cover vast portions of the search
 space. If saturation, as described below, carries out to convergence, the E-Graph represents the search space exhaustively. 
 
 An E-Graph can also be seen as an AND-OR DAG over expressions. Each E-Class is an OR node whose children are equivalent expressions from
-which the optimizer chooses from. Each operator is an AND node whose children must all be picked if the operator itself is picked. In this paper we favor the terms E-Graph and E-Class to emphasize each OR node is an equivalence class. 
+which the optimizer chooses from. Each operator is an AND node whose children must all be picked if the operator itself is picked. In this dissertation we favor the terms E-Graph and E-Class to emphasize each OR node is an equivalence class. 
 
 \subsubsection*{Saturating the E-Graph}
 At the beginning of the optimization process, the optimizer instantiates the
@@ -1192,7 +1192,7 @@ input the left hand side of each rule into SPORES, perform equality
 saturation, then check if the rule's right hand side is present in the saturated
 graph. The optimizer is able to derive
 all 84 sum-product rewrite rules in SystemML using relational equality rules. 
-Refer to the long version of this paper \cite{SPORESarxiv} for a list of these rewrites. 
+Refer to the long version of this chapter \cite{SPORESarxiv} for a list of these rewrites. 
 We believe replacing the 84 ad-hoc
 rules with our translation rules $R_{LR}$ and equality rules $R_{EQ}$ would greatly
 simplify SystemML's codebase. Together with equality saturation, our relational

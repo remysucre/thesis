@@ -47,7 +47,7 @@ This introduces complexity, and hinders the adoption of \WCOJ.
 
 The dichotomy of \WCOJ versus binary join has led researchers 
   and practitioners to view the algorithms as opposites.
-In this paper, we break down this dichotomy by proposing
+In this dissertation, we break down this dichotomy by proposing
   a new framework called \FJ that unifies \WCOJ and binary join.
   % as well as other classic multiway join algorithms.
 %
@@ -92,7 +92,7 @@ column-oriented layout to improve the trie data structure used in
 
 To explain these contributions we provide some context.
 %
-In this paper, we focus on algorithms based on hashing,
+In this dissertation, we focus on algorithms based on hashing,
   and choose \GJ~\cite{DBLP:journals/sigmod/NgoRR13} as a representative of \WCOJ algorithms.
 A crucial difference between \GJ and binary join lies 
   in the way they process each join operation. 
@@ -229,7 +229,7 @@ compared it with two baselines:
 
 
   
-In summary, we make the following contributions in this paper:
+In summary, we make the following contributions in this dissertation:
 % \ds{Please reference the sections where these contributions are
 %   described.  Currently the do NOT align with the contributions
 %   mentioned earlier and discussed in the introduction.  This needs to
@@ -322,7 +322,7 @@ $((R \Join S) \Join T) \Join U$ is a left-deep plan.  We do not treat
 specially right-deep or zig-zag plans, but simply consider them to be
 bushy.
 
-In this paper we consider only hash-joins, which are the most
+In this dissertation we consider only hash-joins, which are the most
 common types of joins in database systems. 
 The standard way to execute a bushy plan is to
 decompose it into a series of left-deep linear plans.  Every join node
@@ -331,7 +331,7 @@ first evaluated, and its result materialized, before the parent join
 can proceed.  As a consequence, every binary plan, bushy or not,
 becomes a collection of left-deep plans. We decompose bushy
 plans in exactly the same way, and we will focus on left-deep linear
-plans in the rest of this paper.  For example, the bushy plan
+plans in the rest of this dissertation.  For example, the bushy plan
 $(R \Join S) \Join (T \Join U)$ is converted into two plans:
 $P_1 = T \Join U$ and $P_2 = (R \Join S) \Join P_1$; both are
 left-deep plans.
@@ -483,7 +483,7 @@ intersection.
 %%% The original \GJ algorithm was specified for set semantics,
 %%% however~\cite{DBLP:journals/pvldb/FreitagBSKN20} showed the algorithm
 %%% can be easily extended to bag semantics.  We therefore ignore the
-%%% difference between the two semantics for the rest of this paper.
+%%% difference between the two semantics for the rest of this dissertation.
 
 \subsection{Binary Join v.s. \GJ}
 Binary join and \GJ each have their own advantages and disadvantages.

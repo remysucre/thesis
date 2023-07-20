@@ -47,7 +47,7 @@ the actual loop.  The few systems that do,
 apply only limited optimization techniques, like magic set optimization and
 semi-naive evaluation, which are restricted to positive queries.
 
-In this paper we describe a new query optimization framework for
+In this chapter we describe a new query optimization framework for
 recursive queries.  Our framework replaces a recursive program with
 another, equivalent recursive program, whose body may be quite
 different, and thus focuses on optimizing the recursive program as a
@@ -185,7 +185,7 @@ because it combines recursion and aggregation.\footnote{Prior
   explicitly re-defining the semantics of recursive rules with
   aggregates.  Our approach keeps the standard least fixpoint
   semantics, but generalizes the semiring.}  In order to express such
-queries, in this paper we propose an extension of Datalog, following
+queries, in this chapter we propose an extension of Datalog, following
 the approach in~\cite{DBLP:conf/pods/GreenKT07}, where the relations
 are interpreted over {\em ordered semirings}.
 
@@ -386,7 +386,7 @@ way we use it.
 % we can readily benefit from these new techniques when they are
 % incorporated in Rosette.
 
-{\bf Contributions} In summary, the main contribution of this paper
+{\bf Contributions} In summary, the main contribution of this chapter
 consists of a new, principled and powerful method for optimizing
 recursive queries.  We make the following specific contributions:
 %
@@ -475,7 +475,7 @@ longer change.
 
 \update{
 %
-  In this paper we will combine multiple rules with the same head into
+  In this chapter we will combine multiple rules with the same head into
   a single rule by OR-ing their bodies, and writing explicitly all
   existential quantifiers.  This is a common convention used in the
   literature, see e.g.,~\cite{DBLP:journals/jlp/Fitting91}.  For
@@ -544,7 +544,7 @@ possibly infinite multiplicities), an $\R_\bot$-relation is a tensor
 projections, joins, and unions (no difference operator in the positive
 fragment).  \update{The most common definition of the relational
   algebra restricts the predicates used in selections to equality
-  predicates, $x=y$.  In this paper we
+  predicates, $x=y$.  In this chapter we
   follow~\cite{DBLP:conf/pods/GreenKT07} and allow arbitrary
   predicates $p(x,y,\ldots)$ over the value space, including
   disequality $x\neq y$, inequality $x < y$, or any other interpreted
@@ -728,7 +728,7 @@ computed by the alternative program, called the GH-program:
 % \end{diagram}
 \end{proof}
 
-In this paper we will apply the FGH-rule to optimize $\name$ programs.
+In this chapter we will apply the FGH-rule to optimize $\name$ programs.
 In this context, $F$ is the ICO of the $\name$ program, $X$ is the
 tuple of all its IDB predicates, and $Y$ are the answer-IDB
 predicates.  We will also make the natural assumption that $G$ maps
@@ -899,7 +899,7 @@ variables $y',y$ to $y,z$ respectively.
   \begin{align*}
     P(y) \defeq & [y=a] \vee \exists z(TC(a,z) \wedge E(z,y))
   \end{align*}
-  We prove in the full version of this paper that, given a sideways information
+  We prove in the full version of this chapter that, given a sideways information
   passing strategy (SIPS)~\cite{DBLP:journals/jlp/BeeriR91} every magic set
   optimization~\cite{DBLP:journals/jlp/BalbinPRM91} over a Datalog program can be
   proven correct using a sequence of applications of the FGH-rule.
@@ -2302,7 +2302,7 @@ require many trials to find them, had we not included them explicitly.
 %
 %
 % We describe the grammar $\Sigma$ that generates
-% $\text{normalize}(P_2)$. In this paper we only consider $H$ programs
+% $\text{normalize}(P_2)$. In this chapter we only consider $H$ programs
 % that are ``linear'' in its argument.  That is, $X$ only appears once
 % in the normal form of $H(X)$.  This restriction limits the search
 % space and speeds up synthesis, and can still capture the optimizations
@@ -2851,7 +2851,7 @@ queries.
 %
 \update{
 %
-  This paper applies a simple cost-model. We use the arity of the IDB
+  this chapter applies a simple cost-model. We use the arity of the IDB
   predicate as a proxy for a simple asymptotic cost model, because
   $N^{\text{arity}}$ is the size bound of the output, when $N$ is the
   size of the active domain. This simple cost-model is currently used
