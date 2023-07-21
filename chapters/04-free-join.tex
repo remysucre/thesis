@@ -118,9 +118,9 @@ Being able to join on any number of variables and relations
 Our new framework, \FJ,
   covers the entire design space, 
   thereby generalizing and unifying existing algorithms.
-The starting observation is that the execution of a left-deep linear 
-  binary join plan is already very similar to \GJ.
-While \GJ (reviewed in Sec.~\ref{sec:background:fj}) is traditionally specified as a series of nested loops~\cite{DBLP:journals/sigmod/NgoRR13},
+The starting observation is that the execution of a {\em left-deep linear 
+  binary join plan} (reviewed in Sec.~\ref{sec:background:fj}) is already very similar to \GJ.
+While \GJ (also reviewed in Sec.~\ref{sec:background:fj}) is traditionally specified as a series of nested loops~\cite{DBLP:journals/sigmod/NgoRR13},
   the push-based model~\cite{DBLP:journals/pvldb/Neumann11,DBLP:journals/pvldb/KerstenLKNPB18} for executing a left-deep linear binary plan
   is also implemented, similarly, as nested loops.
 % \rw{Should I add an example of the loop nest, or is that too much detail?}
@@ -250,23 +250,25 @@ join and \GJ.
 
 \subsection{Basic Concepts}\label{sec:basic-concepts}
 
-We consider a relational database where each relation has a fixed
-\emph{schema}, and may have duplicates, i.e. we use bag semantics.
-A \emph{full conjunctive query} has the following form:
+In previouse chapters we have used upper case variables for key values, 
+ and reserved lower case variables for semiring values. 
+As we do not deal with semirings in this chapter, 
+ we will use lower case variables for key values to reduce clutter.
+Recall from Section~\ref{sec:join} that a \emph{full conjunctive query} 
+ has the following form:
 %
 \begin{align}
   Q(\bm x) \cd & R_1(\bm x_1), \ldots, R_m(\bm x_m). \label{eq:cq}
 \end{align}
 %
-Each term $R_i(\bm x_i)$ is called an \emph{atom}, where $R_i$ is a
-relation name and $\bm x_i$ a tuple of variables.  The query is
-\emph{full}, meaning that the head variables $\bm x$ include all
-variables appearing in the atoms.  To reduce clutter in the following
-sections, we will assume that the query does not have self-joins.
+where each variable in a body atom $R_i({\bm x_i})$ also appears 
+ in the head $R({\bm x})$.
+We will assume that the query does not have {\em self-joins},
+ meaning no two atoms share the same relation name.
 This is without loss of generality: if two atoms have the same
-relation name, then we simply rename one of them.  Our system also
-supports selections, projections, and aggregation.  We assume that the
-selections are pushed down to the base tables, thus the atom $R_i$
+relation name, then we simply rename one of them.  
+Our system also supports selections, projections, and aggregation.  
+We assume that the selections are pushed down to the base tables, thus the atom $R_i$
 in~\eqref{eq:cq} may include a selection over a base table; in
 particular, all variables in the atom $R_i(\bm x_i)$ are distinct.
 Similarly, projections and aggregates are performed after the full
@@ -288,8 +290,8 @@ SELECT r.x, s.u, t.u
    AND r.y = s.u AND s.v = t.u AND t.v = r.x
 \end{lstlisting}
 %
-Then we denote by $S = \Pi_{uv}(\sigma_{w>30}(M))$ and $T =
-\Pi_{uv}(\sigma_{v=w}(M))$, and write the query as:
+Then we denote by $S = \pi_{uv}(\sigma_{w>30}(M))$ and $T =
+\pi_{uv}(\sigma_{v=w}(M))$, and write the query as:
 $$Q_{\triangle}(x,y,z) \cd R(x, y), S(y,z), T(z, x).$$
 %
 We call this query the \emph{triangle query} over the relations $R$, $S$,
@@ -328,9 +330,10 @@ decompose it into a series of left-deep linear plans.  Every join node
 that is a right child becomes the root of a new subplan, which is
 first evaluated, and its result materialized, before the parent join
 can proceed.  As a consequence, every binary plan, bushy or not,
-becomes a collection of left-deep plans. We decompose bushy
-plans in exactly the same way, and we will focus on left-deep linear
-plans in the rest of this dissertation.  For example, the bushy plan
+becomes a collection of left-deep plans. 
+In our system we decompose bushy
+plans exactly this way, and we will focus on left-deep linear
+plans in the rest of this chapter.  For example, the bushy plan
 $(R \Join S) \Join (T \Join U)$ is converted into two plans:
 $P_1 = T \Join U$ and $P_2 = (R \Join S) \Join P_1$; both are
 left-deep plans.
@@ -344,7 +347,9 @@ matching tuple is further probed in $R_3$, etc.
 
 
 \begin{figure}
-  \begin{subfigure}[b]{0.25\linewidth}
+  \begin{subfigure}[b]{0.5\linewidth}
+\centering
+\begin{tabular}{c}
 \begin{lstlisting}
 for (x, y) in R:
   s = S[y]?
@@ -353,12 +358,14 @@ for (x, y) in R:
     for (x, z) in t:
       output(x, y, z)
 \end{lstlisting}
+\end{tabular}
 \caption{Binary join.}
 \label{fig:background:binary-join}
   \end{subfigure}
-\hspace{2cm}
-  \begin{subfigure}[b]{0.25\linewidth}
-    \centering
+% \hspace{2cm}
+  \begin{subfigure}[b]{0.45\linewidth}
+\centering
+\begin{tabular}{c}
 \begin{lstlisting}
 for a in R.x $\cap$ T.x:
   r = R[a]; t = T[a]
@@ -367,6 +374,7 @@ for a in R.x $\cap$ T.x:
     for c in s.z $\cap$ t.z:
       output(a, b, c)
 \end{lstlisting}
+\end{tabular}
     \caption{\GJ.}
     \label{fig:background:gj}
   \end{subfigure}
@@ -382,7 +390,7 @@ for a in R.x $\cap$ T.x:
   A possible left-deep linear plan for $Q_\triangle$ is $[R, S, T]$,
   which represents $(R(x,y) \Join S(y,z)) \Join T(z,x)$.  To execute
   this plan, we first build a hash table for $S$ keyed on $y$, where
-  each $y$ maps to a vector of $(y,z)$ tuples, 
+  each $Y$ maps to a vector of $(y,z)$ tuples, 
   % \yell{Remy: this is not
   %   correct.  The hash table contains tuples.  Think of a table that
   %   has 30 attributes $S(x_1,\ldots, x_{30})$.  If you join on
@@ -530,18 +538,18 @@ We will show how each of the above components generalizes
   the \FJ algorithm generalizes binary join and \GJ.
 
 \begin{figure}
-\begin{subfigure}[b]{0.4\linewidth}
+\begin{subfigure}[b]{0.49\linewidth}
 \begin{align*}
-  Q_{\clubsuit}(x,a,b,c) :- R(x,a),S(x,b),T(x,c)
+  Q_{\clubsuit}(x,a,b,c) \cd R(x,a),S(x,b),T(x,c)
 \end{align*}
-\begin{align*}
-  R & = \set{(x_0, a_0)} \cup \setof{(x_1, a_i^l), (x_2, a_i^r)}{i \in [1 \ldots n]} \\
-  S & = \set{(x_0, b_0)} \cup \setof{(x_2, b_i^l), (x_3, b_i^r)}{i \in [1 \ldots n]} \\
-  T & = \set{(x_0, c_0)} \cup \setof{(x_3, c_i^l), (x_1, c_i^r)}{i \in [1 \ldots n]} 
+\begin{alignat*}{4}
+  R & = \set{(x_0, a_0)} && \cup \{(x_1, a_i^l), (x_2, a_i^r &&) \mid i \in [1 \ldots n] \} \\
+  S & = \set{(x_0, b_0)} && \cup \{(x_2, b_i^l), (x_3, b_i^r &&) \mid i \in [1 \ldots n] \} \\
+  T & = \set{(x_0, c_0)} && \cup \{(x_3, c_i^l), (x_1, c_i^r &&) \mid i \in [1 \ldots n] \} 
   % R & = \set{(x_0, a_0)} \cup \bigcup_{i \in [1 \ldots n]} \set{(x_1, a_i^l), (x_2, a_i^r)} \\
   % S & = \set{(x_0, b_0)} \cup \bigcup_{i \in [1 \ldots n]} \set{(x_2, b_i^l), (x_3, b_i^r)} \\
   % T & = \set{(x_0, c_0)} \cup \bigcup_{i \in [1 \ldots n]} \set{(x_3, c_i^l), (x_1, c_i^r)} 
-\end{align*}
+\end{alignat*}
 \caption{$Q_\clubsuit$ and inputs.}
 \label{fig:clover-query}
 \end{subfigure}
