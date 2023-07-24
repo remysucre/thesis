@@ -177,18 +177,18 @@ For this reason, databases frequently implement the so-called
 To support conjunctive queries with constants, 
  duplicate variables, and those that are not full,
  we need two additional operators from relational algebra, 
- namely selection ($\sigma$) and projection ($\pi$).
+ namely selection ($\sigma$) and projection ($\Pi$).
 The selection operator $\sigma$ takes as arguments an atom $R({\bm X})$
  and a predicate $\theta$ over ${\bm X}$,
  and returns a subset of the relation $R$ containing only the tuples that satisfy $\theta$.
 For example, $\sigma_{X = 1}E(X, Y)$ returns all edges in $E$ that start at vertex 1.
 For another example, $\sigma_{X = Y}E(X, Y)$ returns all edges in $E$ that are self-loops;
  it is equivalent to repeating the variable $X$, i.e., $E(X, X)$.
-The projection operator $\pi$ takes as arguments an atom $R({\bm X})$
+The projection operator $\Pi$ takes as arguments an atom $R({\bm X})$
  and a set of variables ${\bm Y} \subseteq {\bm X}$,
  and returns a relation containing only attributes corresponding 
  to the variables in ${\bm Y}$.
-For example, $\pi_{X}E(X, Y)$ returns all source vertices in $E$.
+For example, $\Pi_{X}E(X, Y)$ returns all source vertices in $E$.
 Both selection and projection can be implemented with a simple loop over the tuples in the input relation.
 Finally, computing UCQs requires the union operator $\cup$,
  which simply takes the set union of the relations.
@@ -204,7 +204,7 @@ To compute the query $Q(X) \cd E(X, Y), E(Y, X)$
  (set of vertices that loop back to themselves in two steps),
  we first compute the join $J(X, Y, Z) \cd E(X, Y), E(Y, Z)$, 
  then select the tuples where $X = Z$ with $S(X, Y, Z) \cd \sigma_{X=Z} J(X, Y, Z)$.
- then project out $Y$ and $Z$ with $Q(X) \cd \pi_{X} S(X, Y, Z)$.
+ then project out $Y$ and $Z$ with $Q(X) \cd \Pi_{X} S(X, Y, Z)$.
 \end{ex}
  
 Although we have presented the evaluation of a query 

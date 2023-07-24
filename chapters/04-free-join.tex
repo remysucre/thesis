@@ -18,7 +18,7 @@ implementations~\cite{DBLP:conf/icdt/Veldhuizen14,DBLP:journals/tods/AbergerLTNO
 Over time, a common belief took hold: 
   ``\WCOJ is designed for cyclic queries''.
 This belief is rooted in the observation that,
- when the query satisfies a property called {\em cyclic},
+ when the query satisfies a property called {\em cyclicity},
   \WCOJ enjoys lower asymptotic complexity 
   than traditional algorithms~\cite{DBLP:journals/sigmod/NgoRR13}.
 But when the query is acyclic, 
@@ -141,7 +141,7 @@ This finer-grained view of join algorithms allows \FJ
   converts it into a new kind of plan that we call a \FJ plan.  It
   then optimizes the \FJ plan, resulting in a plan that sits in
   between binary join and \GJ, combining the benefits of both.  On one
-  hand \FJ takes full advantage of the design space in
+  hand \FJ fully exploits the design space in
   Figure~\ref{fig:design-space}.  On the other hand, by starting from
   an already optimized binary plan, \FJ takes advantage of existing
   cost-based optimizers; in our system we used binary plans produced by
@@ -153,7 +153,7 @@ Next, we address the main source of
 In contrast,  a binary join plan needs to build a hash map only for each relation 
   on the right-hand side of a join,
   and simply iterates over the relation on the left.
-As a result, query optimizers commonly place the largest relations on the left
+As a result, a query optimizer commonly places the largest relation on the left
  to minimize the cost of hash building.
 One simple optimization in \FJ is that we do not built a trie for
 tables that are left children, mimicking the binary plans.
@@ -290,8 +290,8 @@ SELECT r.x, s.u, t.u
    AND r.y = s.u AND s.v = t.u AND t.v = r.x
 \end{lstlisting}
 %
-Then we denote by $S = \pi_{uv}(\sigma_{w>30}(M))$ and $T =
-\pi_{uv}(\sigma_{v=w}(M))$, and write the query as:
+Then we denote by $S = \Pi_{uv}(\sigma_{w>30}(M))$ and $T =
+\Pi_{uv}(\sigma_{v=w}(M))$, and write the query as:
 $$Q_{\triangle}(x,y,z) \cd R(x, y), S(y,z), T(z, x).$$
 %
 We call this query the \emph{triangle query} over the relations $R$, $S$,
@@ -516,7 +516,7 @@ the choice of the optimizer: poor plans perform catastrophically
 bad~\cite{DBLP:journals/pvldb/LeisGMBK015}.  In contrast, although the
 runtime performance of \GJ does depend on the variable order, some
 researchers believe that \GJ is less sensitive to poor variable
-orders, in part because it is always theoretically optimal.
+orders, in part because it is worst-case optimal.
 
 \section{\FJ}\label{sec:free-join}
 
@@ -734,7 +734,7 @@ We now define the \FJ plan using these concepts.
   $R_i(\bm x_i)$ in the query, the set of all its subatoms occurring
   in all nodes must form a partitioning of $R_i(\bm x_i)$.  We denote
   by $vs(\phi_k)$ the set of variables in all subatoms of $\phi_k$.
-  The variables \emph{available to} $\phi_k$ are all variables of the
+  The variables \emph{available to} $\phi_k$ are all the variables of the
   preceding nodes:
 %
 $$avs(\phi_k) = \bigcup_{j < k} vs(\phi_j)$$
@@ -1164,7 +1164,7 @@ Our system starts from an optimized binary plan produced by a
 traditional cost-based optimizer; in particular, we use DuckDB's
 optimizer~\cite{DBLP:conf/cidr/RaasveldtM20,DBLP:conf/vldb/Raasveldt22}. We
 decompose a bushy plan into a set of left-deep plans, as described in
-Sec.~\ref{sec:background}, then convert each left-deep plan into an
+Sec.~\ref{sec:background:fj}, then convert each left-deep plan into an
 equivalent \FJ plan.  Finally, we optimize the converted \FJ plan,
 resulting in a plan that can be anywhere between a left-deep plan or a
 \GJ plan.
@@ -1274,8 +1274,7 @@ last line in the algorithm ensures we factor lookups
 previous lookups in the same node have also been factored out. Doing
 so respects the lookup ordering given by the original cost-based
 optimizer, since scrambling this ordering may inadvertently slow down
-the query. It should be clear that, except for extreme cases where the
-enclosing loop is empty, factoring out any lookup will always improve
+the query. It should be clear that factoring out any lookup will always improve
 performance.
 
 
@@ -1315,7 +1314,8 @@ column-oriented databases~\cite{DBLP:journals/ftdb/AbadiBHIM13}.
 
 
 \begin{figure}
-  \includegraphics[width=0.3\linewidth]{colt.pdf}
+  \centering
+  \includegraphics{colt.pdf}
   \caption{A \COLT for the relation $S$ in
     Fig.~\ref{fig:clover-query}. Each off$_i$ is an integer
     representing an offset into the table $S$.}
@@ -1900,18 +1900,17 @@ Overall, using the default batch size 1000
   and a maximum speedup of 5.33x over non-vectorized \FJ.
 
 \begin{figure*}
-\begin{minipage}{.45\textwidth}
+\begin{minipage}{.48\linewidth}
 \includegraphics[width=\linewidth]{robust.pdf}
 \end{minipage}
-\hspace{1em}
-\begin{minipage}{.45\textwidth}
+\begin{minipage}{.48\textwidth}
 \includegraphics[width=\linewidth]{robust_fj.pdf}
 \end{minipage}
-\begin{minipage}{.45\textwidth}
+
+\begin{minipage}{.48\textwidth}
 \includegraphics[width=\linewidth]{robust_bj.pdf}
 \end{minipage}
-\hspace{1em}
-\begin{minipage}{.45\textwidth}
+\begin{minipage}{.48\textwidth}
 \includegraphics[width=\linewidth]{robust_gj.pdf}
 \end{minipage}
 \caption{Run time of join algorithms with good and bad cardinality estimates.
