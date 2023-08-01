@@ -1,4 +1,4 @@
-\chapter{Optimizing Nonrecursive Queries}
+\chapter{Optimizing Linear Algebra}
 \label{chapter:spores}
 
 
@@ -40,15 +40,18 @@ complex linear algebra programs that leverages relational algebra as
 an intermediate representation to completely represent the search
 space. SPORES first transforms LA expressions into traditional
 Relational Algebra (RA) expressions consisting of joins, unions 
-and aggregates.  It then performs a cost-based optimizations on
+and aggregates.  It then performs cost-based optimizations on
 the resulting Relational Algebra expressions, using only standard
 identities in RA.  Finally, the resulting RA expression is converted
 back to LA, and executed.
 
 A major advantage of \sys\ is that the rewrite rules in RA are
-complete.  Linear Algebra seems to require an endless supply of clever
+{\em complete}, meaning they can be used to prove equivalence of 
+ any two expressions. Linear Algebra seems to require an endless supply of clever
 rewrite rules, but, in contrast, by converting to RA, we can prove
-that our set of just 13 rules are complete. The RA expressions in this dissertation are
+that our set of just 13 rules are complete. 
+Just like in Chapter~\ref{chap:datalogo} for \datalogo,
+the RA expressions in this chapter are
 over $K$-relations~\cite{DBLP:conf/pods/GreenKT07}; a tuple $X(i,j)$
 is no longer true or false, but has a numerical value, e.g. $5$,
 %
@@ -109,7 +112,7 @@ We make the following contributions in this dissertation:
   Algebra expressions by converting them to Relational Algebra, \rvo{and
   prove the completeness of our rewrite rules} (Sec.~\ref{sec:la:to:ra}).
 \item We present a search algorithm based on Equality Saturation that
-  can explore a large search space while reusing memory (Sec.~\ref{explore}).
+  can explore a large search space while using little memory (Sec.~\ref{explore}).
 \item We conduct an empirical evaluation of the optimizer using
   several real-world machine learning tasks, and demonstrate it's
   superiority over an heuristics-driven optimizer in SystemML
@@ -336,7 +339,7 @@ $\unbind{j}{i}\bind{i,j}A$ binds $A$'s row indices to $i$ and its
 column indices to $j$, then unbinds them in the opposite order,
 thereby transposing $A$.
 
-\sys\ translates a complex LA expression into RA by first applying the
+\sys\ translates an LA expression into RA by first applying the
 rules $R_{LR}$ in Figure~\ref{RMR} to each LA operator, replacing it
 with an RA operator, preceded by {\em bind} and followed by {\em
   unbind}. Next, it eliminates consecutive unbind/bind operators,
@@ -472,45 +475,47 @@ $\mathcal{C}(e) \equiv \mathcal{C}(e')$.
 % mean two expressions evaluate to the same result given any same input (variable
 % assignment). We define isomorphism of RA canonical forms in Section~\ref{ranf}.
 We first give formal definitions for several important constructs. First, we interpret a relation as a function from {\em tuples} to a {\em semiring}. For simplicity we assume all attributes have the same domain $\D$. 
-\begin{defn}{{\em (Relations)}}
-  Fix a semiring $\SR$.  An {\em $\SR$-\textbf{relation}} is a function $A: \D^a \rightarrow \SR$ where $a$ is the {\em arity} of the relation.
+Fix a semiring $\SR$.  
+Recall from Chapter~\ref{ch:datalogo} that
+an {\em $\SR$-\textbf{relation}} is a function $A: \D^a \rightarrow \SR$ where $a$ is the {\em arity} of the relation.
 % We write $|\D|$ for the size of domain $\D$. 
-\end{defn}
-When $\SR=\N$, then an $\N$-relation is a standard relation under bag semantics. When the domain is $\D = [n]$ for some natural number $n$ and $\SR=\R$, then an $\R$-relation is a tensor over the reals.  Next we define expressions over operators from Table~\ref{tPlanOps}. 
-
-\begin{defn}{{\em (Expressions)}}\label{raexpr}
-An expression in RA is either \begin{enumerate*}
-    \item an \emph{\textbf{atom}} $r$ of the form $R(x_1, ..., x_a)$ where $R$ is a relation name and $(x_1, ..., x_a)$ a tuple of variables and/or constants, or
-    \item a {\em natural join} of two expressions $e_1 \times e_2$, or 
-    \item a {\em  union} of two expressions, $e_1 + e_2$, or
-    \item an {\em aggregate},  $\sum_x e$. 
-\end{enumerate*}{}
-\end{defn}{}
+% When $\SR=\N$, then an $\N$-relation is a standard relation under bag semantics.
+When the domain is $\D = [n]$ for some natural number $n$ and $\SR=\R$, then an $\R$-relation is a tensor over the reals.  
+Next we define expressions over operators from Table~\ref{tPlanOps}. 
+Recall the definitions of {\em monomials}, {\em sum-product expressions},
+ and {\em sum-sum product expressions} from Chapter~\ref{chap:datalogo}.
+To reduce clutter, we will call sum-product expressions a {\em term}, 
+ and sum-sum product expressions a {\em polynomial}. 
+An {\em expression} in RA is any polynomial.
+Note that a polynomial can have only one term, and a term can have an empty aggregate. 
+As a reminder, such an expression are built up from atoms of the for $R(x_1, \ldots, x_a)$ 
+ the operations $+$ and $\times$, and aggregation $\sum_x e$.
 Because the order of consecutive aggregates does not matter, we write $\sum_{\set{x_1, \dots, x_n}} e$ for $\sum_{x_1} \dots \sum_{x_n} e$. 
-Given an expression $e$, we say that a variable $x$ is \emph{\textbf{bound}} in $e$, if $e$ contains an aggregate of the form $\sum_x e'$; 
-otherwise it is \emph{\textbf{free}}. We write $vars(e)$ for the set of variables in $e$, $bv(t)$ for the set of bound variables, and $fv(t)$ for the set of free variables.
+
+We write $fv(e)$ and $bv(e)$ for the set of free and bound variables in $e$, respectively.
 We interpret every expression $e$ as a lambda expression $\lambda fv(e) . e$ where the parameters $fv(e)$ may follow a given order, e.g. from an unbind operator if $e$ was converted from LA\footnote{A bind operator $[i,j]$ converts a matrix $A$ to an atom $A(i,j)$.}.
  In the body of the lambda expression, any atom $R(x_1, \dots , x_a)$ evaluates to some $s \in \SR$, and $+, \times$ and $\sum$ compute over $\SR$. We say two RA expressions are equivalent iff they evaluate to the same result given any same inputs: 
 
 \begin{defn}{\em (Equivalence of Expressions)} Fix  expressions $e_1, e_2$ over the relation symbols $R_1, \ldots, R_n$.  We say that $e_1, e_2$ are {\em \textbf{equivalent}} over the semiring $\SR$ and the domain $\D$ if they have the same free variables, and for all interpretations $\pmb{I} = (R_1^I, \ldots, R_n^I)$ where $R_j^I : \D^{a_j} \rightarrow \SR$ for $j=1, \ldots, n$ the two expressions return the same answer, $e_1(\pmb{I}) = e_2(\pmb{I})$.  We write $e_1 =_{\SR, \D} e_2$ to mean $e_1$ and $e_2$ are equivalent.  When $e_1 =_{\SR, \D} e_2$ for all domains $\D$, then we abbreviate $e_1 =_\SR e_2$; when this holds for all semirings $\SR$, then we write $e_1 = e_2$.
 \end{defn}{}
 
-Now we give names for special forms of expressions at each level of the normal form.
-\begin{defn}{{\em (R-monomials, Terms, R-polynomials)}}\label{forms} 
- An \emph{\textbf{R-monomial}}, $m$, is a product of any number of atoms. A \emph{\textbf{term}}, $t$, is a summation expression of the form $\sum_{\pmb{x}} m$, where $\pmb{x}$ is a set of variables and $m$ is an R-monomial.  An \emph{\textbf{R-polynomial}}, $e$, is an expression of the form $c_0 + c_1 t_1 + \dots + c_n t_n$ where $c_0,\ldots,c_n$ are constants in the semiring $\SR$ and $t_1, \ldots, t_n$ are  terms. 
- In summary:
-\begin{alignat}{3}
-      &m & & := r_1 \times \dots \times r_n && \mbox{R-monomials} \label{eq:r:monomial} \\
-      &t & & := \textstyle \sum_{\pmb{x}} m  &&  \mbox{terms} \label{eq:term} \\
-      &e & & := c_0 + c_1 t_1 + \dots + c_n t_n \, && \mbox{R-polynomials} \label{eq:r:polynomial}
-\end{alignat}{}
-We identify the R-monomial $m$ with a bag of atoms denoted by $bag(m) \defeq \set{r_1, \ldots, r_n}$.
-\end{defn}{}
 
-\begin{ex}{} An R-polynomial over $\N$-relations is a union of conjunctive queries precisely.  For example, the polynomial $\sum_{j} A(i,j) \times A(i,j) \times B(j,k) \times B(j,k) + \sum_{\ell} A(i,\ell) \times C(\ell,k)$ is precisely the UCQ $Q(i,k) \equiv \exists j (A(i, j) \wedge A(i, j) \wedge B(j, k) \wedge B(j, k)) \vee \exists \ell (A(i, l) \wedge C(l, k))$ under bag semantics.  Notice that
-% When the relations are matrices, the polynomial also represents the linear algebra expression $A^2B^2 + AC $, where $A^2$ squares the matrix element-wise. 
-  the monomial $A(i,j) \times A(i,j) \times B(j,k) \times B(j,k)$ is the same as $A(i,j) \times B(j,k) \times A(i,j) \times B(j,k)$, and we view it as the bag $\{A(i,j), A(i,j), B(j,k), B(j,k)\}$, and also abbreviate it as $A^2(i,j) \times B^2(j,k)$.
-\end{ex}
+% Now we give names for special forms of expressions at each level of the normal form.
+% \begin{defn}{{\em (R-monomials, Terms, R-polynomials)}}\label{forms} 
+%  An \emph{\textbf{R-monomial}}, $m$, is a product of any number of atoms. A \emph{\textbf{term}}, $t$, is a summation expression of the form $\sum_{\pmb{x}} m$, where $\pmb{x}$ is a set of variables and $m$ is an R-monomial.  An \emph{\textbf{R-polynomial}}, $e$, is an expression of the form $c_0 + c_1 t_1 + \dots + c_n t_n$ where $c_0,\ldots,c_n$ are constants in the semiring $\SR$ and $t_1, \ldots, t_n$ are  terms. 
+%  In summary:
+% \begin{alignat}{3}
+%       &m & & := r_1 \times \dots \times r_n && \mbox{R-monomials} \label{eq:r:monomial} \\
+%       &t & & := \textstyle \sum_{\pmb{x}} m  &&  \mbox{terms} \label{eq:term} \\
+%       &e & & := c_0 + c_1 t_1 + \dots + c_n t_n \, && \mbox{R-polynomials} \label{eq:r:polynomial}
+% \end{alignat}{}
+% We identify the R-monomial $m$ with a bag of atoms denoted by $bag(m) \defeq \set{r_1, \ldots, r_n}$.
+% \end{defn}{}
+
+% \begin{ex}{} An R-polynomial over $\N$-relations is a union of conjunctive queries precisely.  For example, the polynomial $\sum_{j} A(i,j) \times A(i,j) \times B(j,k) \times B(j,k) + \sum_{\ell} A(i,\ell) \times C(\ell,k)$ is precisely the UCQ $Q(i,k) \equiv \exists j (A(i, j) \wedge A(i, j) \wedge B(j, k) \wedge B(j, k)) \vee \exists \ell (A(i, l) \wedge C(l, k))$ under bag semantics.  Notice that
+% % When the relations are matrices, the polynomial also represents the linear algebra expression $A^2B^2 + AC $, where $A^2$ squares the matrix element-wise. 
+%   the monomial $A(i,j) \times A(i,j) \times B(j,k) \times B(j,k)$ is the same as $A(i,j) \times B(j,k) \times A(i,j) \times B(j,k)$, and we view it as the bag $\{A(i,j), A(i,j), B(j,k), B(j,k)\}$, and also abbreviate it as $A^2(i,j) \times B^2(j,k)$.
+% \end{ex}
 Before we formally define our canonical form, we need to define two syntactical relationships between our expressions, namely {\em homomorphism} and {\em isomorphism}. Fix terms $t = \sum_{\pmb{x}} m$ and $t' = \sum_{\pmb{x'}} m'$, and let $f: \pmb{x} \rightarrow \pmb{x}'$ be any function. Let $r \in bag(m)$ be an atom of $m$. We write $f(r)$ for the result of applying $f$ to all variables of $r$. We write $f(bag(m))$ for the bag obtained by applying $f$ to each atom $r \in bag(m)$. 
 \begin{defn}{\em (Homomorphism)}
   Fix two terms $t, t'$.  A \emph{\textbf{homomorphism}}, $f : t \rightarrow t'$, is a function $f: \pmb{x} \rightarrow \pmb{x}'$ such that $f(bag(m))=bag(m')$.
@@ -550,7 +555,7 @@ A stronger correspondence between terms is an isomorphism:
 \end{proof}{}
 We are now ready to formally define the canonical form for RA expressions: 
 
-\begin{defn}{\em (Canonical Form)} An RPlan expression (as defined in Table~\ref{tPlanOps}) is {\em \textbf{canonical}} if it is a R-polynomial (Definition~\ref{forms}) containing no isomorphic terms. 
+\begin{defn}{\em (Canonical Form)} An RPlan expression (as defined in Table~\ref{tPlanOps}) is {\em \textbf{canonical}} if it is a polynomial containing no isomorphic terms. 
 \end{defn}{}
 
 We can canonicalize any expression by pulling $+$ to the top and pushing $\times$ to the bottom, while combining isomorphic terms $c_1 t + c_2 t$ into $(c_1 + c_2) t$: 
@@ -587,7 +592,7 @@ The implications (\ref{item:1}) $\Rightarrow$ (\ref{item:2}) $\Rightarrow\cdots\
 
 \begin{proof} We prove (\ref{item:6}) $\Rightarrow$ (\ref{item:1}).
 % $$\forall \D \mbox{ s.t. } |\D|\geq |vars(e_1)| \wedge |\D|\geq |vars(e_2)| : e_1 =_{\N, \D} e_2 \Rightarrow e_1  \equiv e_2 $$
-  Assume that $e_1(\pmb{I})=e_2(\pmb{I})$ for all interpretations $\pmb{I}$ over the domain $\D$.  We start by observing that the constant terms in $e_1$ and $e_2$ must be equal, i.e. if $e_1 = c_0 + \ldots, e_2 = c_0' + \ldots$ then $c_0 = c_0'$.  This follows by choosing $\pmb{I}$ to consists of empty relations, in which case $e_1(\pmb{I})=c_0$ and $e_2(\pmb{I})=c_0'$, proving $c_0=c_0'$.  Thus, we can cancel the constant terms and assume w.l.o.g. that $e_1,e_2$ have no constant terms.
+  Assume that $e_1(\pmb{I})=e_2(\pmb{I})$ for all interpretations $\pmb{I}$ over the domain $\D$.  We start by observing that the constant terms in $e_1$ and $e_2$ must be equal, i.e. if $e_1 = c_0 + \ldots, e_2 = c_0' + \ldots$ then $c_0 = c_0'$.  This follows by choosing $\pmb{I}$ to consist of empty relations, in which case $e_1(\pmb{I})=c_0$ and $e_2(\pmb{I})=c_0'$, proving $c_0=c_0'$.  Thus, we can cancel the constant terms and assume w.l.o.g. that $e_1,e_2$ have no constant terms.
 Next, we show that we can  assume w.l.o.g. that  $e_1$ and $e_2$ have no free variables.  Otherwise, denote by $\pmb{x}$ the free variables in $e_1$ and $e_2$ (they must be the same in order for $e_1$, $e_2$ to be equivalent), and define $e_1' = \sum_{\pmb{x}} e_2$ and $e_2' = \sum_{\pmb{x}} e_2$.  It is easy to check that $e_1', e_2'$ are also equivalent and, if we prove that they are isomorphic, then so are $e_1, e_2$.  Thus, we will assume w.l.o.g. that $e_1, e_2$ have no free variables.
 %
 %  where $\pmb{i}$ is the set of free variables of $e_1$ and $e_2$. We can easily show $e_1 = e_2 \Rightarrow e_1' = e_2'$ and $e_1' \equiv e_2' \Rightarrow e_1 \equiv e_2$, and with a proof of $e_1' = e_2' \Rightarrow e_1' \equiv e_2'$ it follows $e_1 = e_2 \Rightarrow e_1 \equiv e_2$. 
