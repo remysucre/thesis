@@ -754,8 +754,8 @@ computing $X^2$ and $X*UV^T$ would both create dense intermediates. Similarly,
 some rewrites depend on program properties like common subexpressions. Usually,
 these rewrites only apply when the matched expression shares no CSE with others
 in order to leverage common subexpression elimination. Testing input and program
-properties like this becomes boilerplate code, making implementation tedious and
-adds burden to maintenance.
+properties like this becomes tedious over a large code base, 
+ adding burden to implementation and maintenance.
 
 \textsc{Composing Rewrites} Even more relevant to us is the problem of composing
 larger rewrites out of smaller ones. Our equality rules $R_{EQ}$ are very
@@ -788,8 +788,8 @@ equivalent to the input that is optimal according to the cost function.
 
 \begin{figure}
 \centering
-    \includegraphics[scale=0.5]{XYY} \qquad \includegraphics[scale=0.5]{assoc} \qquad 
-\includegraphics[scale=0.5]{CSE} 
+    \includegraphics[width=0.2\linewidth]{XYY} \qquad \includegraphics[width=0.23\linewidth]{assoc} \qquad 
+\includegraphics[width=0.2\linewidth]{CSE} 
     \vspace{7pt}
     \caption{Left: E-Graph representing $(X \times Y) \times Y$, and the graph after applying
       associativity to the root (middle). New nodes are in gray. Each dashed box is an E-Class.
@@ -849,6 +849,7 @@ the transitive closure of the equality rules applied to the initial expression.
 In other words, it contains \textit{all} expressions equivalent to the input under the equality rules.
 
 \begin{figure}
+\begin{subfigure}[t]{.49\textwidth}
 \begin{lstlisting}[language=Python]
 def saturate(egraph, equations):
   for eq in equations: 
@@ -856,7 +857,10 @@ def saturate(egraph, equations):
     for eclass in matches: 
       ec = egraph.add(eq.rhs)
       egraph.merge(eclass, c)
-
+\end{lstlisting}
+\end{subfigure}
+\begin{subfigure}[t]{.5\textwidth}
+\begin{lstlisting}
 def add(expr):
   ID = egraph.find(expr)
   if ID != NULL:
@@ -866,6 +870,7 @@ def add(expr):
     ID = egraph.insert(expr.op, cids)
     return ID
 \end{lstlisting}
+\end{subfigure}
     \caption{Equality saturation pseudocode. 
       % \texttt{match} returns the IDs of the root class of any matching subgraph;
       % \texttt{merge} combines two E-Classes given their IDs; it also propagates
@@ -941,7 +946,8 @@ node with cost 0 and the other node with cost 4, incurring a total cost of 9.
 However, the optimal strategy is to pick the nodes with 0, 2 and share the same
 node with cost 4, incurring a total cost of 6. 
 
-We handle the complexity of the search problem with a constraint
+We follow Tate et.al.~\cite{DBLP:journals/corr/abs-1012-1802} 
+and handle the complexity of the search problem with a constraint
 solver. We assign a variable to each operator and each E-Class, then construct
 constraints over the variables for the solver to select operators that make up a
 valid expression. The solver will then optimize a cost function defined over the
@@ -1189,15 +1195,14 @@ with XLA through \verb|tf.function|, and enable GPU.
 % \end{figure*}{}
 
 Theoretically, our first hypothesis is validated by the fact that our relational
-equality rules are complete w.r.t. linear algebra semantics. To test completeness in
-practice\footnote{\textit{``I have only proved it correct, not tried it''} --
-  Donald Knuth}, our first set of experiments check if SPORES
+equality rules are complete w.r.t. linear algebra semantics. To test the rules' coverage in
+practice, our first set of experiments check if SPORES
 can derive the hand-coded sum product rewrite rules in SystemML. To do this, we
 input the left hand side of each rule into SPORES, perform equality
 saturation, then check if the rule's right hand side is present in the saturated
 graph. The optimizer is able to derive
 all 84 sum-product rewrite rules in SystemML using relational equality rules. 
-Refer to the long version of this chapter \cite{SPORESarxiv} for a list of these rewrites. 
+Refer to~\cite{SPORESarxiv} for a list of these rewrites. 
 We believe replacing the 84 ad-hoc
 rules with our translation rules $R_{LR}$ and equality rules $R_{EQ}$ would greatly
 simplify SystemML's codebase. Together with equality saturation, our relational
@@ -1258,7 +1263,7 @@ sum-product operations including matrix multiply, addition, point-wise multiply 
 the great majority of run time (from 77.4\% to 98.9\%). For other heavy-hitting operations, we implement
 standard rewrite rules as discussed in Section~\ref{udfs}.} 
 \begin{figure}
-    \centering  \includegraphics[width=0.8\linewidth]{heavy.pdf}
+    \centering  \includegraphics[width=0.5\linewidth]{heavy.pdf}
     \caption{\rvt{Run-time profile of benchmark programs.}}
     \label{heavy}
     \vspace*{5pt}
@@ -1271,7 +1276,7 @@ optimizations as SystemML does. For ALS, MLR and PNMF,
 \sys\ found new optimizations that lead to \rvo{up to 10X speedup}.
 We next analyze each benchmark in detail. 
 \begin{figure}
-    \centering  \includegraphics[width=0.9\linewidth]{runtime.pdf}
+    \centering  \includegraphics[width=0.7\linewidth]{runtime.pdf}
     \caption{\rvo{Run time under SystemML/SPORES compilation.}} 
     \label{eval}
     \vspace{5pt}
@@ -1376,7 +1381,7 @@ performance in theory, but did not have an effect in practice since SystemML
 cannot accurately estimate sparsity to inform execution. 
 
 \begin{figure}
-    \centering  \includegraphics[width=0.9\linewidth]{tf.pdf}
+    \centering  \includegraphics[width=0.7\linewidth]{tf.pdf}
     \caption{\rvb{Run time before- and after-rewrite in TensorFlow.}}
     \label{tfeval}
     \vspace{-10pt}
@@ -1399,14 +1404,15 @@ to TensorFlow.
 }
 \subsection{Compilation Overhead} \label{overhead}
 \begin{figure}
-    \includegraphics[width=\linewidth]{compiletime.pdf}
+    \centering
+    \includegraphics[width=.8\linewidth]{compiletime.pdf}
     \caption{Compile time breakdown for different saturation and extraction
       strategies. Depth-first saturation reaches the 2.5s timeout compiling GLM and SVM. }
     \label{compile}
     \vspace{5pt}
 \end{figure}{}
 \begin{figure}
-    \centering  \includegraphics[width=0.8\linewidth]{strategy.pdf}
+    \centering  \includegraphics[width=0.6\linewidth]{strategy.pdf}
     \caption{\rvo{Performance impact of different saturation and extraction
       strategies. S is saturation with sampling, and D is depth-first saturation. Depth-first saturation runs into timeout compiling GLM and SVM.}} 
     \label{sampleeval}
@@ -1471,7 +1477,6 @@ multi-objective optimizer for accuracy and run time.
     \centering
     \caption{\rvt{Numerical characteristics of compiled programs.}}
     \vspace*{7pt}
-\scalebox{0.8}{
     \begin{tabular}{l|c|c|c|c}
     \hline
         Optimizer & SysML & SPORES & SysML & SPORES  \\
@@ -1492,18 +1497,13 @@ multi-objective optimizer for accuracy and run time.
         \hline
         ALS ($iter.$) & 8 & 8 & 9 & 9 \\
         \hline
-    \end{tabular}}
+    \end{tabular}
     \label{tab:numeric}
     \vspace*{5pt}
 \end{table}{}
 
 \section{Related Work}
 
-% TODO emphasize SystemML
-% TODO ADD Immanual Trummer, PILP
-% Morpheus
-% lara
-% volcano
 There is a vast body of literature for both relational query optimization and
 optimizing compilers for machine learning. Since we optimize machine learning programs through a
 relational lens, our work relates to research in both fields. As we have pointed
