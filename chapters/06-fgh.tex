@@ -19,7 +19,7 @@ form of recursive queries, using the
 SQLite, do support this restricted form of recursion.
 
 %
-Datalog is a language
+The Datalog language, covered in Chapter~\ref{chap:background}, is
 designed specifically for recursive queries, and it is gaining in
 popularity~\cite{DBLP:conf/datalog/AlvaroMCHMS10,
 DBLP:reference/db/RoscoeL18,
@@ -31,12 +31,15 @@ DBLP:journals/tkde/SeoGL15,
 10.14778/2824032.2824052,
 francislandau-vieira-eisner-2020-wrla}.
 But the optimization problem for recursive queries is
-much less studied.  A  Datalog program consists of multiple rules,
-defining several, mutually recursive relations, and one
-distinguished relation name which is the output of the program.  The
-effect of the program consist of repeatedly applying the rules,
-sometimes called the {\em body} of the program, until a fixpoint is
-reached, then it returns the output relation.
+much less studied.  
+The na\"ive evaluation of Datalog repeatly applies the 
+ rules in a loop, until a fixpoint is reached. 
+% A  Datalog program consists of multiple rules,
+% defining several, mutually recursive relations, and one
+% distinguished relation name which is the output of the program.  The
+% effect of the program consist of repeatedly applying the rules,
+% sometimes called the {\em body} of the program, until a fixpoint is
+% reached, then it returns the output relation.
 % A recursive query consists of some non-recursive
 % expression, the {\em body}, which is evaluated repeatedly, in a loop,
 % until either a fixpoint is reached, or some convergence criterion is
@@ -129,8 +132,8 @@ guaranteed to be correct, because it is obtained by applying a limited
 set of manually crafted rules (patterns), which are guaranteed to be
 correct.  However, the FGH-rule often requires exploring a very large
 space, which cannot be covered by a limited set of rules.  In this
-paper we propose to use {\em counterexample-guided inductive
-  synthesis} (\cegis) for this purpose, which is a technique designed
+paper we propose to use for this purpose {\em counterexample-guided inductive
+  synthesis} (\cegis), a technique designed
 for program
 sketching~\cite{DBLP:conf/asplos/Solar-LezamaTBSS06,DBLP:conf/tacas/TorlakJ07}.
 When applied to our context, we call this technique {\em query
@@ -155,12 +158,13 @@ invariants.
 %  is an over approximation.}
 
 {\bf Monotone Queries and Semiring Semantics} Datalog is, by
-definition, restricted to monotone queries.  This ensures that every
-query has a well-defined semantics, namely the least fixpoint of its
-immediate consequence operator.  Existing optimizations for Datalog,
-like semi-naive evaluation and magic set rewriting, apply mainly to
-monotone queries. Even stratified negation can (if at all)
-only be handled by imposing appropriate restrictions~\cite{DBLP:journals/corr/abs-1909-08246}.
+definition, restricted to monotone queries.
+% This ensures that every
+% query has a well-defined semantics, namely the least fixpoint of its
+% immediate consequence operator.  Existing optimizations for Datalog,
+% like semi-naive evaluation and magic set rewriting, apply mainly to
+% monotone queries. Even stratified negation can (if at all)
+% only be handled by imposing appropriate restrictions~\cite{DBLP:journals/corr/abs-1909-08246}.
 %\hqn{There are a couple of papers~\cite{DBLP:journals/jlp/BalbinPRM91,DBLP:journals/corr/abs-1909-08246} with magic set transforms on queries with
 %negations. Need to check what kind of stratification assumption is needed.}
 %\reinhard{Hung, are you happy with the above formulation on stratified negation?}
@@ -184,24 +188,28 @@ because it combines recursion and aggregation.\footnote{Prior
   has proposed extending Datalog with $\min$ and $\max$ aggregates by
   explicitly re-defining the semantics of recursive rules with
   aggregates.  Our approach keeps the standard least fixpoint
-  semantics, but generalizes the semiring.}  In order to express such
-queries, in this chapter we propose an extension of Datalog, following
-the approach in~\cite{DBLP:conf/pods/GreenKT07}, where the relations
-are interpreted over {\em ordered semirings}.
+  semantics, but generalizes the semiring.}  
+In order to express such queries, we work with the \datalogo
+ language introduced in Chapter~\ref{chap:datalogo}
+that supports recursive aggregates by extending Datalog with semirings.
 
-A semiring is an
-algebraic structure with two operations, $\oplus, \otimes$.
-Traditional Datalog corresponds to the Boolean semiring, where these
-two operators are $\vee, \wedge$, while the query in Fig.~\ref{fig:cc}
-(b) is over the Tropical semiring, where the two operators are
-$\min, +$ (reviewed in Sec.~\ref{sec:background}).
-We call this extension of Datalog to ordered semirings $\name$,
-pronounced ``Datalogo'', where the circle represents
-the semiring.  In $\name$ recursion is still restricted to monotone\footnote{This
-monotonicity is over the partial order from the ordered semiring.}
-queries, but monotone queries in $\name$ include queries with aggregates, over an
-appropriate semiring.  The query in Fig.~\ref{fig:cc} (b) is monotone
-over the (ordered) tropical semiring.
+% in this chapter we propose an extension of Datalog, following
+% the approach in~\cite{DBLP:conf/pods/GreenKT07}, where the relations
+% are interpreted over {\em ordered semirings}.
+
+% A semiring is an
+% algebraic structure with two operations, $\oplus, \otimes$.
+% Traditional Datalog corresponds to the Boolean semiring, where these
+% two operators are $\vee, \wedge$, while the query in Fig.~\ref{fig:cc}
+% (b) is over the Tropical semiring, where the two operators are
+% $\min, +$ (reviewed in Sec.~\ref{sec:background}).
+% We call this extension of Datalog to ordered semirings $\name$,
+% pronounced ``Datalogo'', where the circle represents
+% the semiring.  In $\name$ recursion is still restricted to monotone\footnote{This
+% monotonicity is over the partial order from the ordered semiring.}
+% queries, but monotone queries in $\name$ include queries with aggregates, over an
+% appropriate semiring.  The query in Fig.~\ref{fig:cc} (b) is monotone
+% over the (ordered) tropical semiring.
 
 {\bf Loop Invariants} One difficulty in reasoning about loops in
 programming languages is the need to discover loop invariants.  Some
@@ -257,11 +265,12 @@ global constraint does not help optimize non-recursive queries, but
 can be used to great advantage to optimize some recursive queries; we
 give details in Sec.~\ref{subsec:constraints}.
 
-{\bf Equality Saturation Systems} Throughout our optimizer we need to
+{\bf Equality Saturation} Throughout our optimizer we need to
 manage symbolic expressions of queries, and their equivalence classes,
-as defined by a set of rules.  We uses for this purpose a
-state-of-the-art Equality Saturation System (\eqsat),
-EGG~\cite{DBLP:journals/pacmpl/WillseyNWFTP21}.  We show how to use
+as defined by a set of rules.  
+This is achieved once again with equality saturation (\eqsat), 
+ a technique introduced in Chapter~\ref{chapter:spores}.
+We show how to use
 \eqsat\ for checking equality under constraints, inferring loop
 invariants, and ``denormalization'' (which is essentially query
 rewriting using views).
@@ -338,48 +347,6 @@ rewriting using views).
 %  our optimizer can apply the FGH-rule and optimize the program into a
 %   simple bottom-up computation, which takes linear time.
 
-\textbf{Related Work} Our work was partially inspired by the \prem\
-condition, described by Zaniolo et
-al.~\cite{DBLP:journals/tplp/ZanioloYDSCI17}, which, as we shall
-explain, is a special case of the FGH-rule.  Unlike our system, their
-implementation required the programmer to check the \prem\ manually,
-then perform the corresponding optimization.
-% As we shall discuss, our FGH-rule generalizes \prem.
-% Their implementation also relies on the programmer to perform the rewrite and
-% check that \prem\ is applicable.
-% Our optimizer is automated and supports the more general FGH-rule.
-%
-Seveal prior systems  leveraged SMT-solvers to reason about
-query languages~\cite{
-  DBLP:conf/icfem/VeanesGHT09,
-  DBLP:conf/cidr/ChuWWC17,
-  DBLP:conf/cav/GrossmanCIRS17,
-  DBLP:conf/sosp/SchlaipferRLS17,
-  DBLP:journals/pacmpl/0001DLC18};
-but none of these  consider recursive queries.
-% We contribute by proposing a simple and sound SMT encoding that can
-% be used in \cegis, and works in conjunction with a rewrite system
-% to reason about semiring operations including unbounded aggregation.
-%
-Datalog synthesizers have been described in~\cite{
-  DBLP:conf/cp/AlbarghouthiKNS17,
-  DBLP:conf/sigsoft/SiLZAKN18,
-  DBLP:conf/ijcai/SiRHN19,
-  DBLP:journals/pvldb/WangSCPD20,
-  DBLP:journals/pacmpl/RaghothamanMZNS20}.
-Their setting is different from ours:
-the specification is given by input-output examples, and the
-synthesizer needs to produce a program that matches all examples.
-% In comparison, we take a Datalog program as the reference implementation
-% which completely specifies the semantics of the program to be synthesized.
-% Unlike prior work which must synthesize recursive definitions,
-% we leverage the FGH-rule to solve the optimization problem
-% by synthesizing a non-recursive expression.
-A design choice that we made, and which sets us further aside from the
-previous systems, is to use an existing \cegis\ system, Rosette; thus,
-we do not aim to  improve the \cegis\ system itself, but optimize the
-way we use it.
-
 % 
 % The cited papers also propose techniques to speed up \cegis;
 % since we implement our optimizer atop the general \cegis\ system Rosette,
@@ -430,227 +397,227 @@ can be profitably integrated into our FGH-optimizer.
 %%% TeX-master: "main"
 %%% End:
 
-\section{Background}
+% \section{Background}
 
-\label{sec:background}
+% \label{sec:background}
 
-%We provide here a brief background on Datalog and semirings.
+% %We provide here a brief background on Datalog and semirings.
 
-{\bf Datalog} \update{A {\em relation} of arity $k$ is a finite subset
-  of $D^k$, where $D$ is a fixed domain.  The abbreviations} EDB and
-IDB stand for {\em Extensional Database} and {\em Intensional
-  Database}, and represent the base relations and the computed
-relations respectively.  A {\em rule} has the form:
-%
-\begin{align*}
-  R_0(\texttt{vars}) \cd & R_1(\texttt{vars}_1) \wedge \cdots \wedge R_m(\texttt{vars}_m)
-\end{align*}
-%
-where $R_0$ is an IDB, and $R_1, \ldots, R_m$ are IDBs or EDBs.  The
-rule is {\em safe} if every variable occurs in at least some predicate
-in the body, and the rule is {\em linear} if its body contains at most
-one IDB.  A {\em Datalog program} consists of a set of possibly
-mutually recursive rules.  Usually, only a subset of the IDB
-predicates are returned to the user, and we will call them the {\em
-  answer} IDBs.  The {\em Immediate Consequence Operator}, ICO, is the
-mapping on the IDB predicates that consists of one application of all
-the Datalog rules.  The {\em semantics} of a Datalog program is given
-by the least fixpoint of its ICO.  The {\em naive evaluation
-  algorithm} consists of repeatedly applying the ICO until the IDBs no
-longer change.
-% The
-% {\em semi-naive evaluation algorithm} reduces the number of
-% rediscovered tuples by computing separately
-% $\Delta_n \defeq \bm R_n - \bm R_{n-1}$:
+% {\bf Datalog} \update{A {\em relation} of arity $k$ is a finite subset
+%   of $D^k$, where $D$ is a fixed domain.  The abbreviations} EDB and
+% IDB stand for {\em Extensional Database} and {\em Intensional
+%   Database}, and represent the base relations and the computed
+% relations respectively.  A {\em rule} has the form:
+% %
+% \begin{align*}
+%   R_0(\texttt{vars}) \cd & R_1(\texttt{vars}_1) \wedge \cdots \wedge R_m(\texttt{vars}_m)
+% \end{align*}
+% %
+% where $R_0$ is an IDB, and $R_1, \ldots, R_m$ are IDBs or EDBs.  The
+% rule is {\em safe} if every variable occurs in at least some predicate
+% in the body, and the rule is {\em linear} if its body contains at most
+% one IDB.  A {\em Datalog program} consists of a set of possibly
+% mutually recursive rules.  Usually, only a subset of the IDB
+% predicates are returned to the user, and we will call them the {\em
+%   answer} IDBs.  The {\em Immediate Consequence Operator}, ICO, is the
+% mapping on the IDB predicates that consists of one application of all
+% the Datalog rules.  The {\em semantics} of a Datalog program is given
+% by the least fixpoint of its ICO.  The {\em naive evaluation
+%   algorithm} consists of repeatedly applying the ICO until the IDBs no
+% longer change.
+% % The
+% % {\em semi-naive evaluation algorithm} reduces the number of
+% % rediscovered tuples by computing separately
+% % $\Delta_n \defeq \bm R_n - \bm R_{n-1}$:
+% % \begin{align}
+% %   \Delta_0 = \bm R_1 \defeq & P(\emptyset) \nonumber \\
+% %   \bm \Delta_n \defeq & \Delta P(\bm R_n, \Delta_{n-1}) - \bm R_n
+% %                       & \bm R_{n+1} \defeq & \bm R_n \cup \Delta_n
+% % \end{align}
+% % %
+% % Here $\Delta P$ is the {\em incremental view computation} query,
+% % i.e., any expression that satisfies
+% % $P(\bm R \cup \Delta) = P(\bm R) \cup \Delta P(\bm R, \Delta)$.  The
+% % seminaive program terminates when $\Delta_n=\emptyset$.
+
+% \update{
+% %
+%   In this chapter we will combine multiple rules with the same head into
+%   a single rule by OR-ing their bodies, and writing explicitly all
+%   existential quantifiers.  This is a common convention used in the
+%   literature, see e.g.,~\cite{DBLP:journals/jlp/Fitting91}.  For
+%   example the following  Datalog program, which computes the transitive
+%   closure of a relation $E$,
+% %
+% \begin{align*}
+%   TC(x,y) \cd & E(x,y) \\
+%   TC(x,y) \cd & E(x,z) \wedge TC(z,y)
+% \end{align*}
+% %
+% becomes $TC(x,y) \cd E(x,y) \vee \exists z (E(x,z) \wedge TC(z,y))$.
+% }
+
+% {\bf (Pre-)Semirings} A {\em pre-semiring} is a tuple
+% $\bm S = (S, \oplus, \otimes, \zero, \one)$ where \update{$\oplus$ is
+%   commutative,} both $\oplus, \otimes$ are associative, have
+% identities $\zero$ and $\one$ respectively, and $\otimes$ distributes
+% over $\oplus$.  \update{When $\otimes$ is commutative, then we call
+%   $\bm S$ a {\em commutative} pre-semiring.  All pre-semirings in this
+%   paper are commutative, and we will simply refer to them as
+%   pre-semirings.}  When the equality $x \otimes \zero = \zero$ holds
+% for all $x$, then it is called a {\em semiring}.  An {\em ordered}
+% pre-semiring is a pre-semiring with a partial order $\preceq$, where
+% both $\oplus, \otimes$ are monotone operations.  When the partial
+% order is defined by $x\preceq y$ iff $\exists z, x\oplus z = y$ then
+% it is called the {\em natural order}.  Examples of ordered
+% (pre-)semirings are the Booleans
+% $\B = (\set{0,1}, \vee, \wedge, 0, 1)$, the closed natural numbers
+% $\N^\infty = (\N \cup \set{\infty},+,*,0,1)$, the tropical semiring
+% $\trop = (\N \cup \set{\infty}, \min, +, \infty,0)$, the reversed
+% tropical semiring $\trop^r=(\N, \max, +, 0, 0)$, the lifted naturals
+% and lifted reals $\N_\bot = (\N \cup \set{\bot}, +, *, 0, 1)$,
+% $\R_\bot = (\R \cup \set{\bot}, +, *, 0, 1)$, where
+% $\bot + x = \bot * x = \bot$.  The structures $\B, \N^\infty, \trop$
+% are semirings, the others are pre-semirings.  $\B$,
+% $\N^\infty, \trop$, and $\trop^r$ are naturally ordered.  Confusingly
+% (!!), the order relation on $\trop$ is the reverse one: $\infty$ is
+% the smallest, and $0$ is the largest element.  The order relation in
+% $\N_\bot$ and $\R_\bot$ is given by $\bot \preceq x$ for all $x$: they
+% are ordered pre-semirings but not naturally ordered.%
+% \footnote{Note that we define $\trop$ and $\trop^r$ over the natural
+%   numbers rather than the reals. The motivation for this slight
+%   deviation from the standard definition of these semirings will
+%   become clear in Section \ref{sec:verification}: the support of
+%   integer theories by the SMT-solver \zzz.}
+
+
+% %  \hqn{May need to clarify why we define the tropical semiring over $\N$ instead of $\R$?
+% %  The standard definition (from Wikipedia, e.g.) uses $\R$}
+
+% {\bf $\bm S$-relations} An $\bm S$-relation $R$ is a function that
+% associates to each tuple $t \in D^k$ a value in the semiring,
+% $R[t] \in \bm S$.  In this context, $\bm S$ is called the {\em value
+%   space} of the relation $R$, while the domain $D$ of its attributes
+% is called the {\em key space}.  $\bm S$-relations were first
+% introduced\footnote{Under the name $K$-relations.} by Green et
+% al.~\cite{DBLP:conf/pods/GreenKT07} in order to model data provenance.
+% A $\B$-relation is a set, an $\N^\infty$-relation is a bag (with
+% possibly infinite multiplicities), an $\R_\bot$-relation is a tensor
+% (with possibly undefined entries).
+
+% {\bf Queries} Consider a relational schema $R_1, R_2, \ldots$ over a
+% \update{pre-}semiring $\bm S$.  A positive (relational algebra) {\em
+%   query} is a relational algebra expression using selections,
+% projections, joins, and unions (no difference operator in the positive
+% fragment).  \update{The most common definition of the relational
+%   algebra restricts the predicates used in selections to equality
+%   predicates, $x=y$.  In this chapter we
+%   follow~\cite{DBLP:conf/pods/GreenKT07} and allow arbitrary
+%   predicates $p(x,y,\ldots)$ over the value space, including
+%   disequality $x\neq y$, inequality $x < y$, or any other interpreted
+%   predicate.}  Green~\cite{DBLP:conf/pods/GreenKT07} showed that
+% positive relational algebra extends naturally to an arbitrary
+% semi\-ring $\bm S$.  When $\bm S$ is the Boolean semiring, then this
+% coincides with the set semantics of relational algebra, and when
+% $\bm S$ is the semiring of natural numbers, then it coincides with bag
+% semantics.
+
+% {\bf Normal Forms} Alternatively, a query can be described using
+% rules, as follows.  A {\em sum-product} query is an expression
+% %
 % \begin{align}
-%   \Delta_0 = \bm R_1 \defeq & P(\emptyset) \nonumber \\
-%   \bm \Delta_n \defeq & \Delta P(\bm R_n, \Delta_{n-1}) - \bm R_n
-%                       & \bm R_{n+1} \defeq & \bm R_n \cup \Delta_n
+%   T(x_1, \ldots, x_k) &\cd \bigoplus_{x_{k+1}, \ldots,x_p \in D} A_1 \otimes  \cdots \otimes A_m
+%                         \label{eq:t:mono}
 % \end{align}
 % %
-% Here $\Delta P$ is the {\em incremental view computation} query,
-% i.e., any expression that satisfies
-% $P(\bm R \cup \Delta) = P(\bm R) \cup \Delta P(\bm R, \Delta)$.  The
-% seminaive program terminates when $\Delta_n=\emptyset$.
+% where each $A_u$ is a {\em relational atom} of the form
+% $R_i(x_{t_{1_{i}}}, \ldots, x_{t_{k_i}})$, or some interpreted predicate such as
+% $x_i > 5x_j+3$.  The variables $x_1, \ldots, x_k$ are called {\em
+%   free variables}, or {\em head variables}, and the others are called
+% {\em bound variables}.
+% % The body of the query (RHS of~\eqref{eq:t:mono}) is a {\em
+% % sum-product expression}.
+% A {\em sum-sum-product} query has the form:
+% %
+% \begin{align}
+%   Q(x_1, \ldots, x_k) &\cd T_1(x_1, \ldots, x_k) \oplus \cdots \oplus T_q(x_1, \ldots, x_k)
+% \label{eq:sum:sum:product}
+% \end{align}
+% %
+% where $T_1, T_2, \ldots, T_q$ are sum-product expressions with the
+% same head variables $x_1, \ldots, x_k$.  When the semiring is
+% $\B, \N^\infty$ \update{and the interpreted predicates are restricted
+%   to equality predicates}, these queries are (Unions of)
+% Conjunctive Queries (UCQs) under set semantics, or under bag
+% semantics; \update{when the semiring is $\R_\bot$, the
+%   sum-products} are tensor expressions, sometimes called {\em Einsum
+%   expressions}~\cite{einsum:rocktaschel}.
+% %
+% Every positive relational algebra query $Q$ can be converted into a
+% sum-sum-product expression, which we call the {\em normal form} of
+% $Q$.
 
-\update{
-%
-  In this chapter we will combine multiple rules with the same head into
-  a single rule by OR-ing their bodies, and writing explicitly all
-  existential quantifiers.  This is a common convention used in the
-  literature, see e.g.,~\cite{DBLP:journals/jlp/Fitting91}.  For
-  example the following  Datalog program, which computes the transitive
-  closure of a relation $E$,
-%
-\begin{align*}
-  TC(x,y) \cd & E(x,y) \\
-  TC(x,y) \cd & E(x,z) \wedge TC(z,y)
-\end{align*}
-%
-becomes $TC(x,y) \cd E(x,y) \vee \exists z (E(x,z) \wedge TC(z,y))$.
-}
+% {\bf Datalog$^{\mathbf{o}}$} \update{Let $\bm S$ be an ordered
+%   pre-semiring.} A $\name$ program consists of a set of (possibly
+% recursive) sum-sum-product rules~\eqref{eq:sum:sum:product}
+% \update{over $\bm S$-relations.} \update{We allow two extensions to
+%   the expressions~\eqref{eq:t:mono}
+%   and~\eqref{eq:sum:sum:product}}: the summation
+% in~\eqref{eq:t:mono} may be restricted by some Boolean predicate,
+% % an atom $A_i$ may be a variable
+% % $x_j$, if the type of the variable is the value domain (i.e., the
+% % semiring $\bm S$); 
+% and we also allow \update{an atom $A$ in~\eqref{eq:t:mono} to be
+%   an {\em interpreted function}.  One important interpreted function
+%   is the cast operator $[-]_{\zero}^{\one} : \B \rightarrow \bm S$,
+%   which maps $0$ to $\zero$ and $1$ to $\one$ and therefore, for any
+%   predicate $P$, $[P]_{\zero}^{\one}$ is an atom in the pre-semiring
+%   $\bm S$. For example, $[x < y]_{\zero}^{\one}$ is $\zero \in \bm S$
+%   when $x \geq y$ and $\one \in \bm S$ when $x < y$; when $\zero,\one$
+%   are clear from the context, we drop them and write simply $[x<y]$.}
+% We treat interpreted functions in a similar way to negation in
+% standard Datalog, and require a program to be {\em stratified}, such
+% that the interpreted functions are applied only to EDBs or to IDBs
+% defined in earlier strata. \update{This implies that the ICO of that
+%   stratum is a monotone function in the IDBs defined by that stratum,
+%   and its semantics is defined as its least fixpoint.}  Abo Khamis et
+% al.~\cite{khamis21:_conver_datal_pre_semir} proved that any $\name$
+% program over the semirings discussed in this section (except for
+% $\N^\infty$ and $\trop^r$) converges in polynomial time in the size of
+% the input database.
 
-{\bf (Pre-)Semirings} A {\em pre-semiring} is a tuple
-$\bm S = (S, \oplus, \otimes, \zero, \one)$ where \update{$\oplus$ is
-  commutative,} both $\oplus, \otimes$ are associative, have
-identities $\zero$ and $\one$ respectively, and $\otimes$ distributes
-over $\oplus$.  \update{When $\otimes$ is commutative, then we call
-  $\bm S$ a {\em commutative} pre-semiring.  All pre-semirings in this
-  paper are commutative, and we will simply refer to them as
-  pre-semirings.}  When the equality $x \otimes \zero = \zero$ holds
-for all $x$, then it is called a {\em semiring}.  An {\em ordered}
-pre-semiring is a pre-semiring with a partial order $\preceq$, where
-both $\oplus, \otimes$ are monotone operations.  When the partial
-order is defined by $x\preceq y$ iff $\exists z, x\oplus z = y$ then
-it is called the {\em natural order}.  Examples of ordered
-(pre-)semirings are the Booleans
-$\B = (\set{0,1}, \vee, \wedge, 0, 1)$, the closed natural numbers
-$\N^\infty = (\N \cup \set{\infty},+,*,0,1)$, the tropical semiring
-$\trop = (\N \cup \set{\infty}, \min, +, \infty,0)$, the reversed
-tropical semiring $\trop^r=(\N, \max, +, 0, 0)$, the lifted naturals
-and lifted reals $\N_\bot = (\N \cup \set{\bot}, +, *, 0, 1)$,
-$\R_\bot = (\R \cup \set{\bot}, +, *, 0, 1)$, where
-$\bot + x = \bot * x = \bot$.  The structures $\B, \N^\infty, \trop$
-are semirings, the others are pre-semirings.  $\B$,
-$\N^\infty, \trop$, and $\trop^r$ are naturally ordered.  Confusingly
-(!!), the order relation on $\trop$ is the reverse one: $\infty$ is
-the smallest, and $0$ is the largest element.  The order relation in
-$\N_\bot$ and $\R_\bot$ is given by $\bot \preceq x$ for all $x$: they
-are ordered pre-semirings but not naturally ordered.%
-\footnote{Note that we define $\trop$ and $\trop^r$ over the natural
-  numbers rather than the reals. The motivation for this slight
-  deviation from the standard definition of these semirings will
-  become clear in Section \ref{sec:verification}: the support of
-  integer theories by the SMT-solver \zzz.}
+% \begin{ex}
+%   Consider the body of the rule in Fig.~\ref{fig:cc}(b).
+%   The relations $L, CC$ are over the tropical semiring, while $E$ is
+%   over the Boolean semiring.  Formally, its body is a sum-sum-product
+%   expression, with a Boolean predicate:
+% %
+%   \begin{align*}
+%     & L[x] \oplus \bigoplus_y \setof{CC[y]}{E(x,y)}
+%   \end{align*}
+% %
+%   \update{Here the summation $\bigoplus_y$ is restricted to those
+%     values $y$ that satisfy the predicate $E(x,y)$.  Equivalently, we
+%     can} rephrase it as:
+% %
+%   \begin{align*}
+%     & L[x] \oplus \bigoplus_y \left(CC[y] \otimes [E(x,y)]_\infty^0\right)
+%   \end{align*}
+% %
+%   where $[-]_\infty^0$ is the cast operator from $\B$ to $\trop$; it
+%   maps $0,1$ to $\infty,0$ respectively.  Alternatively, suppose that
+%   we represent a label $v=L[x]$ using a standard, Boolean-valued
+%   relation $L(x,v)$, where $x$ is a key, and $v$ is the numerical
+%   value (label).  Then, instead of the atom $L[x]$ we would write
+%   $\bigoplus_v \setof{v}{L(x,v)}$, or
+%   $\bigoplus_v \left(v \otimes [L(x,v)]_\infty^0\right)$.  Here $v$ is
+%   considered to be an atom.
+% \end{ex}
 
-
-%  \hqn{May need to clarify why we define the tropical semiring over $\N$ instead of $\R$?
-%  The standard definition (from Wikipedia, e.g.) uses $\R$}
-
-{\bf $\bm S$-relations} An $\bm S$-relation $R$ is a function that
-associates to each tuple $t \in D^k$ a value in the semiring,
-$R[t] \in \bm S$.  In this context, $\bm S$ is called the {\em value
-  space} of the relation $R$, while the domain $D$ of its attributes
-is called the {\em key space}.  $\bm S$-relations were first
-introduced\footnote{Under the name $K$-relations.} by Green et
-al.~\cite{DBLP:conf/pods/GreenKT07} in order to model data provenance.
-A $\B$-relation is a set, an $\N^\infty$-relation is a bag (with
-possibly infinite multiplicities), an $\R_\bot$-relation is a tensor
-(with possibly undefined entries).
-
-{\bf Queries} Consider a relational schema $R_1, R_2, \ldots$ over a
-\update{pre-}semiring $\bm S$.  A positive (relational algebra) {\em
-  query} is a relational algebra expression using selections,
-projections, joins, and unions (no difference operator in the positive
-fragment).  \update{The most common definition of the relational
-  algebra restricts the predicates used in selections to equality
-  predicates, $x=y$.  In this chapter we
-  follow~\cite{DBLP:conf/pods/GreenKT07} and allow arbitrary
-  predicates $p(x,y,\ldots)$ over the value space, including
-  disequality $x\neq y$, inequality $x < y$, or any other interpreted
-  predicate.}  Green~\cite{DBLP:conf/pods/GreenKT07} showed that
-positive relational algebra extends naturally to an arbitrary
-semi\-ring $\bm S$.  When $\bm S$ is the Boolean semiring, then this
-coincides with the set semantics of relational algebra, and when
-$\bm S$ is the semiring of natural numbers, then it coincides with bag
-semantics.
-
-{\bf Normal Forms} Alternatively, a query can be described using
-rules, as follows.  A {\em sum-product} query is an expression
-%
-\begin{align}
-  T(x_1, \ldots, x_k) &\cd \bigoplus_{x_{k+1}, \ldots,x_p \in D} A_1 \otimes  \cdots \otimes A_m
-                        \label{eq:t:mono}
-\end{align}
-%
-where each $A_u$ is a {\em relational atom} of the form
-$R_i(x_{t_{1_{i}}}, \ldots, x_{t_{k_i}})$, or some interpreted predicate such as
-$x_i > 5x_j+3$.  The variables $x_1, \ldots, x_k$ are called {\em
-  free variables}, or {\em head variables}, and the others are called
-{\em bound variables}.
-% The body of the query (RHS of~\eqref{eq:t:mono}) is a {\em
-% sum-product expression}.
-A {\em sum-sum-product} query has the form:
-%
-\begin{align}
-  Q(x_1, \ldots, x_k) &\cd T_1(x_1, \ldots, x_k) \oplus \cdots \oplus T_q(x_1, \ldots, x_k)
-\label{eq:sum:sum:product}
-\end{align}
-%
-where $T_1, T_2, \ldots, T_q$ are sum-product expressions with the
-same head variables $x_1, \ldots, x_k$.  When the semiring is
-$\B, \N^\infty$ \update{and the interpreted predicates are restricted
-  to equality predicates}, these queries are (Unions of)
-Conjunctive Queries (UCQs) under set semantics, or under bag
-semantics; \update{when the semiring is $\R_\bot$, the
-  sum-products} are tensor expressions, sometimes called {\em Einsum
-  expressions}~\cite{einsum:rocktaschel}.
-%
-Every positive relational algebra query $Q$ can be converted into a
-sum-sum-product expression, which we call the {\em normal form} of
-$Q$.
-
-{\bf Datalog$^{\mathbf{o}}$} \update{Let $\bm S$ be an ordered
-  pre-semiring.} A $\name$ program consists of a set of (possibly
-recursive) sum-sum-product rules~\eqref{eq:sum:sum:product}
-\update{over $\bm S$-relations.} \update{We allow two extensions to
-  the expressions~\eqref{eq:t:mono}
-  and~\eqref{eq:sum:sum:product}}: the summation
-in~\eqref{eq:t:mono} may be restricted by some Boolean predicate,
-% an atom $A_i$ may be a variable
-% $x_j$, if the type of the variable is the value domain (i.e., the
-% semiring $\bm S$); 
-and we also allow \update{an atom $A$ in~\eqref{eq:t:mono} to be
-  an {\em interpreted function}.  One important interpreted function
-  is the cast operator $[-]_{\zero}^{\one} : \B \rightarrow \bm S$,
-  which maps $0$ to $\zero$ and $1$ to $\one$ and therefore, for any
-  predicate $P$, $[P]_{\zero}^{\one}$ is an atom in the pre-semiring
-  $\bm S$. For example, $[x < y]_{\zero}^{\one}$ is $\zero \in \bm S$
-  when $x \geq y$ and $\one \in \bm S$ when $x < y$; when $\zero,\one$
-  are clear from the context, we drop them and write simply $[x<y]$.}
-We treat interpreted functions in a similar way to negation in
-standard Datalog, and require a program to be {\em stratified}, such
-that the interpreted functions are applied only to EDBs or to IDBs
-defined in earlier strata. \update{This implies that the ICO of that
-  stratum is a monotone function in the IDBs defined by that stratum,
-  and its semantics is defined as its least fixpoint.}  Abo Khamis et
-al.~\cite{khamis21:_conver_datal_pre_semir} proved that any $\name$
-program over the semirings discussed in this section (except for
-$\N^\infty$ and $\trop^r$) converges in polynomial time in the size of
-the input database.
-
-\begin{ex}
-  Consider the body of the rule in Fig.~\ref{fig:cc}(b).
-  The relations $L, CC$ are over the tropical semiring, while $E$ is
-  over the Boolean semiring.  Formally, its body is a sum-sum-product
-  expression, with a Boolean predicate:
-%
-  \begin{align*}
-    & L[x] \oplus \bigoplus_y \setof{CC[y]}{E(x,y)}
-  \end{align*}
-%
-  \update{Here the summation $\bigoplus_y$ is restricted to those
-    values $y$ that satisfy the predicate $E(x,y)$.  Equivalently, we
-    can} rephrase it as:
-%
-  \begin{align*}
-    & L[x] \oplus \bigoplus_y \left(CC[y] \otimes [E(x,y)]_\infty^0\right)
-  \end{align*}
-%
-  where $[-]_\infty^0$ is the cast operator from $\B$ to $\trop$; it
-  maps $0,1$ to $\infty,0$ respectively.  Alternatively, suppose that
-  we represent a label $v=L[x]$ using a standard, Boolean-valued
-  relation $L(x,v)$, where $x$ is a key, and $v$ is the numerical
-  value (label).  Then, instead of the atom $L[x]$ we would write
-  $\bigoplus_v \setof{v}{L(x,v)}$, or
-  $\bigoplus_v \left(v \otimes [L(x,v)]_\infty^0\right)$.  Here $v$ is
-  considered to be an atom.
-\end{ex}
-
-%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: "main"
-%%% End:
+% %%% Local Variables:
+% %%% mode: latex
+% %%% TeX-master: "main"
+% %%% End:
 
 \section{The FGH-Rule}
 
@@ -789,16 +756,14 @@ see e.g.,~\cite{DBLP:conf/amw/ZanioloYIDSC18}.
 The program is given in Fig.~\ref{fig:cc} (a), and its optimized version
   in Fig.~\ref{fig:cc} (b).  The three transformations $F,G,H$ are as follows:
 %
-{\footnotesize
-  \begin{align*}
-    F(TC) \defeq & TC' &&\mbox{ where}&  TC'(x,y) \defeq & [x=y] \vee \exists z(E(x,z) \wedge TC(z,y))\\
-    G(TC) \defeq & CC  &&\mbox{ where}&  CC[x] \defeq & \min_y \setof{L[y]}{TC(x,y)}\\
-    H(CC) \defeq & CC' &&\mbox{ where}&  CC'[x] \defeq & \min(L[x], \min_y \setof{CC[y]}{E(x,y)})
-  \end{align*}
-}
+\begin{align*}
+  F(TC) \defeq & TC' &&\mbox{ where}&  TC'(x,y) \defeq & [x=y] \vee \exists z(E(x,z) \wedge TC(z,y))\\
+  G(TC) \defeq & CC  &&\mbox{ where}&  CC[x] \defeq & \min_y \setof{L[y]}{TC(x,y)}\\
+  H(CC) \defeq & CC' &&\mbox{ where}&  CC'[x] \defeq & \min(L[x], \min_y \setof{CC[y]}{E(x,y)})
+\end{align*}
 %
 To check the FGH-rule, we compute $CC_1 \defeq G(F(TC)) = G(TC')$,
-then compute
+and
 $CC_2 \defeq H(G(TC)) = H(CC)$, both shown in Fig.~\ref{fig:cc1:cc2}, and
 observe that it becomes identical to $CC_1$ after renaming the
 variables $y',y$ to $y,z$ respectively.
@@ -806,7 +771,6 @@ variables $y',y$ to $y,z$ respectively.
 
 \begin{figure}
 % \fcolorbox{black}{light-gray}{\parbox{0.2\textwidth}{
-\footnotesize
   \begin{align*}
     CC_1[x]  \defeq & \min_y \setof{L[y]}{TC'(x,y)}\\
     = & \min_y \setof{L[y]}{[x=y] \vee \exists z(E(x,z) \wedge TC(z,y))}\\
@@ -899,7 +863,7 @@ variables $y',y$ to $y,z$ respectively.
   \begin{align*}
     P(y) \defeq & [y=a] \vee \exists z(TC(a,z) \wedge E(z,y))
   \end{align*}
-  We prove in the full version of this chapter that, given a sideways information
+  We prove in~\cite{DBLP:journals/corr/abs-2202-10390} that, given a sideways information
   passing strategy (SIPS)~\cite{DBLP:journals/jlp/BeeriR91} every magic set
   optimization~\cite{DBLP:journals/jlp/BalbinPRM91} over a Datalog program can be
   proven correct using a sequence of applications of the FGH-rule.
@@ -907,7 +871,6 @@ variables $y',y$ to $y,z$ respectively.
 
 \begin{figure}
 % \fcolorbox{black}{light-gray}{\parbox{0.45\textwidth}{
-\footnotesize
   \begin{alignat*}{3}
     F(TC) \defeq & TC' &&\mbox{ where } & TC'(x,y) \defeq &[x=y] \vee \exists z(TC(x,z) \wedge E(z,y)) \\
     G(TC) \defeq & Q   &&\mbox{ where } & Q(y) \defeq & TC(a,y) \\
@@ -1127,7 +1090,6 @@ assumption~\eqref{eq:invariant:tc}.
 
 \begin{figure}
 % \fcolorbox{black}{light-gray}{\parbox{0.45\textwidth}{
-\footnotesize
 \begin{align*}
 \Psi_1(x,y)
 % \equiv &  \exists z_1 (E(x,z_1)\wedge TC'(z_1,y)) \\
@@ -1298,7 +1260,6 @@ satisfy $\Gamma$.  We illustrate this with an example:
   inclusion/exclusion.  \update{Line 4 uses the fact that} the term on
   line 3 is $=0$, because the loop invariant implies:
 %
-{\footnotesize
   \begin{align*}
      S(x,z) \wedge \texttt{SubPart}(z,y)& \Rightarrow  ([x=z] \vee T(x,z)) \wedge  \texttt{SubPart}(z,y) & \mbox{\update{by~\eqref{eq:invariant:tree}}}\\
 &  \equiv \texttt{SubPart}(x,y) \vee (T(x,z) \wedge \texttt{SubPart}(z,y))\\
@@ -1306,7 +1267,6 @@ satisfy $\Gamma$.  We illustrate this with an example:
 & \equiv  T(x,y) \\
 & \Rightarrow  x\neq y & \mbox{\update{by~\eqref{eq:gamma:neq}}}
   \end{align*}
-}
 %
 \update{Line 5} follows from the fact that $y$ is a key in
 $\texttt{SubPart}(z,y)$.  A direct calculation of $P_2 = H(G(S))$
@@ -1316,7 +1276,6 @@ Fig.~\ref{fig:fgh:constraints}, proving that $P_1=P_2$.
 
 \begin{figure}
 % \fcolorbox{black}{light-gray}{\parbox{0.45\textwidth}{
-\footnotesize
   \begin{align*}
    P_1[x] = & \sum_y \setof{\texttt{Cost}[y]}{[x=y] \vee \exists z\left(S(x,z) \wedge \texttt{SubPart}(z,y)\right)}\\
     = & \texttt{Cost}[x]+\sum_y \setof{\texttt{Cost}[y]}{\exists z\left(S(x,z) \wedge \texttt{SubPart}(z,y)\right)}\\
@@ -1359,7 +1318,8 @@ Fig.~\ref{fig:fgh:constraints}, proving that $P_1=P_2$.
 \section{Architecture of FGH-Optimization}\label{sec:optimization}
 
 \begin{figure}
-  \null\mbox{\parbox{\linewidth}{\hspace{-5mm}\includegraphics[width=1.3\linewidth]{fgh-optimizer-architecture}}}
+  \centering
+  \includegraphics[width=\linewidth]{fgh-optimizer-architecture}
   \caption{The architecture of the FGH-optimizer.  The input is the
     unoptimized program $\Pi_1$, consisting of the functions $F, G$ and
     the database constraint $\Gamma$. The output consists of the
@@ -1597,7 +1557,6 @@ all three axioms below:
 % better coverage.
 \begin{figure}
 % \fcolorbox{black}{light-gray}{\parbox{0.2\textwidth}{
-\footnotesize
   \begin{align*}
     CC_{1}[x] & = \bigoplus_{y} L[y] \otimes \big([x=y]_{\infty}^{0} \oplus \bigoplus_{z} [E(x,z)]_{\infty}^{0} \otimes [TC(z,y)]_{\infty}^{0}\big) \\
     CC_{2}[x] & = L[x] \oplus \bigoplus_{y} \big( \bigoplus_{y'} L[y'] \otimes [TC(y,y')]_{\infty}^{0}\big) \otimes [E(x,y)]_{\infty}^{0}
@@ -1654,7 +1613,7 @@ axioms~\eqref{eq:axiom:plus:plus}-\eqref{eq:axiom:plus:equal}).  The
   computes the all-pairs shortest
   path up to length of 100:
 %
-{\footnotesize
+{
   \begin{align}
     D[x,y] \cd & \texttt{if } x=y \texttt{ then } 0 \texttt{ else } \min_{z} \left(D[x,z] +E[z,y]\right) \nonumber \\
     Q[x,y] \cd & \min(D[x,y],100)  \label{eq:apss:opt}
@@ -1685,7 +1644,7 @@ axioms~\eqref{eq:axiom:plus:plus}-\eqref{eq:axiom:plus:equal}).  The
   The program is inefficient because it first computes the full path
   length, only to cap it later to 100.  By using the FGH-rule we get:
 %
-{\footnotesize
+{
   \begin{align}
     Q[x,y] \cd & \texttt{if } x=y \texttt{ then } 0 \texttt{ else } \min\left(\min_{z} \left(Q[x,z]+E[z,y]\right),100\right) \label{eq:apss:opt:opt}
   \end{align}
@@ -1698,7 +1657,7 @@ are the obvious functions in the two programs defining $Q$).  After we
 de-sugar, convert to semiring expressions, and normalize,
 they become:
 %
-{\footnotesize
+{
 \begin{alignat*}{2}
   P_{1}[x,y] & =  \left(0 \otimes \totrop{x=y}\right) \oplus \left(\bigoplus_{z} D[x,z] \otimes E[z,y]\right) && \oplus 100 \\
   P_{2}[x,y] % & = 0 \otimes \totrop{x=y} \oplus 100 \oplus \bigoplus_{z} (D[x,z] \oplus 100) \otimes E[z,y] \\
@@ -2218,7 +2177,7 @@ number of recursive IDBs $X$ that occur in any rule of the original
 program $F(X)$, e.g.,  if the original program was linear, then
 $k_{\max} \defeq 1$.  We obtain:
 %
-{\footnotesize
+{
 \begin{align*}
   & \texttt{normalize}(H(G(X))) = \\
   & \ \ \ \   H^{(0)} \oplus \texttt{normalize}(H^{(1)}(G(X))) \oplus \cdots \oplus \texttt{normalize}(H^{(k_{\max})}(G(X)))
@@ -2264,15 +2223,6 @@ restricted to linear programs, hence $k_{\max}=1$.
 % Fig.~\ref{fig:grammar}.
 
 \begin{figure}
-% \fcolorbox{black}{light-gray}{\parbox{0.2\textwidth}{
-\footnotesize
-%
-% \begin{align*}
-% A \rightarrow \ & \parbox{5mm}{\mbox{$A_0 \oplus A_1 \oplus \cdots \oplus A_{k_{\max}}$}} \\
-% A_0 \rightarrow \ & Q_0 \mid Q_0 \oplus A_0 & Q_0 \rightarrow \ & u(Z,Q_0) \mid Q_0 \otimes Q_0 \mid E(Z,Z,\cdots, Z)\\
-% A_1\rightarrow  \ & A_{11} \oplus \cdots \oplus A_{1m} \\
-% A_{1i} \rightarrow \ & Q_{1i} \mid Q_{1i} \oplus A_{1i} & Q_{1i} \rightarrow \ & u(Z,Q_{1i}) \mid Q_{1i} \otimes Q_0 \mid G_i(X)
-%   \end{align*}
 \begin{alignat*}{3}
 A \rightarrow \ & \parbox{15mm}{\mbox{$A_0 \oplus A_1 \oplus \cdots \oplus A_{k_{\max}},$}} \\
 A_0 \rightarrow \ & \parbox{15mm}{\mbox{$Q_0 \mid Q_0 \oplus A_0,\ \ Q_0 \rightarrow \ u(Z,Q_0) \mid Q_0 \otimes Q_0 \mid E(Z,Z,\cdots, Z),$}}\\
@@ -2383,6 +2333,7 @@ require many trials to find them, had we not included them explicitly.
 %%%   free to edit.}
 
 \begin{figure}
+\centering
   \includegraphics[width=0.45\linewidth]{egraph}
   \caption{Example \egraph.}\label{fig:eqsat}
 \end{figure}
@@ -2390,30 +2341,31 @@ require many trials to find them, had we not included them explicitly.
 Throughout the FGH-optimizer we need to manipulate expressions, apply
 rules, and manage equivalent expressions.  This problem is common to
 all query optimizers.  Instead of implementing our own expression
-manager, we adopt a state-of-the-art rewriting system dubbed
-Equality Saturation (\eqsat).
+manager, 
+ we again leverage the equality saturation (\eqsat) system 
+ as we did in Chapter~\ref{chapter:spores}.
 Specifically, we used
-EGG~\cite{DBLP:journals/pacmpl/WillseyNWFTP21} to implement the green
+egg~\cite{DBLP:journals/pacmpl/WillseyNWFTP21} to implement the green
 boxes in the architecture shown in Fig.~\ref{fig:arch}.
 
-An \eqsat\ system maintains a data structure called an
-\egraph\ that compactly represents a set of expressions, together with
-an equivalence relation over this set.  Each \egraph\ consists of a set
-of \eclasses, each \eclass\ consists of a set of \enodes, and each
-\enode\ is a function symbol with \eclasses\ as children.
-Figure~\ref{fig:eqsat} shows an \egraph\ representing the two
-expressions in Eq.~\eqref{eq:axiom:pullmul}, their subexpressions, and
-other equivalent expressions.  Each \eclass\ (dotted box) represents a class of
-equivalent expressions.  For example \eclass\ 5 represents
-$A \otimes B$ and $B \otimes A$, which are equivalent by
-commutativity.  \eclass\ 6 represents four equivalent expressions
-(including the two choices in \eclass\ 5).
+% An \eqsat\ system maintains a data structure called an
+% \egraph\ that compactly represents a set of expressions, together with
+% an equivalence relation over this set.  Each \egraph\ consists of a set
+% of \eclasses, each \eclass\ consists of a set of \enodes, and each
+% \enode\ is a function symbol with \eclasses\ as children.
+% As a refresher, Figure~\ref{fig:eqsat} shows an \egraph\ representing the two
+% expressions in Eq.~\eqref{eq:axiom:pullmul}, their subexpressions, and
+% other equivalent expressions.  Each \eclass\ (dotted box) represents a class of
+% equivalent expressions.  For example \eclass\ 5 represents
+% $A \otimes B$ and $B \otimes A$, which are equivalent by
+% commutativity.  \eclass\ 6 represents four equivalent expressions
+% (including the two choices in \eclass\ 5).
 
-The \eqsat\ system maintains separately a collection of {\em rules},
-each represented by a pair of patterns.  For example, one rule may
-state that $\otimes$ is commutative: $x \otimes y = y \otimes x$.  The
-\egraph\ can efficiently add a new expression to its collection,
-insert a new rule, and match a given expression against the \egraph.
+% The \eqsat\ system maintains separately a collection of {\em rules},
+% each represented by a pair of patterns.  For example, one rule may
+% state that $\otimes$ is commutative: $x \otimes y = y \otimes x$.  The
+% \egraph\ can efficiently add a new expression to its collection,
+% insert a new rule, and match a given expression against the \egraph.
 
 We describe how we use EGG in the FGH-optimizer.  First, we use it to
 extend the Rule-based test (Sec.~\ref{sec:axiomatic-rewrite}) to
@@ -2453,10 +2405,10 @@ Sec.~\ref{subsec:loop:invariants}.
 %%% End:
 
 \begin{figure*}
-    {\footnotesize
+    {\small
       \begin{center}
         \begin{tabular}{|l|l|l|l|l|l|} \hline
-          Program & Synthesis Type & Constraint? & Invariant? & Dataset & \required{Size (\# ops)} \\ \hline
+          Program & Type & Con. & Inv. & Dataset & \required{\#op} \\ \hline
           Beyond Magic (BM) & rule-based & No & Yes & twitter, epinions, wiki & \required{6} \\ \hline
           Connected Components (CC) & rule-based & No & No & twitter, epinions, wiki & \required{6} \\ \hline
           Single Source Shortest Path (SSSP) & rule-based & No & No & twitter, epinions, wiki & \required{17} \\ \hline
@@ -2465,41 +2417,32 @@ Sec.~\ref{subsec:loop:invariants}.
           Graph Radius (R) & \cegis\ & Yes & Yes & Random Recursive Trees & \required{12} \\ \hline
           Multi-level Marketing (MLM) & \cegis\ & Yes & Yes & Random Recursive Trees & \required{6} \\ \hline
         \end{tabular}
-    %%% 
-    %%% 
-    %%%     \begin{tabular}{c c}
-    %%%       \textbf{Program} & \textbf{Dataset} \\
-    %%%       \toprule
-    %%%       Beyond Magic (BM) & twitter, epinions, wiki \\
-    %%%       Connected Components (CC) & twitter, epinions, wiki \\
-    %%%       Single Source Shortest Path (SSSP) & twitter, epinions, wiki \\
-    %%%       \midrule
-    %%%       Sliding Window Sum (WS) & Vector of Numbers \\
-    %%%       Betweenness Centrality (BC) & Erdős–Rényi Graphs \\
-    %%%       Graph Radius (R) & Random Recursive Trees \\
-    %%%       Multi-level Marketing (MLM) & Random Recursive Trees \\
-    %%%       \bottomrule
-    %%%     \end{tabular}
       \end{center}
     }
-      \caption{Experimental Setup}
+      \caption{Experimental Setup.
+       ``Type'' is the type of synthesis required to optimize the program.
+       ``Con.'' means whether the input
+        database has constraints. ``Inv.'' means whether optimizing the program
+        requires loop invariants.
+        ``\#op'' is the number of operations in the program. }
       \label{fig:setup}
     \end{figure*}
     
     \begin{figure*}
-      \begin{subfigure}[b]{0.33\textwidth}
+      \centering
+      \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{basic-bd}
         % \caption{BigDatalog}\label{fig:eval:basic:bd}
       \end{subfigure}
-      \hfill
-      \begin{subfigure}[b]{0.33\textwidth}
+
+      \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{basic-rs}
         % \caption{RecStep}\label{fig:eval:basic:rs}
       \end{subfigure}
       \hfill
-      \begin{subfigure}[b]{0.33\textwidth}
+      \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{basic-x}
         % \caption{X}\label{fig:eval:basic:x}
@@ -2516,7 +2459,6 @@ Sec.~\ref{subsec:loop:invariants}.
     
     \begin{figure*}
       \centering
-    {\footnotesize
      \begin{tabular}{ c | c c c | c c c c }
      Program & BM & CC & SSSP & R & MLM & BC & WS \\
      \hline
@@ -2524,15 +2466,16 @@ Sec.~\ref{subsec:loop:invariants}.
      Synthesis & 0.004 & 0.005 & 0.004 & 0.284 & 0.299 & 1.2 & 0.821 \\
      \hline
      Total & 0.096 & 0.005 & 0.004 & 0.413 & 0.431 & 1.2 & 0.821 \\
-     Opt. / Exec. (max-min) & .82\% - .16\% & .04\%-.01\% & .24\%-.002\% & .41\%-.07\% & .76\%-.09\% & 6.3\%-.51\% & 7.4\%-.66\%
+     Opt. / Exec. (max\%-min\%) & .82 - .16 & .04-.01 & .24-.002 & .41-.07 & .76-.09 & 6.3-.51 & 7.4-.66
     \end{tabular}
-    \qquad
+
+    \vspace{1em}
+
     \begin{tabular}{ c | c c c c }
      Program & R & MLM & BC & WS \\
      \hline
      Search space & 10 & 20 & 132 & 94 \\
     \end{tabular}
-    }
       \caption{Optimization time in seconds, 
       \required{optimization time over execution time,}
        and  size of the search space. }
@@ -2825,60 +2768,3 @@ Sec.~\ref{subsec:loop:invariants}.
     %%% End:
 
     % \section{Summary and Discussion}
-\section{Conclusion}
-
-We have presented a new optimization method for recursive queries,
-which generalizes many previous optimizations described in the
-literature.  We implemented it using a \cegis\ and an \eqsat\ system.
-Our experiments have shown that this optimization is beneficial,
-regardless of what other optimizations a Datalog system supports.  We
-discuss here some limitations and future work.
-
-\update{
-%
-  Our current implementation is restricted to linear programs, but our
-  techniques apply to nonlinear programs as well. Non-linear programs
-  require a more complex grammar $\Sigma$; this is likely to increase
-  the search space, and possibly increase the optimization time. We
-  leave this exploration to future work.
-%
-}
-
-Our current optimizer is heuristic-based, and future work needs to
-integrate it with a cost model.  This, however, will be challenging,
-because very little work exists for estimating the cost of recursive
-queries.  
-%
-\update{
-%
-  this chapter applies a simple cost-model. We use the arity of the IDB
-  predicate as a proxy for a simple asymptotic cost model, because
-  $N^{\text{arity}}$ is the size bound of the output, when $N$ is the
-  size of the active domain. This simple cost-model is currently used
-  by the commercial DB system mentioned in the paper. If the optimized
-  program reduces the arity, then it is assessed to have lower cost.
-%
-}
-
-\update{
-%
-  Two limitations of our current implementation are the fact that we
-  currently do not ``invent'' new IDBs for the optimized query, and do
-  not apply the FGH-optimizer repeatedly.  Both would be required 
-  to support more advanced magic set optimizations.
-%
-}
-
-
-Our initial motivation for this work came from a real application,
-which consists of a few hundred Datalog rules that were
-computationally very expensive, and required a significant amount of
-manual optimizations.  Upon close examination, at a very high level,
-the manual optimization that we performed could be described,
-abstractly, as a {\em sliding window} optimization (WS in
-Fig.~\ref{fig:setup}), which is one of the simplest instantiations of
-the FGH-rule.  Yet, our current system is far from able to optimize
-automatically programs with hundreds of rules: we leave that for
-future work.
-
-

@@ -63,7 +63,7 @@
 \newtheorem{lmm}{Lemma}[chapter]
 \newtheorem{ex}{Example}[chapter]
 \newtheorem{fact}{Example}[chapter]
-\newtheorem{corollary}{Example}[chapter]
+\newtheorem{corollary}{Corollary}[chapter]
 
 \setlength{\marginparwidth}{2cm}
 \usepackage[textsize=tiny]{todonotes}
@@ -193,9 +193,9 @@
   \tableofcontents
 \end{spacing}
 
-\chapter*{Acknowledgments}
+% \chapter*{Acknowledgments}
 
-Thank you!
+% Thank you!
 
 \clearpage
 
@@ -206,12 +206,13 @@ Thank you!
 \renewcommand{\sectionmark}[1]{\markright{\sc{\thesection.\ #1}}{}}
 % \listoftodos
 \input{chapters/01-intro}
+\input{chapters/related}
 \input{chapters/02-background}
 \input{chapters/03-datalogo.tex}
-% \input{chapters/04-free-join.tex}
+\input{chapters/04-free-join.tex}
 \input{chapters/05-spores.tex}
-% \input{chapters/06-fgh.tex}
-% \input{chapters/07-conclusion.tex}
+\input{chapters/06-fgh.tex}
+\input{chapters/07-conclusion.tex}
 
 \clearpage
 \addcontentsline{toc}{chapter}{Bibliography}

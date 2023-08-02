@@ -1,2 +1,169 @@
 \chapter{Conclusions}
 \label{chap:conclusions}
+
+  \section{Limitations and Future Work}\label{sec:discussion}
+
+  With \FJ we have made a first step to bring together 
+  the worlds of binary join and \WCOJ algorithms.
+  There are three obvious limitations that require future work.  Our
+  current system is main memory only.  If the data were to reside on
+  disk, then \COLT could be quite inefficient, because it requires
+  repeated, random accesses to the data.  Another limitation is that the
+  optimization of a \FJ plan is split into two phases: a
+  traditional cost-based optimization (currently done by DuckDB),
+  followed by a heuristic-based optimization of the \FJ plan
+  (factorization).  This has the advantage of reusing an existing
+  cost-based optimizer, but the disadvantage is that an integrated
+  optimizer may be able to find better plans.  Third, our current
+  optimizer does not make use of existing indices.  It is known that the
+  optimization problem for join plans becomes harder in the presence of
+  foreign key indices~\cite{DBLP:journals/pvldb/LeisGMBK015}, and we
+  expect the same to hold for \FJ plans.  All these limitations require
+  future work.  As we have designed \FJ to closely capture binary join
+  while also generalizing it, we hope the solutions to these problems
+  can also be smoothly transferred from binary join to \FJ.
+  
+  Finally, we have made several observations during this project, some
+  of them quite surprising (to us), which we believe deserve a future
+  study.  We observed that a major bottleneck is the materialization of
+  intermediate results in bushy plans; an improved materialization
+  algorithm may speed up \FJ on bushy plans.  One promising idea is to
+  be more aggressively lazy and keep \COLTs unexpanded during
+  materialization, which essentially leads to a factorized
+  representation of the intermediates.  We also observed that, contrary
+  to common belief, a cyclic query does not necessarily mean \WCOJ
+  algorithms are faster, and an acyclic query does not mean they are
+  slow.  A natural question is thus ``when exactly are \WCOJ algorithms
+  faster than binary join?''  Answering this question will also help us
+  design a better optimizer for \FJ.  The optimizer can output a plan
+  closer to \WCOJ when it expects major speedups.  We note that the
+  query optimizer by~\cite{DBLP:journals/pvldb/FreitagBSKN20} switches
+  between \GJ and binary join depending on the estimated cardinality.
+  In contrast, an optimizer for \FJ should smoothly transform a \FJ plan
+  to fully explore the design space between the two extremes of binary
+  join and \GJ.  Finally, we realized that, rather surprisingly, \GJ and
+  traditional joins diverge in their choice of the inner table (called
+  the cover in our paper): \GJ requires that to be the smallest
+  (otherwise it is not optimal), while a traditional plan will chose it
+  to be the largest (to save the cost of computing its hash table).
+  Future work is required for a better informed decision for the choice
+  of the inner relation.
+  
+  
+  %%% Yet, we have been working with the most basic forms 
+  %%%   of the algorithms, where the data fits into main memory, 
+  %%%   the algorithms use a single thread. 
+  %%% Some natural questions to answer next include: 
+  %%% \begin{itemize}
+  %%%     \item What data structures can make \FJ efficient on disk?
+  %%%     \item How can we take advantage of multi-cores to scale up \FJ? And what about distributed \FJ?
+  %%%     \item How can \FJ make use of indices?
+  %%% \end{itemize}
+  %%% These problems have all been well-studied in the context of binary join. 
+  %%% As we have designed \FJ to closely capture binary join while also generalizing it, 
+  %%%   we hope the solutions to these problems can also be smoothly transferred 
+  %%%   from binary join to \FJ.
+  %%% 
+  %%% We designed \FJ to take as input an already optimized binary plan, 
+  %%%   so that it is easy to integrate \FJ into an existing system.
+  %%% Nevertheless, we expect an optimizer designed for \FJ will find 
+  %%%   better plans than a traditional optimizer designed for binary join.
+  %%% Designing optimization algorithms for \FJ can therefore be an 
+  %%%   important research direction.
+  %%% 
+  %%% Throughout the experiments, we have observed one major bottleneck to be the
+  %%%   materialization of intermediate results. A better materialization algorithm
+  %%%   than ours may further speed up \FJ on bushy plans. One promising idea is to be
+  %%%   more aggressively lazy and keep \COLTs unexpanded during materialization, 
+  %%%   which essentially leads to a factorized representation of the intermediates.
+  %%% 
+  %%% Through experiments, we have observed that a cyclic query does not necessarily 
+  %%% mean \WCOJ algorithms are faster, and an acyclic query does not mean they are slow.
+  %%% A natural question is thus ``when exactly are \WCOJ algorithms faster than binary join?''
+  %%% Answering this question will also help us design a better optimizer for \FJ.
+  %%% The optimizer can output a plan closer to \WCOJ when it expects major speedups. 
+  %%% We note that the query optimizer by~\cite{DBLP:journals/pvldb/FreitagBSKN20} 
+  %%%   switches between \GJ and binary join depending on the estimated cardinality.
+  %%% In contrast, an optimizer for \FJ should smoothly transform a \FJ plan 
+  %%%   to fully explore the design space between the two extremes of binary join and \GJ.
+
+\section{FGH Conclusion}
+
+We have presented a new optimization method for recursive queries,
+which generalizes many previous optimizations described in the
+literature.  We implemented it using a \cegis\ and an \eqsat\ system.
+Our experiments have shown that this optimization is beneficial,
+regardless of what other optimizations a Datalog system supports.  We
+discuss here some limitations and future work.
+
+\update{
+%
+  Our current implementation is restricted to linear programs, but our
+  techniques apply to nonlinear programs as well. Non-linear programs
+  require a more complex grammar $\Sigma$; this is likely to increase
+  the search space, and possibly increase the optimization time. We
+  leave this exploration to future work.
+%
+}
+
+Our current optimizer is heuristic-based, and future work needs to
+integrate it with a cost model.  This, however, will be challenging,
+because very little work exists for estimating the cost of recursive
+queries.  
+%
+\update{
+%
+  this chapter applies a simple cost-model. We use the arity of the IDB
+  predicate as a proxy for a simple asymptotic cost model, because
+  $N^{\text{arity}}$ is the size bound of the output, when $N$ is the
+  size of the active domain. This simple cost-model is currently used
+  by the commercial DB system mentioned in the paper. If the optimized
+  program reduces the arity, then it is assessed to have lower cost.
+%
+}
+
+\update{
+%
+  Two limitations of our current implementation are the fact that we
+  currently do not ``invent'' new IDBs for the optimized query, and do
+  not apply the FGH-optimizer repeatedly.  Both would be required 
+  to support more advanced magic set optimizations.
+%
+}
+
+
+Our initial motivation for this work came from a real application,
+which consists of a few hundred Datalog rules that were
+computationally very expensive, and required a significant amount of
+manual optimizations.  Upon close examination, at a very high level,
+the manual optimization that we performed could be described,
+abstractly, as a {\em sliding window} optimization (WS in
+Fig.~\ref{fig:setup}), which is one of the simplest instantiations of
+the FGH-rule.  Yet, our current system is far from able to optimize
+automatically programs with hundreds of rules: we leave that for
+future work.
+
+
+\section{SPORES Limitations and Future Work}
+\rvt{
+We intend \sys\ to be used to optimize machine learning programs that perform
+linear algebra operations. As such, \sys\ is not a linear algebra solver, and 
+operations like matrix inversion and calculating eigenvalues are out of scope.
+\sys\ does not include a matrix decomposition operator, but the programmer
+can implement decomposition algorithms like our ALS and PNMF benchmarks. 
+The operations we support already cover a variety of algorithms as we show in
+the evaluation. Similar scope is shared by existing research \cite{DBLP:journals/pvldb/BoehmRHSEP18}
+\cite{ElgamalLBETRS17}
+\cite{DBLP:journals/pacmpl/KjolstadKCLA17}. Although
+\sys\ does not focus on deep learning, its design can be adapted to optimize
+deep models. We are experimenting to incorporate the identity rules from TASO
+into our framework. It would be challenging to extend the completeness theorem to
+the complex operators used in deep learning, 
+but we expect our extension of equality saturation can find high-impact optimizations
+with short compile time. Finally, although our rewrite rules are complete, we had to
+resort to rule sampling and greedy extraction to cut down the overhead. Future work can 
+investigate more intelligent rule application and extraction strategies. For example,
+the optimizer can learn which rules more likely lead to performance improvement and
+prioritizes firing those rules. Another direction is to incorporate plus into
+theoretical sum-product frameworks like FAQ \cite{KhamisNR16} and guarantee optimality. 
+}
