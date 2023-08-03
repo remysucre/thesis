@@ -240,7 +240,7 @@ In summary, we make the following contributions in this dissertation:
     optimized \FJ plan (Section~\ref{sec:bj-to-fj}).
   \item \COLT, a column-oriented lazy trie data structure (Section~\ref{sec:colt}).
   \item A vectorized execution algorithm for \FJ (Section~\ref{sec:vectorized-execution}).
-  \item Experiments evaluating the algorithms and optimizations (Section~\ref{sec:eval}).
+  \item Experiments evaluating the algorithms and optimizations (Section~\ref{sec:fj:eval}).
 \end{enumerate}
 
 \section{Background}\label{sec:background:fj}
@@ -824,7 +824,7 @@ We will assume only valid plans in the rest of the paper.  To simplify
 the presentation, in this section we assume that each node $\Phi_k$,
 has {\em one} subatom designated as cover, and will always list it as
 the first subatom in $\Phi_k$.  We will revisit this assumption in
-Sec.~\ref{sec:optimization}, and allow for multiple covers.
+Sec.~\ref{sec:fj:optimization}, and allow for multiple covers.
 
 %%% By this definition, every node must contain at least one subatom.  In
 %%% addition, since we rename relations in a self-join as described in
@@ -1130,7 +1130,7 @@ choose the cover during the {\em join phase}.
 
 \section{Optimizing the \FJ Plan}
 
-\label{sec:optimization}
+\label{sec:fj:optimization}
 
 In the previous section we have introduced \FJ plans and their associated
 data structures, the \GHTs.  We have seen that a \FJ plan is capable
@@ -1608,7 +1608,7 @@ When we use \COLTs, we cannot know the exact number of keys in a vector unless
 % and a sophisticated cost model can even receive feedback from previous 
 % iterations of the loop.
 
-\section{Experiments}\label{sec:eval}
+\section{Experiments}\label{sec:fj:eval}
 
 % \ds{The section looks good overall.  I made only stylistic changes,
 %   mostly in the beginning.  Regarding the Latex layout, I don't
