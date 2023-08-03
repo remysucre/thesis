@@ -1,50 +1,165 @@
 \chapter{Related Work}
 \label{chap:related}
 
-\textbf{Related Work} Our work was partially inspired by the \prem\
-condition, described by Zaniolo et
-al.~\cite{DBLP:journals/tplp/ZanioloYDSCI17}, which, as we shall
-explain, is a special case of the FGH-rule.  Unlike our system, their
-implementation required the programmer to check the \prem\ manually,
-then perform the corresponding optimization.
-% As we shall discuss, our FGH-rule generalizes \prem.
-% Their implementation also relies on the programmer to perform the rewrite and
-% check that \prem\ is applicable.
-% Our optimizer is automated and supports the more general FGH-rule.
-%
-Seveal prior systems  leveraged SMT-solvers to reason about
-query languages~\cite{
-  DBLP:conf/icfem/VeanesGHT09,
-  DBLP:conf/cidr/ChuWWC17,
-  DBLP:conf/cav/GrossmanCIRS17,
-  DBLP:conf/sosp/SchlaipferRLS17,
-  DBLP:journals/pacmpl/0001DLC18};
-but none of these  consider recursive queries.
-% We contribute by proposing a simple and sound SMT encoding that can
-% be used in \cegis, and works in conjunction with a rewrite system
-% to reason about semiring operations including unbounded aggregation.
-%
-Datalog synthesizers have been described in~\cite{
-  DBLP:conf/cp/AlbarghouthiKNS17,
-  DBLP:conf/sigsoft/SiLZAKN18,
-  DBLP:conf/ijcai/SiRHN19,
-  DBLP:journals/pvldb/WangSCPD20,
-  DBLP:journals/pacmpl/RaghothamanMZNS20}.
-Their setting is different from ours:
-the specification is given by input-output examples, and the
-synthesizer needs to produce a program that matches all examples.
-% In comparison, we take a Datalog program as the reference implementation
-% which completely specifies the semantics of the program to be synthesized.
-% Unlike prior work which must synthesize recursive definitions,
-% we leverage the FGH-rule to solve the optimization problem
-% by synthesizing a non-recursive expression.
-A design choice that we made, and which sets us further aside from the
-previous systems, is to use an existing \cegis\ system, Rosette; thus,
-we do not aim to  improve the \cegis\ system itself, but optimize the
-way we use it.
+In this chapter we cover related work for each of our main contributions.
+First, we discuss prior proposals for relational programming languages.
+Then we review the literature on join algorithms, with an emphasis on multi-way joins.
+Next we cover existing techniques for speeding up linear algebra programs.
+Finally, we present the state-of-the-art in optimizing recursive programs and query synthesis.
 
+\section{Relational Programming Languages}
+\label{sec:related:relational}
 
-\section{Related Work}
+We are not the first to use the term ``relational programming''.
+It appeared as early as 1981 in a paper by Bruce J. MacLennan~\cite{maclennan1981introduction}, 
+ where it is described as ``a style of programming in which entire relations 
+ are manipulated rather than individual data''.
+The term was also used as a synonym for logic programming a la Prolog~\cite{colmerauer1990introduction}, 
+ where the fundamental building blocks are relations.
+While there is, to the best of our knowledge, no surviving implementation of MacLennan's relational programming language, 
+ many Prolog systems are still being used and actively 
+ developed~\cite{zhou2012language, bueno1997ciao, diaz2001design, prolog2021scryer, wielemaker2012swi}.
+Both MacLennan and proponents of Prolog emphasize one aspect of their languages: 
+ thanks to a relational foundation, the programmer can specify 
+ complex logic at a very high level, resulting in concise and elegant programs.
+As a result, such langauges found success in classic AI applications
+ like expert systems, which require sophisticated symbolic reasoning~\cite{korner2022fifty}.
+
+More recently, a class of languages called miniKanren has renewed interest 
+ in relational programming~\cite{byrd2009relational, byrd2012minikanren, rozplokhas2019certified, DBLP:books/daglib/0015651}.
+The designers of miniKanren were motivated by the ``impurity'' of Prolog: 
+ since Prolog evaluation is based on backtracking, 
+ Prolog programmers frequently resort to imperative features like the ``cut'' operator 
+ to prune the enormous search space.
+In contrast, miniKanren has been touted as ``purely logical'' or ``purely relational'', 
+ in that it more strictly adheres to the declarative paradigm.
+Another distinguishing feature of miniKanren is its simple design: 
+ the core language requires consists of only three logical operators: 
+ the equality constraint \verb|==|, disjunction \verb|conde|, 
+ and variable introduction \verb|fresh|.
+Thanks to its simplicity, miniKanren has been embedded in dozens of programming languages. 
+
+A closer line of work to us centers around the Datalog language.
+We will cover Datalog in more detail in Chapter~\ref{chap:background}, 
+ but note here that it is a ``pure'' subset of Prolog.
+There are well-established declarative semantics for Datalog based on proof theory 
+ and model theory~\cite{DBLP:books/aw/AbiteboulHV95}.
+As we will see, Datalog is also delightfully simple: 
+ a Datalog program is just a set of inference rules, 
+ and the na\"ive evaluation algorithm for Datalog just applies the rules in a loop until a fixpoint.
+ 
+Nevertheless, the core Datalog language is very limited. 
+It does not allow negation, arithmetic, or aggregation, 
+ all of which are essential for modern data analysis.
+Researchers have therefore proposed various extensions to Datalog
+ to support such constructs.
+In this dissertation, we focus on extensions
+ that aim to support {\em aggregates} in Datalog.  These include, but
+ are not limited to, the standard \texttt{MIN}, \texttt{MAX},
+ \texttt{SUM}, and \texttt{COUNT} aggregates in SQL.
+ 
+ The main challenge in having aggregates is that they are not {\em
+   monotone} under set inclusion, yet monotonicity is crucial for the
+ declarative semantics of Datalog, and optimizations like semi-na\"ive
+ evaluation.  
+%  Consider the APSP Example~\ref{ex:apsp}.  We could
+%  attempt to write it in Datalog, by extending the language with a
+%  $\min$-aggregation:
+%  %
+%  \begin{align}
+%    P(x,y,d) & \cd E(x,y,d) \nonumber\\
+%    P(x,y,\min(d)) & \cd P(x,z,d_1), E(z,y,d_2), d=d_1+d_2 \label{eqn:non:monotone}
+% \end{align}
+%  However, the second rule is not monotone w.r.t.~set inclusion.
+%  This is a subtle, but important point.  For example, fix
+%  $E = \set{(b,c,20),(b',c,10)}$: if $P$ is $\set{(a,b,1)}$, then the
+%  output of the rule is $\set{(a,c,21)}$, but when $P$ is the superset
+%  $\set{(a,b,1),(a,b',1)}$, then the output is $\set{(a,c,11)}$, which
+%  is not a superset of the previous output,
+%  $\set{(a,c,21)}\not\subseteq \set{(a,c,11)}$.
+ Approaches to resolve the tension between aggregates and monotonicity
+ mainly follow two strategies: break the program into {\em strata}, or
+ generalize the order relation to ensure that aggregates become
+ monotone.
+ 
+ \paragraph*{\bf Stratified Aggregates}
+ The simplest way to add aggregates to Datalog while staying monotone
+  is to disallow aggregates in recursion.
+ Proposed by Mumick et al.~\cite{DBLP:conf/vldb/MumickPR90}, the idea is inspired by stratified negation,
+  where every negated relation must be computed in a previous stratum.
+%  Ex.~\ref{ex:apsp-stratified} is stratified:
+%   the first two rules form the first stratum and compute $P_{\text{all}}$
+%   to a fixpoint in regular Datalog\footnote{The second rule uses the built-in function $+$.},
+%   and the last rule performs the $\min$ aggregate in its own stratum.
+ Stratifying aggregates has the benefit that the semantics,
+  evaluation algorithms, and optimizations for classic Datalog
+  can be applied unchanged to each stratum.
+ However, stratification limits the programs one is allowed to write --
+   in Chapter~\ref{chap:datalogo} we show two versions of the same program, 
+   one stratified and one not, yet the latter is more efficient.
+ The stratification requirement can also be a cognitive burden on the programmer.
+ In fact, the most general notion of stratification, dubbed ``magic stratification''~\cite{DBLP:conf/vldb/MumickPR90}, involves both a syntactic condition and a semantic condition defined
+  in terms of derivation trees.
+ 
+ \paragraph*{\bf Generalized Ordering}
+ In this dissertation, we follow the approach that restores monotonicity by
+ generalizing the ordering on which monotonicity is defined.  The key
+ idea is that, although a program is not monotone according to the
+ $\subseteq$ ordering on sets, we can pick another order under which
+ $P$ \textbf{is} monotone.  Ross and
+ Sagiv~\cite{DBLP:conf/pods/RossS92} define the ordering\footnote{If
+   $(x, y)$ is not a key in $P$, then $\sqsubseteq$ is only a
+   preorder.}  $P \sqsubseteq P'$ as:
+ \begin{align*}
+     \forall (x, y, d) \in P, \exists (x, y, d') \in P' : (x, y, d) \sqsubseteq (x, y, d') \\
+     \text{where } (x, y, d) \sqsubseteq (x', y', d') \defeq x = x' \wedge y = y' \wedge d \geq d'
+ \end{align*}
+ %%% \dan{If $(x,y)$ is not a key in $P$, then $\sqsubseteq$ is only a
+ %%%   preorder.  I wonder whether we should metion this explicitly,
+ %%%   justifying the need for $P$ to be a mapping, as described below; I'm
+ %%%   just not sure whether we need so much detail.}
+ %%% \remy{I added a footnote to clarify this.}
+ %%% %
+ That is, $P$ increases if we replace $(x, y, d)$ with $(x, y, d')$
+ where $d' < d$, for example $\set{(a,c,21)}\sqsubseteq \set{(a,c,11)}$. 
+ In general, to define a generalized ordering we need to view a relation as a map
+  from a tuple to an element in some ordered set $S$.
+ For example, the relation $P$ maps a pair of vertices $(x,y)$ to a distance $d$.
+ We will call such generalized relations $S$-relations.
+ Different approaches in existing work have modeled $S$ using different algebraic structures:
+ Ross and Sagiv~\cite{DBLP:conf/pods/RossS92} require it to be a complete lattice,
+  Conway et al.~\cite{DBLP:conf/cloud/ConwayMAHM12} require only a semilattice,
+  whereas Green et al.~\cite{DBLP:conf/pods/GreenKT07} require $S$ to be an $\omega$-continuous semiring.
+ These proposals bundle the ordering together with two operations $\otimes$ and/or $\oplus$.
+ % with $\otimes$ generalizing join to work on $S$-relations, and $\oplus$ generalizing union.
+ In this dissertation, we follow this line of work and ensure monotonicity by generalizing the ordering.
+ However, in contrast to prior work we {\em decouple} operations on $S$-relations from the ordering,
+ and allow one to freely mix and match the two as long as monotonicity is respected.
+ 
+ \paragraph*{\bf Other Approaches}
+ There are other approaches to support aggregates in Datalog that do not fall into
+  the two categories above. We highlight a few of them here.
+  Ganguly et al.~\cite{DBLP:conf/pods/GangulyGZ91}
+  model $\min$ and $\max$ aggregates in Datalog with negation,
+  thereby supporting aggregates via semantics defined for negation.
+  Mazuran et al.~\cite{DBLP:journals/tplp/MazuranSZ13}
+  extend Datalog with counting quantification,
+  which additionally captures \texttt{SUM}.
+ Kemp and Stuckey~\cite{DBLP:conf/slp/KempS91} extend the well-founded semantics~\cite{DBLP:journals/jacm/GelderRS91, DBLP:conf/pods/Gelder89}
+  and stable model semantics~\cite{DBLP:conf/iclp/GelfondL88} of Datalog
+  to support recursive aggregates.
+ They show that their semantics captures various previous attempts to incorporate aggregates into Datalog.
+ They also discuss a semantics using {\em closed} semirings, and observe that under such a semantics
+  some programs may not have a unique stable model.
+ Semantics of aggregation in Answer Set Programming has been extensively studied
+  \cite{DBLP:journals/ai/FaberPL11, DBLP:journals/tplp/GelfondZ14, DBLP:journals/fuin/Alviano16}.
+ Liu and Stoller~\cite{DBLP:conf/lfcs/LiuS22} give a comprehensive survey of this space.
+
+\section{Join Algorithms}
+\label{sec:related:joins}
+
+\section{Linear Algebra Optimization}
+\label{sec:related:linear-algebra}
 
 There is a vast body of literature for both relational query optimization and
 optimizing compilers for machine learning. Since we optimize machine learning programs through a
@@ -102,31 +217,6 @@ explore compiling sparse linear algebra via
 a relational abstraction. We contribute by providing a simple set of rewrite rules
 and prove them complete.}
 
-\subsection{Equality Saturation and AND-OR DAGs}
-Equality saturation and \textsc{and-or dag}s have been applied to optimize
-low-level assembly code~\cite{DBLP:conf/pldi/JoshiNR02}, Java programs \cite{DBLP:journals/corr/abs-1012-1802}, 
-database queries \cite{Graefe95a}, floating point arithmetics \cite{DBLP:conf/pldi/PanchekhaSWT15}, and even computer-aided
-design models \cite{DBLP:journals/corr/abs-1909-12252}. The design of our relational IR brings unique challenges
-in adopting equality saturation. Compared to database query optimizers 
-that focus on optimizing join orders, unions and aggregates play a central
-role in our relational IR and are prevalent in real-world programs. As
-a result, our
-equality rules depend on the expression schema which is not immediately accessible
-from the syntax. We propose class invariants as a solution to access schema
-information, and show it to be a powerful construct that enables constant
-folding and improves cost estimation. Compared to optimizers for low-level
-assembly code or Java program, we commonly encounter linear algebra expressions
-that trigger expansive rules and make saturation convergence impractical. 
-We propose to sample rewrite matches in order to achieve good exploration
-without full saturation. Equality saturation takes advantage of constraint solvers which have also been applied to program optimization and query
-optimization. In particular, the use of solvers for satisfiability
-modulo theories by \cite{DBLP:conf/asplos/Solar-LezamaTBSS06} has spawned a paradigm now known as \textit{program synthesis}. 
-In query optimization research, 
-\cite{DBLP:conf/sigmod/Trummer017} applies Mixed Integer Linear Programming for optimizing join ordering. 
-Although constraint solvers offer pleasing guarantees of optimality, our
-experiments show their overhead does not bring significant gains for optimizing
-LA expressions. 
-
 \subsection{Low-level Code Generation}
 \rvt{
 Novel machine learning compilers including TACO \cite{DBLP:journals/pacmpl/KjolstadKCLA17},
@@ -176,3 +266,48 @@ in compilation.}
 % optimization is to perform equality saturation for multiple expressions in the
 % same egraph, thereby enabling sharing across optimization sessions and reducing
 % compilation time.
+
+\section{Recursive Program Optimization}
+\label{sec:related:recursion}
+
+Our work was partially inspired by the \prem\
+condition, described by Zaniolo et
+al.~\cite{DBLP:journals/tplp/ZanioloYDSCI17}, which, as we shall
+explain, is a special case of the FGH-rule.  Unlike our system, their
+implementation required the programmer to check the \prem\ manually,
+then perform the corresponding optimization.
+% As we shall discuss, our FGH-rule generalizes \prem.
+% Their implementation also relies on the programmer to perform the rewrite and
+% check that \prem\ is applicable.
+% Our optimizer is automated and supports the more general FGH-rule.
+%
+Seveal prior systems  leveraged SMT-solvers to reason about
+query languages~\cite{
+  DBLP:conf/icfem/VeanesGHT09,
+  DBLP:conf/cidr/ChuWWC17,
+  DBLP:conf/cav/GrossmanCIRS17,
+  DBLP:conf/sosp/SchlaipferRLS17,
+  DBLP:journals/pacmpl/0001DLC18};
+but none of these  consider recursive queries.
+% We contribute by proposing a simple and sound SMT encoding that can
+% be used in \cegis, and works in conjunction with a rewrite system
+% to reason about semiring operations including unbounded aggregation.
+%
+Datalog synthesizers have been described in~\cite{
+  DBLP:conf/cp/AlbarghouthiKNS17,
+  DBLP:conf/sigsoft/SiLZAKN18,
+  DBLP:conf/ijcai/SiRHN19,
+  DBLP:journals/pvldb/WangSCPD20,
+  DBLP:journals/pacmpl/RaghothamanMZNS20}.
+Their setting is different from ours:
+the specification is given by input-output examples, and the
+synthesizer needs to produce a program that matches all examples.
+% In comparison, we take a Datalog program as the reference implementation
+% which completely specifies the semantics of the program to be synthesized.
+% Unlike prior work which must synthesize recursive definitions,
+% we leverage the FGH-rule to solve the optimization problem
+% by synthesizing a non-recursive expression.
+A design choice that we made, and which sets us further aside from the
+previous systems, is to use an existing \cegis\ system, Rosette; thus,
+we do not aim to  improve the \cegis\ system itself, but optimize the
+way we use it.
