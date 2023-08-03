@@ -1780,5 +1780,50 @@ Specifically, we replace every $t-2$ with $t-1$
 At this point, we recover exactly the semi-na\"ive algorithm for classic Datalog
  which is the same as \datalogo over the POPS $\B$.
 
-% \section{Conclusions}
-% \label{sec:datalogo:conclusions}
+\section{Conclusions}
+\label{sec:datalogo:conclusions}
+
+A massive number of application domains demand us to move beyond the confine of the Boolean
+world: from program analysis~\cite{DBLP:conf/popl/CousotC77,MR1728440},
+graph algorithms~\cite{MR556411,MR584516,MR526496},
+provenance~\cite{DBLP:conf/pods/GreenKT07},
+formal language theory~\cite{MR1470001}, to machine learning and linear
+algebra~\cite{einsum:rocktaschel,DBLP:conf/osdi/AbadiBCCDDDGIIK16}.
+Semiring and poset theory -- of which POPS is an instance -- is the natural
+bridge connecting the Boolean island to these applications.
+
+The bridge helps enlarge the set of problems $\name$ can express in a
+very natural way.  The possibilities are endless. For example,
+amending $\name$ with an interpreted function such as {\sf sigmoid}
+will allow it to express typical neural network computations.  Adding
+another semiring to the query language (in the sense of
+FAQ~\cite{DBLP:conf/pods/KhamisNR16}) helps express rectilinear units
+in modern deep learning.  At the same time, the bridge facilitates the
+porting of analytical ideas from datalog to analyze convergence
+properties of the application problems, and to carry over optimization
+techniques such as semi-na\"ive evaluation.
+
+This paper established part of the bridge. There are many interesting problems left
+open; we mention a few here.
+
+The question of whether a $\name$ program over $p$-stable POPS
+converges in polynomial time in $p$ and the size of the input database
+is open. This is open even for linear programs.  Our result on
+$\trop_p$ indicates that the linear case
+is likely in PTIME.
+
+We have discussed in Sec.~\ref{sec:datalogo} several extensions to
+$\name$ that we believe are necessary in practice.  It remains open
+whether our convergence results continue to hold for those extensions.
+
+Negation can be added to $\name$ as an interpreted predicate.  The
+question is, can we extend semantics results (such as stable model
+semantics) from general datalog / logic programming to $\name$ with
+negation?  
+
+Beyond exact solution and finite convergence, as mentioned in the
+introduction, it is natural in some domain applications to have
+approximate fixpoint solutions, which will allow us to trade off
+convergence time and solution quality. A theoretical framework along
+this line will go a long way towards making $\name$ deal with real
+machine learning, linear algebra, and optimization problems.

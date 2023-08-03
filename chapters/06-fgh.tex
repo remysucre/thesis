@@ -2767,4 +2767,58 @@ Sec.~\ref{subsec:loop:invariants}.
     %%% TeX-master: "main"
     %%% End:
 
-    % \section{Summary and Discussion}
+    \section{Summary and Discussion}
+
+We have presented a new optimization method for recursive queries,
+which generalizes many previous optimizations described in the
+literature.  We implemented it using a \cegis\ and an \eqsat\ system.
+Our experiments have shown that this optimization is beneficial,
+regardless of what other optimizations a Datalog system supports.  We
+discuss here some limitations and future work.
+
+\update{
+%
+  Our current implementation is restricted to linear programs, but our
+  techniques apply to nonlinear programs as well. Non-linear programs
+  require a more complex grammar $\Sigma$; this is likely to increase
+  the search space, and possibly increase the optimization time. We
+  leave this exploration to future work.
+%
+}
+
+Our current optimizer is heuristic-based, and future work needs to
+integrate it with a cost model.  This, however, will be challenging,
+because very little work exists for estimating the cost of recursive
+queries.  
+%
+\update{
+%
+  this chapter applies a simple cost-model. We use the arity of the IDB
+  predicate as a proxy for a simple asymptotic cost model, because
+  $N^{\text{arity}}$ is the size bound of the output, when $N$ is the
+  size of the active domain. This simple cost-model is currently used
+  by the commercial DB system mentioned in the paper. If the optimized
+  program reduces the arity, then it is assessed to have lower cost.
+%
+}
+
+\update{
+%
+  Two limitations of our current implementation are the fact that we
+  currently do not ``invent'' new IDBs for the optimized query, and do
+  not apply the FGH-optimizer repeatedly.  Both would be required 
+  to support more advanced magic set optimizations.
+%
+}
+
+
+Our initial motivation for this work came from a real application,
+which consists of a few hundred Datalog rules that were
+computationally very expensive, and required a significant amount of
+manual optimizations.  Upon close examination, at a very high level,
+the manual optimization that we performed could be described,
+abstractly, as a {\em sliding window} optimization (WS in
+Fig.~\ref{fig:setup}), which is one of the simplest instantiations of
+the FGH-rule.  Yet, our current system is far from able to optimize
+automatically programs with hundreds of rules: we leave that for
+future work.

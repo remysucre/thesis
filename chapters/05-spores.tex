@@ -1503,3 +1503,28 @@ multi-objective optimizer for accuracy and run time.
     \label{tab:numeric}
     \vspace*{5pt}
 \end{table}{}
+
+
+\section{SPORES Limitations and Future Work}
+\rvt{
+We intend \sys\ to be used to optimize machine learning programs that perform
+linear algebra operations. As such, \sys\ is not a linear algebra solver, and 
+operations like matrix inversion and calculating eigenvalues are out of scope.
+\sys\ does not include a matrix decomposition operator, but the programmer
+can implement decomposition algorithms like our ALS and PNMF benchmarks. 
+The operations we support already cover a variety of algorithms as we show in
+the evaluation. Similar scope is shared by existing research \cite{DBLP:journals/pvldb/BoehmRHSEP18}
+\cite{ElgamalLBETRS17}
+\cite{DBLP:journals/pacmpl/KjolstadKCLA17}. Although
+\sys\ does not focus on deep learning, its design can be adapted to optimize
+deep models. We are experimenting to incorporate the identity rules from TASO
+into our framework. It would be challenging to extend the completeness theorem to
+the complex operators used in deep learning, 
+but we expect our extension of equality saturation can find high-impact optimizations
+with short compile time. Finally, although our rewrite rules are complete, we had to
+resort to rule sampling and greedy extraction to cut down the overhead. Future work can 
+investigate more intelligent rule application and extraction strategies. For example,
+the optimizer can learn which rules more likely lead to performance improvement and
+prioritizes firing those rules. Another direction is to incorporate plus into
+theoretical sum-product frameworks like FAQ \cite{KhamisNR16} and guarantee optimality. 
+}

@@ -1,11 +1,10 @@
 \chapter{Related Work}
 \label{chap:related}
 
-In this chapter we cover related work for each of our main contributions.
+In this chapter we cover related work to this dissertation.
 First, we discuss prior proposals for relational programming languages.
 Then we review the literature on join algorithms, with an emphasis on multi-way joins.
-Next we cover existing techniques for speeding up linear algebra programs.
-Finally, we present the state-of-the-art in optimizing recursive programs and query synthesis.
+Finally, we cover existing techniques for optimizing relational programs.
 
 \section{Relational Programming Languages}
 \label{sec:related:relational}
@@ -158,7 +157,42 @@ In this dissertation, we focus on extensions
 \section{Join Algorithms}
 \label{sec:related:joins}
 
-\section{Linear Algebra Optimization}
+Join algorithms have been studied since the birth of relational databases, 
+ and there are thousands of papers focusing on improving the performance of joins.
+Algorithms for computing the join roughly fall into two categories: 
+ binary joins and multi-way joins.
+We will provide a more in-depth comparison of the two paradigms in Chapter~\ref{chap:free-join}, 
+ and highlight a few distinguishing features here.
+
+Compared to multi-way joins, binary joins are by far more frequently implemented 
+ in practice~\cite{gaffney2022sqlite, stonebraker1991postgres, raasveldt2019duckdb}.
+This is largely because the former is more modular: 
+ to compute the join of multiple relations, 
+ we can chain together a sequence of binary joins.
+Modularity simplifies implementation, 
+ and also makes it easy to optimize, parallelize, incrementalize, and distribute 
+ the query, or make it more robust to failures.
+
+On the other hand, multi-way joins can be more efficient than binary joins~\cite{DBLP:conf/vldb/GraefeBC98, DBLP:conf/vldb/KemperKW99, DBLP:conf/sigmod/HellersteinA00}.
+By processing multiple relations at the same time, 
+ multi-way joins can avoid materializing intermediate results. 
+It also has the freedom to reorder the relations at runtime,
+ taking advantage of better statistics computed during execution.
+More recently, researchers have shown a kind of multi-way join algorithms to be 
+ {\em Worst-case optimal}~\cite{DBLP:conf/pods/NgoPRR12, DBLP:conf/icdt/Veldhuizen14,
+  DBLP:journals/sigmod/NgoRR13, DBLP:conf/pods/000118},
+ making them the algorithms to have stronger asymptotic guarantees than the classic binary join algorithms.
+
+Given that each paradigm has its own strength, 
+ researchers have proposed to combine the two within the same 
+ system~\cite{DBLP:journals/pvldb/FreitagBSKN20,DBLP:journals/tods/AbergerLTNOR17, DBLP:journals/pvldb/MhedhbiS19}, 
+ much like how modern database systems implement both hash joins and sort-merge joins.
+We will discuss these systems in more detail in Chapter~\ref{chap:free-join}.
+Our approach is motivated by the same idea of bringing the best of both worlds, 
+ but instead of implementing both binary join and multi-way join,
+ we unify and generalize them into a single join algorithm.
+
+\section{Optimizing Relational Programs}
 \label{sec:related:linear-algebra}
 
 There is a vast body of literature for both relational query optimization and
@@ -179,13 +213,13 @@ but fall short of LA workloads that occur in practice. We step past these
 frameworks by incorporating common subexpressions and incorporating addition
 ($+$). 
 
-In terms of approach, our design of relational IR ties in to research that
-explores the connection between linear algebra and relational algebra. Our
-design and implementation of the optimizer ties into research that leverage
-equality saturation and \textsc{and-or dag}s for query optimization and compiler
-optimization for programming languages. Since we focus on optimizing sum-product
-expressions in linear algebra, our work naturally relates to research in sum-product
-optimization. We now discuss these three lines of research in detail. 
+% In terms of approach, our design of relational IR ties in to research that
+% explores the connection between linear algebra and relational algebra. Our
+% design and implementation of the optimizer ties into research that leverage
+% equality saturation and \textsc{and-or dag}s for query optimization and compiler
+% optimization for programming languages. Since we focus on optimizing sum-product
+% expressions in linear algebra, our work naturally relates to research in sum-product
+% optimization. We now discuss these three lines of research in detail. 
 
 \subsection{Relational Algebra and Linear Algebra}
 Elgamal et al. \cite{ElgamalLBETRS17} envisions \textsc{spoof}, a compiler for machine learning programs
@@ -267,10 +301,10 @@ in compilation.}
 % same egraph, thereby enabling sharing across optimization sessions and reducing
 % compilation time.
 
-\section{Recursive Program Optimization}
+\subsection{Recursive Program Optimization and Program Synthesis}
 \label{sec:related:recursion}
 
-Our work was partially inspired by the \prem\
+Our work on optimizing recursive programs was partially inspired by the \prem\
 condition, described by Zaniolo et
 al.~\cite{DBLP:journals/tplp/ZanioloYDSCI17}, which, as we shall
 explain, is a special case of the FGH-rule.  Unlike our system, their
