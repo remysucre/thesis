@@ -1,4 +1,80 @@
 \chapter{Conclusions and Future Outlook}
 \label{chap:conclusions}
 
+In this dissertation we have enhanced the relational paradigm 
+ of data processing to support more complex data and programs.
+We first extended the traditional Datalog 
+ language with support for recursive aggregates,
+ enabling the expression of a wide range of data processing tasks.
+We then described a new algorithm to speed up the relation join, 
+ a key operation in relational data processing.
+We presented techniques to optimize linear algebra programs 
+ through a relational lens,
+ and finally showed how to optimize recursive programs over relational data.
+Our approach follows the core principle of the relational model:
+ to allow the programmer to specify computation in a high-level, declarative language,
+ and let the system optimize the program for efficient execution.
 
+Nevertheless, to realize the full potential of the relational model 
+ in modern data processing, 
+ there are still many challenges to overcome.
+Namely, the relational model offers {\em data independence},
+ meaning the programmer needs only to write the program logic once, 
+ and the system will automatically handle
+ optimization, parallelism, distribution, incremetal maintenance, 
+ persistence, fault tolerance, etc.
+Addressing each of these challenges in the context of modern data processing
+ is a research topic of its own right.
+In the following, we point out a few promising directions 
+ that will bring us closer towards our vision of relational programming.
+
+\paragraph*{Scheduling Languages.}
+Building a relational data system is hard.
+Half a century after the relational model was first proposed,
+ we are still perfecting the arts and crafts of non-recursive
+ simple queries over tabular data.
+We believe the relational future of programming is much more tangible, 
+ if we rethink the relationship between the data analyst and the data system.
+In a perfect world, the analyst need only specify the program logic 
+ in the highest possible level of abstraction, 
+ and the system will fill in all the details automatically.
+Building such a fully autonomous system is indeed a daunting task.
+The rise of {\em scheduling languages} like Halide~\cite{DBLP:conf/pldi/Ragan-KelleyBAPDA13} 
+ in domain-specific computing provides a more pragmatic alternative.
+The programmer may start with a simple, yet inefficient, program that 
+ is already executable (perhaps for prototyping purposes).
+Then, instead of relying on the system to automatically optimize their program, 
+ the programmer {\em guides} the system to gradually refine the program to be more efficient.
+For example, one may instruct the system to unroll or fuse certain loops, 
+ or arrange data into tiles to take advantage of SIMD instructions.
+In fact, some database systems already provide mechanisms for 
+ the programmer to specify hints to the optimizer,
+ and the most performance-critical queries are already 
+ decorated with hand-picked join orders, cardinality estimates, and index selections.
+We believe the first practical, high-performance relational programming system 
+ will be built on top of such a scheduling language.
+
+\paragraph*{Modular Architecture.}
+Traditionally, database systems are built as monolithic systems.
+Partly due to the commercial nature of many database systems, 
+ and partly due to the rapid evolution of hardware and software,
+ each system is built from scratch 
+ around a new architectural design.
+This means building every new system requires significant effort
+ that is not reusable by other systems.
+However, the design of many components of a database system 
+ has largely stablized:
+ query optimizers usually follow the \textsf{CASCADE} framework~\cite{Graefe95a},
+ with the execution engine implementing either the pull-based or push-based model~\cite{DBLP:journals/pvldb/KerstenLKNPB18},
+ and the data are stored as either rows or columns~\cite{DBLP:journals/ftdb/AbadiBHIM13}.
+Even within the optimizer, most systems implement variants of the dynamic programming algorithm~\cite{DBLP:conf/vldb/MoerkotteN06}
+ which interacts with a cardinality estimator to find the cheapest join order.
+We therefore advocate developing modular, reusable components 
+ for relational data systems, 
+ and designing new system architectures by composing these components.
+There is already encourage progress in this direction, 
+ for example the Apache Calcite project~\cite{begoli2018apache} and 
+ the Orca optimizer~\cite{DBLP:conf/sigmod/SolimanAREGSCGRPWNKB14}.
+Again taking inspireation from the programming languages community, 
+ the database community should aim to build a collection of 
+ database components like the LLVM project did for compilers~\cite{DBLP:conf/cgo/LattnerA04}.
