@@ -33,7 +33,7 @@ The designers of miniKanren were motivated by the ``impurity'' of Prolog:
 In contrast, miniKanren has been touted as ``purely logical'' or ``purely relational'', 
  in that it more strictly adheres to the declarative paradigm.
 Another distinguishing feature of miniKanren is its simple design: 
- the core language requires consists of only three logical operators: 
+ the core language consists of only three logical operators: 
  the equality constraint \verb|==|, disjunction \verb|conde|, 
  and variable introduction \verb|fresh|.
 Thanks to its simplicity, miniKanren has been embedded in dozens of programming languages. 
@@ -200,11 +200,13 @@ optimizing compilers for machine learning. Since we optimize machine learning pr
 relational lens, our work relates to research in both fields. As we have pointed
 out, numerous state-of-the-art optimizing compilers for machine learning
  resort to syntactic rewrites and heuristics to optimize linear algebra
-expressions~\cite{DBLP:reference/bdt/Boehm19}~\cite{DBLP:conf/icml/SujeethLBRCWAOO11}~\cite{DBLP:conf/sigmod/HuangB013}. We distinguish our work which performs optimization based on a
+expressions~\cite{DBLP:reference/bdt/Boehm19}~\cite{DBLP:conf/icml/SujeethLBRCWAOO11}~\cite{DBLP:conf/sigmod/HuangB013}. 
+We perform optimization based on a
 relational semantics of linear algebra and holistically explore the complex
 search space. A majority of relational query optimization focus on join order
 optimization \cite{Graefe95a} \cite{MoerkotteN06} \cite{MoerkotteN08}
-\cite{selinger1979access}; we distinguish our work which optimizes programs with
+\cite{selinger1979access}; 
+we optimize programs with
 join (product), union (addition), and aggregate (sum) operations. Sum-product optimization considers operators other than join while optimizing
 relational queries. Recent years have seen a line of excellent theoretical and
 practical research in this area \cite{KhamisNR16} \cite{Joglekar2016AJARAA}.
@@ -236,7 +238,7 @@ to sum-product expressions, Elgamal et al. also considers selection and projecti
 like selecting the positive entries of a matrix. We plan to explore supporting
 selection and projection in the future. Elgamal et al. also proposes compile-time generation of
 fused operators, which is implemented by Boehm et al.~\cite{DBLP:journals/pvldb/BoehmRHSEP18}.
-SPORES readily takes advantage of existing fused operators, and we
+SPORES can replace operations with existing fused operators when it is beneficial, and we
 plan to explore combining sum-product rewrite with fusion generation in the future. 
 
 MorpheusFI by Li et al.~\cite{DBLP:conf/sigmod/LiC019} and LARA by Hutchison et al.~\cite{DBLP:journals/corr/HutchisonHS17} explore optimizations across the interface of machine learning and database systems. In particular, MorpheusFI speeds up machine learning algorithms over large joins by pushing computation into each joined table, thereby avoiding expensive
