@@ -78,3 +78,22 @@ There is already encourage progress in this direction,
 Again taking inspireation from the programming languages community, 
  the database community should aim to build a collection of 
  database components like the LLVM project did for compilers~\cite{DBLP:conf/cgo/LattnerA04}.
+
+\paragraph*{Testing and Analyzing Relation Programs.}
+In the real world, software development is an iterative process.
+No software is guarenteed to be bug-free in the beginning, 
+ and requirements change over time.
+Just like for general purpose programming languages,
+ tools to test and analyze relational programs are essential
+ for programmer productivity and software quality.
+Testing and analyzing relational programs presents unique challenges.
+For example, each relational program usually touches a large amount of data, 
+ so debugging the program on the full dataset can be prohibitively expensive.
+As we have seen in this dissertation, 
+ the data system applies advanced optimizations to the program,
+ which means the program that is executed is usually very different
+ from the original program written by the programmer.
+Although there is increasing interest 
+ in testing and analyzing relational data {\em systems}~\cite{DBLP:journals/pacmpl/RiggerS20,DBLP:conf/osdi/RiggerS20,DBLP:conf/sigsoft/RiggerS20},
+ we believe the problem of testing and analyzing relational programs
+ also deserves attention from the community.
