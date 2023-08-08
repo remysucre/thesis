@@ -189,7 +189,9 @@ The projection operator $\Pi$ takes as arguments an atom $R({\bm X})$
  and returns a relation containing only attributes corresponding 
  to the variables in ${\bm Y}$.
 For example, $\Pi_{X}E(X, Y)$ returns all source vertices in $E$.
-Both selection and projection can be implemented with a simple loop over the tuples in the input relation.
+Selection can be implemented with a simple loop over the tuples in the input relation.
+The same goes for projection in {\em bag} semantics, 
+ whereas in set semantics, projection requires looping over the tuples while taking care to remove duplicates.
 Finally, computing UCQs requires the union operator $\cup$,
  which simply takes the set union of the relations.
 Popular databases also implement several additional relational algebra operators 
