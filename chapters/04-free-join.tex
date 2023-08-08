@@ -76,7 +76,7 @@ both binary join and \WCOJ:
 %   experiments.  I suggest that here we remove the bullets and simply
 %   list these three contribution sin the text, then at the end of the
 %   intro we repeat them in bullets, and add experimental evaluation.
-%   Also, the contributions need to align with the text in the paper.}
+%   Also, the contributions need to align with the text in the chapter.}
 % \rw{Fixed.}
 we design an algorithm to convert any binary join plan to a \FJ plan
 that runs as fast or faster; we design a new data structure called
@@ -820,7 +820,7 @@ be available, either from the same node or a previous one.
   for $\phi_k$, and write $cover(\phi_k)$ for the set of covers.
 \end{defn}
 
-We will assume only valid plans in the rest of the paper.  To simplify
+We will assume only valid plans in the rest of this chapter.  To simplify
 the presentation, in this section we assume that each node $\Phi_k$,
 has {\em one} subatom designated as cover, and will always list it as
 the first subatom in $\Phi_k$.  We will revisit this assumption in
@@ -1992,7 +1992,7 @@ Overall, we believe \FJ can be more robust to bad plans with
   to fully explore the design space between the two extremes of binary
   join and \GJ.  Finally, we realized that, rather surprisingly, \GJ and
   traditional joins diverge in their choice of the inner table (called
-  the cover in our paper): \GJ requires that to be the smallest
+  the cover in this chapter): \GJ requires that to be the smallest
   (otherwise it is not optimal), while a traditional plan will chose it
   to be the largest (to save the cost of computing its hash table).
   Future work is required for a better informed decision for the choice
