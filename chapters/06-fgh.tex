@@ -2429,35 +2429,6 @@ Sec.~\ref{subsec:loop:invariants}.
     
     \begin{figure*}
       \centering
-      \begin{subfigure}[b]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{basic-bd}
-        % \caption{BigDatalog}\label{fig:eval:basic:bd}
-      \end{subfigure}
-
-      \begin{subfigure}[b]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{basic-rs}
-        % \caption{RecStep}\label{fig:eval:basic:rs}
-      \end{subfigure}
-      \hfill
-      \begin{subfigure}[b]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{basic-x}
-        % \caption{X}\label{fig:eval:basic:x}
-      \end{subfigure}
-      \caption{Speedup of the optimized v.s.\ original program; higher is better; 
-      \required{t.o. means the original program timed out after 3 hours, in which case we report the speedup against 3 hours; o.o.m. means the original program ran out of memory.}}\label{fig:eval:eqsat}
-    \end{figure*}
-    
-    \begin{figure*}
-        \centering
-        \includegraphics[width=.9\textwidth]{hard_bench}
-        \caption{Runtime increase as a function of the data size; lower is  better.}\label{fig:eval:hard}
-    \end{figure*}
-    
-    \begin{figure*}
-      \centering
      \begin{tabular}{ c | c c c | c c c c }
      Program & BM & CC & SSSP & R & MLM & BC & WS \\
      \hline
@@ -2625,6 +2596,30 @@ Sec.~\ref{subsec:loop:invariants}.
     % since the experiments are not meant to compare the systems against
     % each other, we only report speedup and relative time.
     
+    \begin{figure*}
+      \centering
+      \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{basic-bd}
+        % \caption{BigDatalog}\label{fig:eval:basic:bd}
+      \end{subfigure}
+
+      \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{basic-rs}
+        % \caption{RecStep}\label{fig:eval:basic:rs}
+      \end{subfigure}
+      \hfill
+      \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{basic-x}
+        % \caption{X}\label{fig:eval:basic:x}
+      \end{subfigure}
+      \caption{Speedup of the optimized v.s.\ original program; higher is better; 
+      \required{t.o. means the original program timed out after 3 hours, in which case we report the speedup against 3 hours; o.o.m. means the original program ran out of memory.}}
+      \label{fig:eval:eqsat}
+    \end{figure*}
+    
     
     \subsubsection{Findings} Figure~\ref{fig:eval:eqsat} shows the results
     of the first group of benchmarks optimized by the
@@ -2650,6 +2645,14 @@ Sec.~\ref{subsec:loop:invariants}.
     Overall, both the semi-naive and
     naive versions of the optimized program are significantly faster than
     the unoptimized program.
+
+    \begin{figure*}
+        \centering
+        \includegraphics[width=.9\textwidth]{hard_bench}
+        \caption{Runtime increase as a function of the data size; lower is  better.}
+        \label{fig:eval:hard}
+    \end{figure*}
+    
     
     Figure~\ref{fig:eval:hard} shows the results of the second group of
     benchmarks, which required \cegis.  Since we used synthetic data,  we
