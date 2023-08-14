@@ -1515,7 +1515,11 @@ can implement decomposition algorithms like our ALS and PNMF benchmarks.
 The operations we support already cover a variety of algorithms as we show in
 the evaluation. Similar scope is shared by existing research \cite{DBLP:journals/pvldb/BoehmRHSEP18}
 \cite{ElgamalLBETRS17}
-\cite{DBLP:journals/pacmpl/KjolstadKCLA17}. Although
+\cite{DBLP:journals/pacmpl/KjolstadKCLA17}. 
+\sys\'s cost function assumes the cost of each operator is proportional 
+ to its output size. 
+This is a reasonable assumption for sparse inputs, but may not hold for dense inputs.
+Although
 \sys\ does not focus on deep learning, its design can be adapted to optimize
 deep models. We are experimenting to incorporate the identity rules from TASO
 into our framework. It would be challenging to extend the completeness theorem to

@@ -30,7 +30,7 @@ The designers of miniKanren were motivated by the ``impurity'' of Prolog:
  since Prolog evaluation is based on backtracking, 
  Prolog programmers frequently resort to imperative features like the ``cut'' operator 
  to prune the enormous search space.
-In contrast, miniKanren has been touted as ``purely logical'' or ``purely relational'', 
+In contrast, miniKanren is ``purely logical'' or ``purely relational'', 
  in that it more strictly adheres to the declarative paradigm.
 Another distinguishing feature of miniKanren is its simple design: 
  the core language consists of only three logical operators: 
@@ -197,8 +197,8 @@ Our approach is motivated by the same idea of bringing the best of both worlds,
 
 There is a vast body of literature for both relational query optimization and
 optimizing compilers for machine learning. Since we optimize machine learning programs through a
-relational lens, our work relates to research in both fields. As we have pointed
-out, numerous state-of-the-art optimizing compilers for machine learning
+relational lens, our work relates to research in both fields. 
+Numerous state-of-the-art optimizing compilers for machine learning
  resort to syntactic rewrites and heuristics to optimize linear algebra
 expressions~\cite{DBLP:reference/bdt/Boehm19}~\cite{DBLP:conf/icml/SujeethLBRCWAOO11}~\cite{DBLP:conf/sigmod/HuangB013}. 
 We perform optimization based on a
@@ -212,7 +212,7 @@ relational queries. Recent years have seen a line of excellent theoretical and
 practical research in this area \cite{KhamisNR16} \cite{Joglekar2016AJARAA}.
 These work gives significant improvement for queries involving $\times$ and $\sum$,
 but fall short of LA workloads that occur in practice. We step past these
-frameworks by incorporating common subexpressions and incorporating addition
+frameworks by incorporating common subexpression elimination and incorporating addition
 ($+$). 
 
 % In terms of approach, our design of relational IR ties in to research that
@@ -256,8 +256,9 @@ and prove them complete.}
 \subsection{Low-level Code Generation}
 \rvt{
 Novel machine learning compilers including TACO \cite{DBLP:journals/pacmpl/KjolstadKCLA17},
-TVM \cite{DBLP:conf/nips/ChenZYJMCGK18}, TensorComprehension \cite{DBLP:journals/corr/abs-1802-04730} and
-Tiramisu \cite{DBLP:conf/cgo/BaghdadiRRSAZSK19} generate efficient low-level code
+TVM \cite{DBLP:conf/nips/ChenZYJMCGK18}, TensorComprehension \cite{DBLP:journals/corr/abs-1802-04730},
+Tiramisu \cite{DBLP:conf/cgo/BaghdadiRRSAZSK19}, and COMET~\cite{DBLP:conf/llvmhpc/TianGLRK21}
+ generate efficient low-level code
 for kernel operators. These kernels are small expressions that consist of a few
 operators. For example the MATTRANSMUL kernel in TACO implements $\alpha A^T x + \beta z$.
 The kernels are of interest because they commonly appear in machine learning programs,

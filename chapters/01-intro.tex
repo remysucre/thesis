@@ -2,7 +2,7 @@
 \label{sec:intro}
 
 Fifty years after its initial proposal by Edgar F. Codd~\cite{DBLP:journals/cacm/Codd70},
- the relational model has cemeted its status as the de-facto data model 
+ the relational model has cemented its status as the de-facto data model 
  in nearly all modern databases.
 It provides {\em data independence}, 
  which has allowed data systems to scale to unprecedented sizes
@@ -12,7 +12,7 @@ The success of the relational model is witnessed
  uniquitous in computing systems 
  from smartphones to data centers.
 
- Nevertheless, traditional relational databases are struggling 
+ Nevertheless, the capabilities of traditional databases are struggling 
   to meet the demands of modern data analytics.
 Today's data analytics involve new kinds of data, 
  as well as new kinds of computation over such data. 
@@ -22,8 +22,8 @@ For another example, graph analytics require iterative algorithms
  over graph data.
 Running these workloads in existing relational databases 
  is both cumbersome and slow:
- SQL is a poor language for expressing the computation,
- and the systems are not optimized for such workloads.
+ {\em SQL is a poor language for expressing the computation,
+ and the systems are not optimized for such workloads}.
 
 This dissertation is motivated by the question: 
 {\em How can we renew relational database systems 
@@ -31,8 +31,9 @@ This dissertation is motivated by the question:
 Towards that end, we propose a new language foundation
  for writing relational programs;
  a new algorithm for the relational join;
- and techniques to optimize relational queries. 
-Together, these three ingredients make up 
+ an optimizer for linear algebra through relational algebra, 
+ and optimization techniques for recursive queries.
+Together, these four ingredients make up 
  the basis for a new generation of relational systems
  that are more expressive and more efficient.
 Using these systems,
@@ -56,13 +57,13 @@ the physical implementation~\cite{DBLP:journals/cacm/Codd70}, and
 enables advanced implementation techniques, such as cost-based
 optimizations, indices, materialized views, incremental view
 maintenance, parallel evaluation, and many others, while keeping the
-same simple, declarative interface to the data unchanged.
+same simple, declarative interface to the data.
 
-But analysts today often need to perform tasks that require
-iteration over the data.
-Gradient descent, clustering, page-rank, network centrality, inference
-in knowledge graphs are some examples of common tasks in data science
-that require iteration.  While SQL has introduced recursion since 1999
+But data scientists today often need to perform tasks that require
+iteration over the data,
+ such as gradient descent, clustering, page-rank, network centrality, and inference
+ in knowledge graphs.
+While SQL has introduced recursion since 1999
 (through Common Table Expressions, CTE), it has many cumbersome
 limitations and is little used in practice~\cite{frankmcsherry-2022}.
 
@@ -75,7 +76,7 @@ powerful optimizations, such as semi-na\"ive evaluation and magic set
 rewriting.  Datalog has been extensively studied in the literature;
 see~\cite{DBLP:journals/ftdb/GreenHLZ13} for a survey
 and~\cite{DBLP:books/mc/18/MaierTKW18,DBLP:conf/pods/Vianu21} for historical notes.
-We will also briefly review the semantics and execution of Datalog in
+We briefly review the semantics and execution of Datalog in
  Chapter~\ref{chap:background}.
 
 However, Datalog is not the answer to modern needs, because it only
@@ -95,7 +96,7 @@ and have not been adopted by either Datalog systems or SQL engines.
 The first contribution of this dissertation is a foundation for a query language that
 supports both recursion and aggregation.}  
 Our language, called \datalogo, is a generalization of Datalog. 
-Intuitively, Datalog works over sets which are functions from tuples to booleans.
+Intuitively, Datalog works over sets, which are functions from tuples to booleans.
 \datalogo instead works over functions from tuples to values from a semiring.
 For example, setting the semiring to be the reals allows us to define recursive 
  tensor programs in \datalogo,
@@ -108,7 +109,7 @@ To evaluate any relational program,
  including \datalogo programs,
  classic Datalog programs, 
  or even SQL queries without recursion, 
- a key operation is the relational join.
+ a key operation is the {\em relational join}.
 The join allows us to combine data from different sources, 
  as well as compose computation from different programs.
 Most mainstream databases today evaluate a query 

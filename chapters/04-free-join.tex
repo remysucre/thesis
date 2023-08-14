@@ -146,6 +146,7 @@ This finer-grained view of join algorithms allows \FJ
   an already optimized binary plan, \FJ takes advantage of existing
   cost-based optimizers; in our system we used binary plans produced by
   the optimizer of DuckDB~\cite{DBLP:conf/cidr/RaasveldtM20,DBLP:conf/vldb/Raasveldt22}.
+We chose DuckDB because it is the only system able to produce query plans in a machine-readable format.
 
 Next, we address the main source of
   inefficiency in \GJ: the need to construct a trie on each relation
@@ -713,8 +714,7 @@ A \FJ plan may join on any number of variables and relations at each step,
   and therefore needs to specify both explicitly.
 
   To help define the \FJ plan, we introduce two new concepts, called
-  \emph{subatom} and \emph{partitioning}.  Fix the query $Q$ in
-  Eq.~\eqref{eq:cq}:
+  \emph{subatom} and \emph{partitioning}.  
 
 \begin{defn}
   A \emph{subatom} of an atom $R_i(\bm x_i)$ is an expression
@@ -728,8 +728,8 @@ We now define the \FJ plan using these concepts.
 
 \begin{defn}[\FJ Plan]
   Fix a conjunctive query $Q$.  A \FJ \emph{plan} is a list
-  $[\phi_1, \ldots, \phi_m]$, where each $\phi_k$ is a list of
-  subatoms of $Q$, called a {\em node}.  The nodes are required to
+  $[\phi_1, \ldots, \phi_m]$, where each $\phi_k$, called a {\em node}, is a list of
+  subatoms of $Q$.  The nodes are required to
   {\em partition the query}, in the sense that, for every atom
   $R_i(\bm x_i)$ in the query, the set of all its subatoms occurring
   in all nodes must form a partitioning of $R_i(\bm x_i)$.  We denote
@@ -1086,8 +1086,8 @@ for x in R:
 
 \begin{ex}\label{ex:binary-free-join}
   Consider the plan in Eq.~\eqref{eq:bj-plan} for the clover query $Q_\clubsuit$.
-  Figure~\ref{fig:bj-loop} shows its execution; ignore the underlined
-  instruction for now.
+  Figure~\ref{fig:bj-loop} shows its execution (ignore the underlined
+  instruction for now).
 %%%   Here we have omitted all ``setup'' code, 
 %%%     showing only the nested loops performing iteration and lookup.
   In the build phase, 
